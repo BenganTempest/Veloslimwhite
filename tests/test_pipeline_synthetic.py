@@ -30,6 +30,7 @@ from backtest import run_backtests  # noqa: E402
 from build_dashboard import build_data_json, write_data_json  # noqa: E402
 from earnings import check_upcoming_earnings, tickers_with_earnings_soon  # noqa: E402
 import notify  # noqa: E402
+import staleness_check  # noqa: E402
 
 rng = np.random.default_rng(42)
 
@@ -217,6 +218,23 @@ def run():
     sent = notify.send_telegram_message("test message -- should not actually send")
     assert sent is False, "expected send to report False (skipped) with no token/chat id configured"
     print("   OK -- skipped cleanly, no exception, no network attempted")
+
+    print("14. Staleness-alert decision logic (pure function, no network)...")
+    assert staleness_check.decide_alert(10, None) is None, "well under 30 days -- nothing to alert"
+    assert staleness_check.decide_alert(35, None) == "30", "first crossing of the 30-day mark should alert '30'"
+    assert staleness_check.decide_alert(35, "30") is None, "already alerted '30' for this streak -- no repeat"
+    assert staleness_check.decide_alert(50, "30") == "45", "still stale past 45 days -- escalate to '45'"
+    assert staleness_check.decide_alert(50, None) == "45", \
+        "a streak already this stale should jump straight to '45', not a now-pointless '30'"
+    assert staleness_check.decide_alert(50, "45") is None, "already alerted '45' -- no further escalation configured"
+    print("   OK -- 30/45-day thresholds and no-repeat-alert logic all correct")
+
+    print("15. Staleness check end-to-end is a no-op (not an error) without Telegram secrets configured...")
+    # os.environ still has TELEGRAM_BOT_TOKEN/CHAT_ID popped from step 13 above.
+    forty_days_ago_epoch = (pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=40)).timestamp()
+    level = staleness_check.check_and_alert(forty_days_ago_epoch)
+    assert level is None, "send should fail soft (no secrets) -- nothing should be recorded as sent"
+    print("   OK -- fails soft exactly like the threshold-alert path above")
 
     print("\nALL SYNTHETIC PIPELINE CHECKS PASSED")
 

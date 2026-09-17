@@ -23,6 +23,9 @@ other.
 
 ```
 GitHub Actions (daily, scheduled)
+  -> scripts/staleness_check.py  runs FIRST, even if the pipeline below fails: optional
+                                  free Telegram nudge if the repo hasn't been updated in
+                                  30/45 days (see "Optional: free Telegram alerts" below)
   -> scripts/universe.py     pull S&P 500 + Nasdaq-100 tickers from Wikipedia, plus
                               the Nasdaq Stockholm all-share list from stockanalysis.com
   -> scripts/collect.py      pull 2y OHLCV per ticker (yfinance) + recent headlines (Google News RSS)
@@ -108,6 +111,22 @@ the pipeline just won't send alerts; nothing else changes or breaks. Set
 `TELEGRAM_ALERTS_ENABLED = False` in `config.py` to turn it off explicitly, and change
 `TELEGRAM_SCORE_THRESHOLD` (and, if you want the message to link back, `DASHBOARD_URL`)
 to taste.
+
+The same bot also covers a second, unrelated case: GitHub automatically disables a
+**public** repo's *scheduled* Actions workflows after 60 days with no repository
+activity ([GitHub Docs](https://docs.github.com/actions/managing-workflow-runs/disabling-and-enabling-a-workflow)) —
+after that, this whole pipeline would just silently stop running. Under normal
+operation this is a non-issue: the daily run itself commits `docs/data.json`
+whenever the numbers change, which resets that 60-day clock every day on its own.
+It only becomes a real risk if something breaks badly enough that the pipeline
+stops reaching its own commit step for a long stretch — so `scripts/staleness_check.py`
+runs at the very start of every scheduled run (before the main pipeline, and even
+on a day the main pipeline step fails) and sends a Telegram heads-up at 30 days
+since the repo's last commit, then a more urgent one at 45 if it's still stale two
+weeks after that — well before GitHub's 60-day cutoff actually arrives. Tune
+`STALENESS_WARN_DAYS` / `STALENESS_URGENT_DAYS` in `config.py` to taste; it's
+silently skipped if `TELEGRAM_ALERTS_ENABLED = False` or the two Telegram secrets
+above aren't set, same as the threshold alert.
 
 ## Customizing
 

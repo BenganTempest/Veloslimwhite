@@ -110,6 +110,20 @@ TELEGRAM_SCORE_THRESHOLD = 75  # alert when a ticker crosses this for the first 
 # straight through. Leave blank to omit it.
 DASHBOARD_URL = ""
 
+# --- Repo-staleness alert -----------------------------------------------------
+# GitHub auto-disables a PUBLIC repo's scheduled Actions workflows after 60
+# days with no repository activity (commits) -- after that, this whole
+# pipeline just silently stops running. Under healthy operation this is a
+# non-issue: the daily run itself commits docs/data.json whenever the
+# numbers change, which resets the clock every day on its own. This alert
+# only matters if something breaks badly enough that the pipeline stops
+# reaching its own commit step for a long stretch -- two early warnings,
+# well before the 60-day cutoff, via the same free Telegram bot as above
+# (reuses TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID; no extra setup).
+STALENESS_WARN_DAYS = 30    # first, low-key heads-up
+STALENESS_URGENT_DAYS = 45  # louder nudge if it's still stale two weeks later
+STALENESS_STATE_FILE = DATA_DIR / "staleness_state.json"
+
 # --- Misc ------------------------------------------------------------------
 REQUEST_USER_AGENT = "stock-trend-scanner/1.0 (personal research project)"
 MAX_WORKERS = 8

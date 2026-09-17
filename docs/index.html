@@ -86,6 +86,22 @@
   }
   .disclaimer strong { color: var(--text-primary); }
 
+  .quickstart {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 16px; font-size: 12.5px; color: var(--text-secondary); margin-bottom: 20px;
+  }
+  /* Setting display:flex on the class above would otherwise override the
+     browser's default "[hidden]{display:none}" rule (author styles beat
+     user-agent styles at equal specificity) -- this restores it. */
+  .quickstart[hidden] { display: none; }
+  .quickstart strong { color: var(--text-primary); }
+  .quickstart-close {
+    margin-left: auto; background: none; border: none; color: var(--text-muted); cursor: pointer;
+    font-size: 13px; padding: 0 2px; flex: none;
+  }
+  .quickstart-close:hover { color: var(--text-primary); }
+
   .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
   @media (max-width: 720px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
   .stat-tile {
@@ -150,6 +166,16 @@
   .filters input[type="search"] { min-width: 200px; }
   .filters .count { margin-left: auto; font-size: 12.5px; color: var(--text-muted); }
 
+  .pagination-row {
+    display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+    margin-top: 14px; font-size: 12.5px; color: var(--text-muted); text-align: center;
+  }
+  .pagination-row button {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 14px; font-size: 13px; color: var(--text-primary); cursor: pointer;
+  }
+  .pagination-row button:hover { border-color: var(--text-muted); }
+
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead th {
     text-align: left; font-weight: 600; color: var(--text-secondary); font-size: 12px;
@@ -176,6 +202,14 @@
     display: inline-block; font-size: 10.5px; padding: 1px 6px; border-radius: 999px;
     background: var(--surface-2); color: var(--text-secondary); margin: 1px 3px 1px 0; border: 1px solid var(--border);
   }
+  .tag-filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+  .tag-chip {
+    display: inline-flex; align-items: center; font-size: 11.5px; padding: 4px 11px; border-radius: 999px;
+    background: var(--surface-2); color: var(--text-secondary); border: 1px solid var(--border);
+    cursor: pointer; user-select: none; line-height: 1.3;
+  }
+  .tag-chip:hover { border-color: var(--text-muted); color: var(--text-primary); }
+  .tag-chip.active { background: var(--seq-550); color: #fff; border-color: var(--seq-550); }
   .score-pill {
     display: inline-block; min-width: 34px; text-align: center; padding: 2px 8px; border-radius: 999px;
     color: #fff; font-weight: 650; font-variant-numeric: tabular-nums;
@@ -214,6 +248,16 @@
     visar om verktygets egna tidigare poäng faktiskt förutspådde något.
   </div>
 
+  <div class="quickstart" id="quickstart">
+    <span><strong>Så läser du sidan på 30 sekunder:</strong></span>
+    <span><strong>Topplista</strong> = högst poäng just nu.</span>
+    <span><strong>Dagens största rörelser</strong> = störst förändring sedan igår.</span>
+    <span><strong>Fullständig skanning</strong> = alla aktier, med sök/filter/taggar &mdash; klicka
+      <strong>?</strong> där för alla begrepp.</span>
+    <button class="quickstart-close" id="quickstartClose" type="button" aria-label="Dölj den här rutan"
+      title="Dölj den här rutan">Dölj ✕</button>
+  </div>
+
   <div class="kpi-row" id="kpiRow"></div>
 
   <section>
@@ -234,9 +278,11 @@
       <button class="help-btn" id="scanHelpBtn" type="button" aria-expanded="false" aria-controls="scanHelpPanel"
         aria-label="Vad betyder kolumnerna?" title="Vad betyder kolumnerna?">?</button>
     </h2>
-    <p class="desc">Alla aktier som skannats idag. Klicka på en kolumnrubrik för att sortera. De små ikonerna
-      bredvid varje ticker öppnar dess Yahoo Finance-sida och en direkt Google Nyheter-sökning, i en ny flik
-      &mdash; bra för att kolla poängen mot de faktiska nyheterna istället för att bara lita på sentimentsiffran.</p>
+    <p class="desc">Alla aktier som skannats idag, 100 i taget &mdash; klicka "Visa fler" längst ner för fler,
+      eller "Visa alla" för hela listan på en gång. Klicka på en kolumnrubrik för att sortera. De små
+      ikonerna bredvid varje ticker öppnar dess Yahoo Finance-sida och en direkt Google Nyheter-sökning,
+      i en ny flik &mdash; bra för att kolla poängen mot de faktiska nyheterna istället för att bara lita
+      på sentimentsiffran.</p>
     <dl class="help-panel" id="scanHelpPanel" hidden>
       <dt>Tumregel (inte finansiell rådgivning)</dt>
       <dd>En hög poäng betyder att aktien just nu <em>liknar tidigare uppgångar mer</em>, rör sig starkare och
@@ -276,6 +322,12 @@
         den är en dålig aktie), <strong>vinstrapport snart</strong> (nästa kvartalsrapport väntas inom en
         vecka, enligt Yahoo &mdash; kollas bara för de högst rankade aktierna varje dag, inte alla, se
         Metodik). Rapportdatum kan ändras eller saknas helt för mindre bolag.</dd>
+      <dt>Filtrera på taggar</dt>
+      <dd>Klicka på en eller flera taggar under filtren ovan för att bara visa aktier som har
+        <em>minst en</em> av de markerade taggarna &mdash; inte nödvändigtvis alla samtidigt. Fler markerade
+        taggar breddar alltså listan snarare än att snäva in den. Klicka på en markerad tagg igen för att
+        ta bort den. Taggen <strong>ny</strong> är inte en riktig tagg utan visar aktier utan någon
+        tidigare poäng att jämföra med, samma betydelse som "ny" under "Dagens största rörelser" nedan.</dd>
       <dt>Dagens största rörelser</dt>
       <dd>Skiljer sig från topplistan &mdash; den visar högsta poäng just nu, det här visar störst
         <em>förändring</em> i poäng sedan förra körningen. En aktie kan dyka upp här utan att vara i
@@ -293,26 +345,28 @@
         </label>
         <span class="count" id="rowCount"></span>
       </div>
+      <div class="tag-filters" id="tagFilters"></div>
       <div style="overflow-x:auto;">
         <table id="mainTable">
           <thead>
             <tr>
-              <th data-key="ticker">Ticker</th>
-              <th data-key="market">Marknad</th>
-              <th data-key="sector">Sektor</th>
-              <th class="num" data-key="price">Pris</th>
-              <th class="num" data-key="mom_5d">5d %</th>
-              <th class="num" data-key="mom_20d">20d %</th>
-              <th class="num" data-key="rel_volume">Rel. vol</th>
-              <th class="num" data-key="sentiment_score">Sentiment</th>
-              <th>Trend</th>
-              <th class="num" data-key="trend_score">Poäng</th>
-              <th>Taggar</th>
+              <th data-key="ticker" title="Klicka för att sortera">Ticker</th>
+              <th data-key="market" title="USA eller Sverige">Marknad</th>
+              <th data-key="sector" title="Yahoo-rapporterad sektor/bransch">Sektor</th>
+              <th class="num" data-key="price" title="Senaste stängningskurs, i aktiens egen valuta">Pris</th>
+              <th class="num" data-key="mom_5d" title="Kursförändring senaste 5 handelsdagarna">5d %</th>
+              <th class="num" data-key="mom_20d" title="Kursförändring senaste 20 handelsdagarna">20d %</th>
+              <th class="num" data-key="rel_volume" title="Dagens volym / senaste snittvolym. Över 2× = ovanligt hög handel">Rel. vol</th>
+              <th class="num" data-key="sentiment_score" title="0–100 nyhetssentiment (ordlisteanalys, inte AI). 50 = neutralt">Sentiment</th>
+              <th title="30-dagars minigraf över stängningskurser">Trend</th>
+              <th class="num" data-key="trend_score" title="Sammanvägd trendpoäng 0–100 (mönsterlikhet + momentum + sentiment)">Poäng</th>
+              <th title="Snabba flaggor, inte en del av poängen">Taggar</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
         </table>
       </div>
+      <div class="pagination-row" id="paginationControls"></div>
     </div>
   </section>
 
@@ -344,7 +398,8 @@
 (function () {
   "use strict";
 
-  var state = { rows: [], sortKey: "trend_score", sortDir: -1, data: null };
+  var PAGE_SIZE = 100;
+  var state = { rows: [], sortKey: "trend_score", sortDir: -1, data: null, visibleCount: PAGE_SIZE, selectedTags: [] };
 
   var seqSteps = [
     { max: 20, css: "var(--seq-250)" },
@@ -414,6 +469,18 @@
   function svSector(v) { return SECTOR_SV[v] || v; }
   function svTag(v) { return TAG_SV[v] || v; }
   function svHorizon(v) { return HORIZON_SV[v] || v; }
+
+  // "__new__" isn't a real backend tag -- it's a client-side pseudo-tag
+  // computed the same way renderMovers() already decides what counts as
+  // "new" (no prior-day score to diff against). Keeping the list here
+  // fixed (rather than derived from whatever tags happen to appear in
+  // today's data) means the filter chips don't jump around day to day.
+  var TAG_FILTER_KEYS = ["__new__", "volume spike", "near 52w high", "sentiment surge", "overbought (RSI)", "earnings soon"];
+  function tagFilterLabel(key) { return key === "__new__" ? "ny" : svTag(key); }
+  function tickerHasTag(r, key) {
+    if (key === "__new__") return r.score_change === null || r.score_change === undefined;
+    return (r.tags || []).indexOf(key) !== -1;
+  }
 
   // Small inline icons (no external icon font/library -- keeps the page
   // fully self-contained). Chart glyph for the Yahoo Finance quote page,
@@ -546,6 +613,15 @@
     });
   }
 
+  function renderTagFilters() {
+    var el = document.getElementById("tagFilters");
+    el.innerHTML = TAG_FILTER_KEYS.map(function (key) {
+      var active = state.selectedTags.indexOf(key) !== -1;
+      return '<button type="button" class="tag-chip' + (active ? " active" : "") + '" data-tag-key="' +
+        esc(key) + '" aria-pressed="' + active + '">' + esc(tagFilterLabel(key)) + "</button>";
+    }).join("");
+  }
+
   function currentFilters() {
     return {
       q: document.getElementById("searchBox").value.trim().toLowerCase(),
@@ -562,6 +638,10 @@
       if (f.market && r.market !== f.market) return false;
       if (f.minScore && (r.trend_score || 0) < f.minScore) return false;
       if (f.q && r.ticker.toLowerCase().indexOf(f.q) === -1 && r.name.toLowerCase().indexOf(f.q) === -1) return false;
+      // Match-ANY (OR), not match-all: with several chips selected, a
+      // ticker only needs one of them -- selecting more chips widens the
+      // result set instead of narrowing it to zero fast.
+      if (state.selectedTags.length && !state.selectedTags.some(function (key) { return tickerHasTag(r, key); })) return false;
       return true;
     });
     rows.sort(function (a, b) {
@@ -574,12 +654,31 @@
     return rows;
   }
 
+  function renderPaginationControls(totalFiltered, shownCount) {
+    var el = document.getElementById("paginationControls");
+    if (shownCount >= totalFiltered) {
+      el.innerHTML = totalFiltered > PAGE_SIZE
+        ? '<span>Visar alla ' + totalFiltered + " aktier.</span>" : "";
+      return;
+    }
+    var remaining = totalFiltered - shownCount;
+    var nextBatch = Math.min(PAGE_SIZE, remaining);
+    el.innerHTML =
+      '<span>Visar ' + shownCount + " av " + totalFiltered + " aktier</span>" +
+      '<button type="button" data-action="more">Visa fler (+' + nextBatch + ")</button>" +
+      '<button type="button" data-action="all">Visa alla (' + totalFiltered + ")</button>";
+  }
+
   function renderTable(d) {
-    var rows = applyFiltersAndSort(d);
-    document.getElementById("rowCount").textContent = rows.length + " av " + d.rows.length + " aktier";
+    var filtered = applyFiltersAndSort(d);
+    document.getElementById("rowCount").textContent = filtered.length + " av " + d.rows.length + " aktier";
+    var rows = filtered.slice(0, state.visibleCount);
+    renderPaginationControls(filtered.length, rows.length);
     var body = document.getElementById("tableBody");
     var html = rows.map(function (r) {
-      var tags = (r.tags || []).map(function (t) { return '<span class="tag">' + esc(svTag(t)) + "</span>"; }).join("");
+      var tagPills = (r.tags || []).map(function (t) { return '<span class="tag">' + esc(svTag(t)) + "</span>"; });
+      if (tickerHasTag(r, "__new__")) tagPills.unshift('<span class="tag">ny</span>');
+      var tags = tagPills.join("");
       return "<tr>" +
         '<td class="ticker-cell"><div class="ticker-row"><span>' + esc(r.ticker) + "</span>" +
           externalLinksHtml(r) + '</div><div class="name-cell">' + esc(r.name) + "</div></td>" +
@@ -682,20 +781,76 @@
       " · " + d.universe_size + " aktier skannade";
   }
 
+  // Remembers your filter/tag/search choices between visits so reloading
+  // the page (or coming back tomorrow) doesn't reset everything -- purely
+  // a per-browser convenience, never read by the pipeline or anyone else.
+  var FILTER_STORAGE_KEY = "filterState";
+  function saveFilterState() {
+    try {
+      localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify({
+        q: document.getElementById("searchBox").value,
+        sector: document.getElementById("sectorFilter").value,
+        market: document.getElementById("marketFilter").value,
+        minScore: document.getElementById("minScore").value,
+        tags: state.selectedTags,
+      }));
+    } catch (e) {}
+  }
+  function restoreFilterState() {
+    var saved = null;
+    try {
+      var raw = localStorage.getItem(FILTER_STORAGE_KEY);
+      if (raw) saved = JSON.parse(raw);
+    } catch (e) {}
+    if (!saved) return;
+    if (saved.q) document.getElementById("searchBox").value = saved.q;
+    if (saved.sector) document.getElementById("sectorFilter").value = saved.sector;
+    if (saved.market) document.getElementById("marketFilter").value = saved.market;
+    if (saved.minScore) {
+      document.getElementById("minScore").value = saved.minScore;
+      document.getElementById("minScoreVal").textContent = saved.minScore;
+    }
+    if (Array.isArray(saved.tags)) {
+      state.selectedTags = saved.tags.filter(function (k) { return TAG_FILTER_KEYS.indexOf(k) !== -1; });
+    }
+  }
+
   function wireControls() {
-    document.getElementById("searchBox").addEventListener("input", function () { renderTable(state.data); });
-    document.getElementById("sectorFilter").addEventListener("change", function () { renderTable(state.data); });
-    document.getElementById("marketFilter").addEventListener("change", function () { renderTable(state.data); });
+    // Any change to what's filtered/sorted starts the paginated view over
+    // from the top -- showing "the next 100" of a list you just re-sorted
+    // or re-filtered would be a confusing, effectively-random slice.
+    function resetAndRender() { state.visibleCount = PAGE_SIZE; renderTable(state.data); }
+    function resetSaveAndRender() { saveFilterState(); resetAndRender(); }
+
+    document.getElementById("searchBox").addEventListener("input", resetSaveAndRender);
+    document.getElementById("sectorFilter").addEventListener("change", resetSaveAndRender);
+    document.getElementById("marketFilter").addEventListener("change", resetSaveAndRender);
     document.getElementById("minScore").addEventListener("input", function (e) {
       document.getElementById("minScoreVal").textContent = e.target.value;
-      renderTable(state.data);
+      resetSaveAndRender();
     });
     document.querySelectorAll("thead th[data-key]").forEach(function (th) {
       th.addEventListener("click", function () {
         var key = th.getAttribute("data-key");
         if (state.sortKey === key) state.sortDir *= -1; else { state.sortKey = key; state.sortDir = -1; }
-        renderTable(state.data);
+        resetAndRender();
       });
+    });
+    document.getElementById("paginationControls").addEventListener("click", function (e) {
+      var btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      if (btn.getAttribute("data-action") === "more") state.visibleCount += PAGE_SIZE;
+      else state.visibleCount = Infinity;
+      renderTable(state.data);
+    });
+    document.getElementById("tagFilters").addEventListener("click", function (e) {
+      var chip = e.target.closest("button[data-tag-key]");
+      if (!chip) return;
+      var key = chip.getAttribute("data-tag-key");
+      var idx = state.selectedTags.indexOf(key);
+      if (idx === -1) state.selectedTags.push(key); else state.selectedTags.splice(idx, 1);
+      renderTagFilters();
+      resetSaveAndRender();
     });
     document.getElementById("scanHelpBtn").addEventListener("click", function () {
       var panel = document.getElementById("scanHelpPanel");
@@ -713,6 +868,15 @@
       var saved = localStorage.getItem("theme");
       if (saved) document.documentElement.setAttribute("data-theme", saved);
     } catch (e) {}
+    document.getElementById("quickstartClose").addEventListener("click", function () {
+      document.getElementById("quickstart").hidden = true;
+      try { localStorage.setItem("quickstartDismissed", "1"); } catch (e) {}
+    });
+    try {
+      if (localStorage.getItem("quickstartDismissed") === "1") {
+        document.getElementById("quickstart").hidden = true;
+      }
+    } catch (e) {}
   }
 
   function boot() {
@@ -722,6 +886,8 @@
       .then(function (d) {
         state.data = d;
         populateSectorFilter(d);
+        restoreFilterState();
+        renderTagFilters();
         render();
       })
       .catch(function (err) {
