@@ -122,6 +122,10 @@
     padding: 16px;
   }
 
+  .movers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 720px) { .movers-grid { grid-template-columns: 1fr; } }
+  .movers-col h3 { font-size: 13px; margin: 0 0 8px; color: var(--text-secondary); font-weight: 650; }
+
   /* leaderboard bars */
   .bar-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; position: relative; }
   .bar-row .bar-label { width: 190px; flex: none; font-size: 12.5px; color: var(--text-secondary);
@@ -218,6 +222,13 @@
     <div class="card" id="leaderboard"></div>
   </section>
 
+  <section id="movers">
+    <h2>Dagens största rörelser</h2>
+    <p class="desc">Störst förändring i trendpoäng sedan senaste körningen &mdash; fångar det som plötsligt hettar
+      till (eller svalnar av) idag, oavsett var poängen råkar ligga just nu.</p>
+    <div class="card" id="moversPanel"></div>
+  </section>
+
   <section>
     <h2>Fullständig skanning
       <button class="help-btn" id="scanHelpBtn" type="button" aria-expanded="false" aria-controls="scanHelpPanel"
@@ -262,7 +273,14 @@
         <strong>sentimentsuppgång</strong> (8+ färska rubriker, tydligt positiva i snitt),
         <strong>överköpt (RSI)</strong> (14-dagars RSI &ge; 70 &mdash; en klassisk teknisk-analys-signal om
         att en aktie stigit snabbt och att en rekyl/paus kan vara mer sannolik just nu, inte ett bevis på att
-        den är en dålig aktie).</dd>
+        den är en dålig aktie), <strong>vinstrapport snart</strong> (nästa kvartalsrapport väntas inom en
+        vecka, enligt Yahoo &mdash; kollas bara för de högst rankade aktierna varje dag, inte alla, se
+        Metodik). Rapportdatum kan ändras eller saknas helt för mindre bolag.</dd>
+      <dt>Dagens största rörelser</dt>
+      <dd>Skiljer sig från topplistan &mdash; den visar högsta poäng just nu, det här visar störst
+        <em>förändring</em> i poäng sedan förra körningen. En aktie kan dyka upp här utan att vara i
+        närheten av topplistan, om den gick från t.ex. 30 till 55 över natten. "Ny" betyder att det inte
+        fanns någon poäng att jämföra med igår (ny aktie i skanningen, eller skannerns första körning).</dd>
     </dl>
     <div class="card">
       <div class="filters">
@@ -389,6 +407,7 @@
     "near 52w high": "nära 52-veckorshögsta",
     "sentiment surge": "sentimentsuppgång",
     "overbought (RSI)": "överköpt (RSI)",
+    "earnings soon": "vinstrapport snart",
   };
   var HORIZON_SV = { "1 month": "1 månad", "3 months": "3 månader" };
   function svMarket(v) { return MARKET_SV[v] || v; }
@@ -473,6 +492,41 @@
         "</div>";
     }).join("");
     document.getElementById("leaderboard").innerHTML = html || '<p class="not-ready">Inga rader.</p>';
+  }
+
+  function moverBarsHtml(list, isGain) {
+    if (!list.length) return '<p class="not-ready">Inga aktier här idag.</p>';
+    var maxAbs = Math.max.apply(null, list.map(function (r) { return Math.abs(r.score_change); }).concat([0.1]));
+    return list.map(function (r) {
+      var pct = Math.max(2, (Math.abs(r.score_change) / maxAbs) * 100);
+      var sign = r.score_change > 0 ? "+" : "";
+      return '<div class="bar-row">' +
+        '<div class="bar-label">' + esc(r.ticker) + " · " + esc(r.name) + "</div>" +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + pct + "%;background:" +
+          (isGain ? "var(--good)" : "var(--critical)") + ';"></div></div>' +
+        '<div class="bar-value">' + sign + fmtNum(r.score_change, 1) + "</div>" +
+        '<div class="bar-tooltip">' + esc(r.ticker) + ": " + sign + fmtNum(r.score_change, 1) +
+          " (nu " + fmtNum(r.trend_score, 1) + ")</div>" +
+        "</div>";
+    }).join("");
+  }
+
+  function renderMovers(d) {
+    var el = document.getElementById("moversPanel");
+    var withChange = d.rows.filter(function (r) { return r.score_change !== null && r.score_change !== undefined; });
+    if (!withChange.length) {
+      el.innerHTML = '<p class="not-ready">Ingen historik att jämföra med än &mdash; kommer synas efter nästa körning.</p>';
+      return;
+    }
+    var n = d.movers_top_n || 10;
+    var gainers = withChange.filter(function (r) { return r.score_change > 0; })
+      .sort(function (a, b) { return b.score_change - a.score_change; }).slice(0, n);
+    var decliners = withChange.filter(function (r) { return r.score_change < 0; })
+      .sort(function (a, b) { return a.score_change - b.score_change; }).slice(0, n);
+    el.innerHTML = '<div class="movers-grid">' +
+      '<div class="movers-col"><h3>Störst uppgång</h3>' + moverBarsHtml(gainers, true) + "</div>" +
+      '<div class="movers-col"><h3>Störst nedgång</h3>' + moverBarsHtml(decliners, false) + "</div>" +
+      "</div>";
   }
 
   function populateSectorFilter(d) {
@@ -605,13 +659,21 @@
       "<p>Universum: S&amp;P 500 + Nasdaq-100 (uppdateras från Wikipedia varje körning) plus hela " +
       "Nasdaq Stockholm-listan, inklusive mindre First North-bolag (uppdateras från stockanalysis.com " +
       "varje körning). Priser visas i respektive akties egen valuta (USD för amerikanska aktier, SEK för " +
-      "Stockholmsnoterade aktier) &mdash; använd marknadsfiltret ovanför tabellen för att isolera den ena eller andra.</p>";
+      "Stockholmsnoterade aktier) &mdash; använd marknadsfiltret ovanför tabellen för att isolera den ena eller andra.</p>" +
+      "<p><strong>Vinstrapport snart</strong>-taggen kollas bara för de " + esc(d.earnings_check_top_n || 100) +
+      " högst rankade aktierna varje dag, inte alla &mdash; en Yahoo-fråga per aktie för hela universumet " +
+      "skulle riskera samma typ av hastighetsbegränsning som prisnedladdningen redan en gång stötte på. " +
+      "Rapportdatum är Yahoos egen uppskattning, inte alltid exakt.</p>" +
+      "<p>Ett gratis Telegram-larm kan skickas när en akties poäng korsar " + esc(d.telegram_score_threshold || 75) +
+      " för första gången (ställs in i <code>config.py</code>) &mdash; en egen, kostnadsfri Telegram-bot, " +
+      "ingen betald tjänst. Om det inte är konfigurerat skickas inga larm och resten av skanningen påverkas inte.</p>";
   }
 
   function render() {
     var d = state.data;
     renderKpis(d);
     renderLeaderboard(d);
+    renderMovers(d);
     renderTable(d);
     renderBacktests(d);
     renderMethodology(d);

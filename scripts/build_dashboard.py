@@ -47,8 +47,10 @@ def build_data_json(
     prices: dict[str, pd.DataFrame],
     model_meta: dict,
     backtests: list[BacktestResult],
+    score_change: dict[str, float] | None = None,
 ) -> dict:
     universe_idx = universe.set_index("ticker")
+    score_change = score_change or {}
 
     rows = []
     for ticker, r in scored.iterrows():
@@ -73,6 +75,10 @@ def build_data_json(
                 "pattern_score": round(float(r["pattern_score"]), 1) if pd.notna(r.get("pattern_score")) else None,
                 "momentum_score": round(float(r["momentum_score"]), 1) if pd.notna(r.get("momentum_score")) else None,
                 "trend_score": round(float(r["trend_score"]), 1) if pd.notna(r.get("trend_score")) else None,
+                # None means "no prior-day score to compare against" (new
+                # ticker, or the scanner's first run) -- the dashboard shows
+                # that as "new" rather than a fabricated 0.0 change.
+                "score_change": score_change.get(ticker),
                 "tags": r.get("tags", []),
                 "sparkline": _sparkline(close_series),
             }
@@ -92,6 +98,9 @@ def build_data_json(
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "universe_size": len(scored),
+        "movers_top_n": config.MOVERS_TOP_N,
+        "earnings_check_top_n": config.EARNINGS_CHECK_TOP_N,
+        "telegram_score_threshold": config.TELEGRAM_SCORE_THRESHOLD,
         "weights": {
             "pattern": config.WEIGHT_PATTERN,
             "momentum": config.WEIGHT_MOMENTUM,

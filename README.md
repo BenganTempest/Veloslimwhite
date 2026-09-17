@@ -32,9 +32,11 @@ GitHub Actions (daily, scheduled)
                                 >=20% / 10-trading-day move? (time-split validated, so
                                 the reported accuracy isn't inflated by lookahead)
   -> scripts/score.py        blend pattern score + momentum + news sentiment (VADER) -> Trend Score
+  -> scripts/earnings.py     best-effort "earnings soon" tag, top-scoring tickers only
+  -> scripts/notify.py       optional free Telegram alert on a new threshold crossing
   -> scripts/backtest.py     check the scanner's OWN accumulated daily snapshots: did
                               high-scored stocks actually outperform low-scored ones?
-  -> scripts/build_dashboard.py  write docs/data.json
+  -> scripts/build_dashboard.py  write docs/data.json (incl. day-over-day score change)
   -> commit docs/data.json + data/history.csv back to the repo
   -> GitHub Pages serves docs/index.html, which fetches data.json client-side
 ```
@@ -83,6 +85,29 @@ After that, it runs on its own: the schedule in `.github/workflows/daily.yml` fi
 at 21:30 UTC on weekdays (after the US close for most of the year — edit the cron
 line if you want a different time), and each run appends to the honesty panel's
 history.
+
+## Optional: free Telegram alerts
+
+The pipeline can ping you on Telegram the first time a ticker's Trend Score crosses
+`config.TELEGRAM_SCORE_THRESHOLD` (default 75). This is entirely free — no billing
+account, no credit card, ever — but it does need two values only you can create,
+stored as GitHub Actions secrets (never in the repo):
+
+1. **Create a bot.** In Telegram, message **@BotFather**, send `/newbot`, and follow
+   the prompts (pick any name). It replies with a bot token that looks like
+   `123456789:AAAbc-Def...`. That's `TELEGRAM_BOT_TOKEN`.
+2. **Get your chat ID.** Message your new bot anything first (bots can't message you
+   until you've messaged them), then message **@userinfobot** and it will reply with
+   your numeric ID. That's `TELEGRAM_CHAT_ID`.
+3. **Add both as repo secrets.** On github.com: your repo -> Settings -> Secrets and
+   variables -> Actions -> "New repository secret". Add `TELEGRAM_BOT_TOKEN` and
+   `TELEGRAM_CHAT_ID` with the values above.
+
+That's it — the next run will alert you automatically. Skip all of this entirely and
+the pipeline just won't send alerts; nothing else changes or breaks. Set
+`TELEGRAM_ALERTS_ENABLED = False` in `config.py` to turn it off explicitly, and change
+`TELEGRAM_SCORE_THRESHOLD` (and, if you want the message to link back, `DASHBOARD_URL`)
+to taste.
 
 ## Customizing
 
@@ -153,6 +178,17 @@ push — the next scheduled or manual run picks it up.
   `scripts/universe.py` already has some defensive handling for that).
 - **Point-in-time snapshot, not intraday.** Prices/scores update once a day. This
   isn't built for day trading or anything time-sensitive.
+- **"Earnings soon" only checks the top-scoring tickers, and dates can be wrong.**
+  Checking every ticker's earnings calendar daily would mean 1000+ more individual
+  Yahoo requests on top of the ones that already caused rate-limiting once (see
+  above) — so `scripts/earnings.py` only checks the top `EARNINGS_CHECK_TOP_N`
+  (default 100) tickers by today's score, fails soft per-ticker, and Yahoo's
+  calendar data is its own estimate that can shift or be missing, especially for
+  smaller names.
+- **Day-over-day movers need a "yesterday" to compare against.** A ticker shows
+  `score_change: null` ("new" on the dashboard) on the scanner's first-ever run, or
+  the first day a given ticker appears in the universe — nothing wrong, just nothing
+  to diff against yet. It fills in from the second run onward.
 
 ## Development notes
 

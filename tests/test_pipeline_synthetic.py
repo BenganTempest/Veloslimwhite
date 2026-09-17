@@ -28,6 +28,8 @@ import pattern_model  # noqa: E402
 import score as scoring  # noqa: E402
 from backtest import run_backtests  # noqa: E402
 from build_dashboard import build_data_json, write_data_json  # noqa: E402
+from earnings import check_upcoming_earnings, tickers_with_earnings_soon  # noqa: E402
+import notify  # noqa: E402
 
 rng = np.random.default_rng(42)
 
@@ -52,7 +54,7 @@ def make_synthetic_ohlcv(n_days=500, drift=0.0003, vol=0.02, breakout_at=None, s
     )
 
 
-def build_synthetic_universe(n=40) -> tuple[pd.DataFrame, dict[str, pd.DataFrame]]:
+def build_synthetic_universe(n=40, n_swedish=6) -> tuple[pd.DataFrame, dict[str, pd.DataFrame]]:
     sectors = ["Technology", "Healthcare", "Energy", "Financials", "Industrials"]
     rows = []
     prices = {}
@@ -63,13 +65,19 @@ def build_synthetic_universe(n=40) -> tuple[pd.DataFrame, dict[str, pd.DataFrame
         # the pattern model has positive examples to learn from and score against
         breakout_at = 460 if i % 5 == 0 else None
         prices[ticker] = make_synthetic_ohlcv(breakout_at=breakout_at, seed=i)
+    # a handful of .ST tickers to exercise the SEK/USD currency-labeling path
+    for i in range(n_swedish):
+        ticker = f"SYNSE{i}.ST"
+        rows.append({"ticker": ticker, "name": f"Svenska Bolag {i}", "sector": "Unknown", "index": "OMX Stockholm"})
+        breakout_at = 460 if i == 0 else None
+        prices[ticker] = make_synthetic_ohlcv(breakout_at=breakout_at, seed=1000 + i)
     return pd.DataFrame(rows), prices
 
 
 def run():
     print("1. Building synthetic universe + prices...")
     universe, prices = build_synthetic_universe()
-    assert len(universe) == len(prices) == 40
+    assert len(universe) == len(prices) == 46
 
     print("2. compute_features on every ticker...")
     today_features = {}
@@ -142,16 +150,73 @@ def run():
         "n_positive_train": model.n_positive_train,
         "n_validation_rows": model.n_validation_rows,
     }
-    payload = build_data_json(scored, universe, prices, model_meta, backtests)
+    # a synthetic "yesterday" comparison for a handful of tickers, to
+    # exercise the day-over-day movers feature end to end
+    sample_tickers = list(scored.index[:5])
+    synthetic_score_change = {
+        t: round(float(scored.at[t, "trend_score"]) - 40.0, 1) for t in sample_tickers
+    }
+    payload = build_data_json(scored, universe, prices, model_meta, backtests, synthetic_score_change)
     assert payload["universe_size"] == len(scored)
     assert len(payload["rows"]) == len(scored)
-    for key in ("ticker", "trend_score", "sparkline", "tags"):
+    for key in ("ticker", "trend_score", "sparkline", "tags", "currency", "market", "score_change"):
         assert key in payload["rows"][0], f"missing key {key} in dashboard row payload"
+    assert "movers_top_n" in payload and "earnings_check_top_n" in payload and "telegram_score_threshold" in payload
     write_data_json(payload)
     import json
     reloaded = json.load(open(config.DOCS_DIR / "data.json"))
     assert reloaded["universe_size"] == payload["universe_size"]
     print(f"   OK -- wrote {config.DOCS_DIR / 'data.json'} ({(config.DOCS_DIR / 'data.json').stat().st_size} bytes), round-trips through JSON")
+
+    print("9. currency/market labeling for .ST tickers...")
+    by_ticker = {r["ticker"]: r for r in payload["rows"]}
+    se_rows = [r for t, r in by_ticker.items() if t.endswith(".ST")]
+    us_rows = [r for t, r in by_ticker.items() if not t.endswith(".ST")]
+    assert se_rows, "no Swedish rows made it into the payload"
+    assert all(r["currency"] == "SEK" and r["market"] == "Sweden" for r in se_rows)
+    assert all(r["currency"] == "USD" and r["market"] == "US" for r in us_rows)
+    print(f"   OK -- {len(se_rows)} SEK rows, {len(us_rows)} USD rows, all labeled correctly")
+
+    print("10. day-over-day score_change made it into the payload correctly...")
+    by_ticker2 = {r["ticker"]: r for r in payload["rows"]}
+    for t in sample_tickers:
+        assert by_ticker2[t]["score_change"] == synthetic_score_change[t], f"score_change mismatch for {t}"
+    untouched = [t for t in scored.index if t not in sample_tickers]
+    assert all(by_ticker2[t]["score_change"] is None for t in untouched), \
+        "tickers with no prior score should show score_change=None (\"new\"), not 0.0"
+    print(f"   OK -- {len(sample_tickers)} tickers carry a real change, "
+          f"{len(untouched)} correctly show None (no prior-day score)")
+
+    print("11. earnings-date check fails soft without yfinance/network (this sandbox has neither)...")
+    earnings_result = check_upcoming_earnings(list(scored.index[:3]))
+    assert earnings_result == {}, "expected an empty (fail-soft) result with no yfinance/network available"
+    assert tickers_with_earnings_soon(earnings_result) == set()
+    print("   OK -- returned {} instead of raising, exactly the fail-soft behavior GitHub Actions relies on "
+          "when a ticker's calendar data is missing")
+
+    print("12. Telegram threshold-crossing logic (pure function, no network)...")
+    universe_idx = universe.set_index("ticker")
+    threshold = config.TELEGRAM_SCORE_THRESHOLD
+    fake_scored = scored.copy()
+    hi_ticker, lo_ticker = fake_scored.index[0], fake_scored.index[-1]
+    fake_scored.at[hi_ticker, "trend_score"] = threshold + 5  # crosses: was below, now above
+    fake_scored.at[lo_ticker, "trend_score"] = threshold + 3  # does NOT cross: already above yesterday
+    prev_scores = {hi_ticker: threshold - 10, lo_ticker: threshold + 1}
+    crossers = notify.find_threshold_crossers(fake_scored, prev_scores, universe_idx)
+    crossed_tickers = {c["ticker"] for c in crossers}
+    assert hi_ticker in crossed_tickers, "a ticker newly above threshold should be flagged as a crosser"
+    assert lo_ticker not in crossed_tickers, "a ticker already above threshold yesterday should NOT re-alert"
+    msg = notify.format_alert_message(crossers)
+    assert hi_ticker in msg and str(threshold) in msg
+    print(f"   OK -- {len(crossers)} crosser(s) detected correctly, message formats without error")
+
+    print("13. Telegram send is a no-op (not an error) when secrets aren't configured...")
+    import os
+    os.environ.pop("TELEGRAM_BOT_TOKEN", None)
+    os.environ.pop("TELEGRAM_CHAT_ID", None)
+    sent = notify.send_telegram_message("test message -- should not actually send")
+    assert sent is False, "expected send to report False (skipped) with no token/chat id configured"
+    print("   OK -- skipped cleanly, no exception, no network attempted")
 
     print("\nALL SYNTHETIC PIPELINE CHECKS PASSED")
 

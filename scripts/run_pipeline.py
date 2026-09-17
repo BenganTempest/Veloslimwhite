@@ -28,6 +28,8 @@ import pattern_model  # noqa: E402
 import score as scoring  # noqa: E402
 from backtest import run_backtests  # noqa: E402
 from build_dashboard import build_data_json, write_data_json, ensure_html_shell  # noqa: E402
+from earnings import check_upcoming_earnings, tickers_with_earnings_soon  # noqa: E402
+import notify  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 log = logging.getLogger("run_pipeline")
@@ -103,9 +105,52 @@ def main() -> None:
 
     log.info("Scored %d tickers. Top 5: %s", len(scored), list(scored.head(5).index))
 
-    # --- append today's snapshot to the accumulating honesty log
+    # --- earnings-date awareness, scoped to just the top scorers (see
+    # config.py / earnings.py for why this can't safely run for everyone)
+    if config.CHECK_EARNINGS_DATES:
+        if config.PAUSE_BEFORE_EARNINGS_CHECK_SECONDS:
+            log.info("Pausing %ds before the earnings-date check...", config.PAUSE_BEFORE_EARNINGS_CHECK_SECONDS)
+            time.sleep(config.PAUSE_BEFORE_EARNINGS_CHECK_SECONDS)
+        top_tickers = list(scored.head(config.EARNINGS_CHECK_TOP_N).index)
+        earnings_by_ticker = check_upcoming_earnings(top_tickers)
+        soon = tickers_with_earnings_soon(earnings_by_ticker)
+        if soon:
+            log.info("%d ticker(s) have earnings within %d days", len(soon), config.EARNINGS_SOON_DAYS)
+            for ticker in soon:
+                scored.at[ticker, "tags"] = list(scored.at[ticker, "tags"]) + ["earnings soon"]
+
+    # --- read YESTERDAY's scores (if any) before we overwrite history.csv
+    # with today's snapshot -- powers both the "movers" leaderboard and the
+    # Telegram threshold-cross alert, at no extra data-collection cost since
+    # this is the same history.csv already kept for the honesty panel.
     config.DATA_DIR.mkdir(parents=True, exist_ok=True)
     today_str = pd.Timestamp.utcnow().strftime("%Y-%m-%d")
+    prev_scores: dict[str, float] = {}
+    if config.SNAPSHOT_HISTORY_CSV.exists():
+        existing_history = pd.read_csv(config.SNAPSHOT_HISTORY_CSV)
+        existing_history = existing_history[existing_history["date"] != today_str]
+        if not existing_history.empty:
+            last_prev_date = existing_history["date"].max()
+            prev_rows = existing_history[existing_history["date"] == last_prev_date]
+            prev_scores = dict(zip(prev_rows["ticker"], prev_rows["trend_score"]))
+    else:
+        existing_history = pd.DataFrame(columns=["date", "ticker", "close", "trend_score"])
+
+    score_change: dict[str, float] = {}
+    for ticker in scored.index:
+        prev = prev_scores.get(ticker)
+        if prev is not None:
+            score_change[ticker] = round(float(scored.at[ticker, "trend_score"]) - float(prev), 1)
+
+    # --- Telegram alert for new threshold crossers (silently skipped if
+    # TELEGRAM_ALERTS_ENABLED is off or the secrets aren't configured)
+    universe_idx = universe.set_index("ticker")
+    try:
+        notify.maybe_send_threshold_alert(scored, prev_scores, universe_idx)
+    except Exception as exc:  # noqa: BLE001
+        log.warning("Telegram alert step failed (non-fatal): %s", exc)
+
+    # --- append today's snapshot to the accumulating honesty log
     snapshot_rows = []
     for ticker, r in scored.iterrows():
         close = prices[ticker]["Close"].iloc[-1] if ticker in prices else None
@@ -115,18 +160,12 @@ def main() -> None:
             {"date": today_str, "ticker": ticker, "close": float(close), "trend_score": float(r["trend_score"])}
         )
     snapshot_df = pd.DataFrame(snapshot_rows)
-
-    if config.SNAPSHOT_HISTORY_CSV.exists():
-        history = pd.read_csv(config.SNAPSHOT_HISTORY_CSV)
-        history = history[history["date"] != today_str]  # replace same-day reruns instead of duplicating
-        history = pd.concat([history, snapshot_df], ignore_index=True)
-    else:
-        history = snapshot_df
+    history = pd.concat([existing_history, snapshot_df], ignore_index=True)
     history.to_csv(config.SNAPSHOT_HISTORY_CSV, index=False)
 
     backtests = run_backtests(history)
 
-    payload = build_data_json(scored, universe, prices, model_meta, backtests)
+    payload = build_data_json(scored, universe, prices, model_meta, backtests, score_change)
     ensure_html_shell()
     write_data_json(payload)
 

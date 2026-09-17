@@ -78,6 +78,38 @@ WEIGHT_PATTERN = 0.55
 WEIGHT_MOMENTUM = 0.25
 WEIGHT_SENTIMENT = 0.20
 
+# --- Day-over-day movers ---------------------------------------------------
+# Reuses data/history.csv (already collected for the honesty panel) to show
+# which tickers' Trend Score moved the most since the previous run, not just
+# who's highest today. No new data source, no extra cost.
+SHOW_MOVERS = True
+MOVERS_TOP_N = 15  # how many gainers/decliners to show on the dashboard
+
+# --- Earnings-date awareness -------------------------------------------------
+# A per-ticker yfinance call (like the sector backfill), so it's deliberately
+# scoped to only the top-scoring tickers each run, not the whole universe --
+# doing this for 1000+ tickers daily would risk the exact Yahoo rate-limiting
+# problem the sector backfill already caused once (see README). Runs AFTER
+# the bulk price download finishes and after its own pause, so it never
+# competes with that download for Yahoo's short-term rate-limit budget.
+CHECK_EARNINGS_DATES = True
+EARNINGS_CHECK_TOP_N = 100          # only check the top N tickers by today's score
+EARNINGS_CHECK_MAX_WORKERS = 3
+EARNINGS_SOON_DAYS = 7              # tag as "earnings soon" if within this many days
+PAUSE_BEFORE_EARNINGS_CHECK_SECONDS = 15
+
+# --- Telegram alerts ---------------------------------------------------------
+# Completely free (no billing, ever) -- a bot token from Telegram's own
+# @BotFather and your personal chat ID, both stored as GitHub Actions
+# secrets (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID), never in this repo. If
+# those secrets aren't set, alerting is silently skipped -- the pipeline
+# doesn't require this to work. See the README for setup steps.
+TELEGRAM_ALERTS_ENABLED = True
+TELEGRAM_SCORE_THRESHOLD = 75  # alert when a ticker crosses this for the first time
+# Optional: your GitHub Pages URL, appended to alert messages so you can tap
+# straight through. Leave blank to omit it.
+DASHBOARD_URL = ""
+
 # --- Misc ------------------------------------------------------------------
 REQUEST_USER_AGENT = "stock-trend-scanner/1.0 (personal research project)"
 MAX_WORKERS = 8
