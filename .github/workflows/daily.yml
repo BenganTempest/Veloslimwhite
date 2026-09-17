@@ -1,0 +1,44 @@
+name: Daily trend scan
+
+on:
+  schedule:
+    # 21:30 UTC — after the US market close for most of the year (4pm ET
+    # close + a little buffer; shifts by an hour across DST, which is fine
+    # for a daily scan). Edit this if you want a different time.
+    - cron: "30 21 * * 1-5"
+  workflow_dispatch: {}   # lets you trigger a run manually from the Actions tab
+
+permissions:
+  contents: write   # needed so the workflow can commit updated data/docs back
+
+concurrency:
+  group: daily-trend-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run pipeline
+        run: python scripts/run_pipeline.py
+
+      - name: Commit updated data + dashboard
+        run: |
+          git config user.name "trend-scanner-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/data.json data/history.csv data/universe.csv
+          git diff --cached --quiet || git commit -m "Daily scan: $(date -u +'%Y-%m-%d')"
+          git push
