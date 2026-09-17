@@ -107,6 +107,7 @@ BA,Boeing,Industrials,S&P 500
 BAC,Bank of America,Financials,S&P 500
 BACTI-B.ST,Bactiguard Holding AB (publ),Healthcare,OMX Stockholm
 BAHN-B.ST,Bahnhof AB (publ),Communication Services,OMX Stockholm
+BALCO.ST,Balco Group AB,Consumer Cyclical,OMX Stockholm
 BALD-B.ST,Fastighets AB Balder (publ),Real Estate,OMX Stockholm
 BALL,Ball Corporation,Materials,S&P 500
 BAX,Baxter International,Health Care,S&P 500
@@ -209,7 +210,6 @@ CL,Colgate-Palmolive,Consumer Staples,S&P 500
 CLA-B.ST,Cloetta AB (publ),Consumer Defensive,OMX Stockholm
 CLAS-B.ST,Clas Ohlson AB (publ),Consumer Cyclical,OMX Stockholm
 CLAV.ST,Clavister Holding AB (publ.),Technology,OMX Stockholm
-CLBIO.ST,Corline Biomedical AB,Healthcare,OMX Stockholm
 CLX,Clorox,Consumer Staples,S&P 500
 CMBTOO.ST,Cmb.Tech NV,Unknown,OMX Stockholm
 CMCSA,Comcast,Communication Services,Nasdaq-100+S&P 500
@@ -518,6 +518,7 @@ JM.ST,JM AB (publ),Consumer Cyclical,OMX Stockholm
 JNJ,Johnson & Johnson,Health Care,S&P 500
 JOMA.ST,John Mattson FastighetsfÃ¶retagen AB (publ),Real Estate,OMX Stockholm
 JPM,JPMorgan Chase,Financials,S&P 500
+K2A-B.ST,K2A Knaust & Andersson Fastigheter AB (publ),Real Estate,OMX Stockholm
 KABE-B.ST,KABE Group AB (publ.),Consumer Cyclical,OMX Stockholm
 KAMBI.ST,Kambi Group plc,Consumer Cyclical,OMX Stockholm
 KAPIAB.ST,KallebÃ¤ck Property Invest AB (publ),Real Estate,OMX Stockholm
@@ -684,7 +685,6 @@ NWS,News Corp (Class B),Communication Services,S&P 500
 NWSA,News Corp (Class A),Communication Services,S&P 500
 NXPI,NXP Semiconductors,Information Technology,Nasdaq-100+S&P 500
 NYAB.ST,Nyab AB (publ),Industrials,OMX Stockholm
-NYOR.ST,Nyorda AB,Communication Services,OMX Stockholm
 O,Realty Income,Real Estate,S&P 500
 OBAB.ST,Online Brands Nordic AB (publ),Consumer Cyclical,OMX Stockholm
 OCTV-SDB.ST,Octave Intelligence plc,Technology,OMX Stockholm
