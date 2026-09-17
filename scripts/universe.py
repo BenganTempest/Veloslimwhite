@@ -35,7 +35,13 @@ import config  # noqa: E402
 log = logging.getLogger("universe")
 
 SP500_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-NASDAQ100_URL = "https://en.wikipedia.org/wiki/Nasdaq-100"
+# Wikipedia moved the actual constituents table off the "Nasdaq-100" article
+# and onto this separate list article -- the old URL still returns a page,
+# just with none of its 18 tables being the ticker/company one (confirmed by
+# checking the live page: it now only has all-time-high/milestone/navbox
+# tables). If this ever breaks again, check whether the article got renamed
+# again before assuming _find_column needs more substrings.
+NASDAQ100_URL = "https://en.wikipedia.org/wiki/List_of_NASDAQ-100_companies"
 OMX_STOCKHOLM_URL = "https://stockanalysis.com/list/nasdaq-stockholm/"
 
 HEADERS = {"User-Agent": config.REQUEST_USER_AGENT}
@@ -107,7 +113,10 @@ def fetch_nasdaq100() -> pd.DataFrame:
                   "Tables found on the page: %s", seen)
         raise ValueError(f"Could not locate Nasdaq-100 constituents table (saw {len(tables)} tables, see log for their columns)")
 
-    sector_col = _find_column(candidate.columns, "gics sector", "sector")
+    # The new page uses ICB (Ticker/Company/ICB Industry/ICB Subsector)
+    # instead of the old page's GICS Sector column -- accept either so this
+    # doesn't need a matching fix next time the classification scheme changes.
+    sector_col = _find_column(candidate.columns, "gics sector", "sector", "industry")
 
     df = pd.DataFrame(
         {

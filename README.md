@@ -1,6 +1,7 @@
 # Trend Scanner
 
-A daily, automated dashboard that scans the S&P 500 + Nasdaq-100 for stocks whose
+A daily, automated dashboard that scans the S&P 500, Nasdaq-100, and the Nasdaq
+Stockholm all-share list (including smaller First North names) for stocks whose
 recent price/volume behavior resembles stocks that had big moves in the past, blended
 with current momentum and news sentiment, into one 0–100 "Trend Score" per ticker.
 
@@ -11,13 +12,19 @@ anything.
 
 It costs nothing to run: GitHub Actions' free tier does the daily compute, GitHub
 Pages hosts the dashboard, and every data source (Yahoo Finance via `yfinance`,
-Wikipedia for the ticker list, Google News RSS for headlines) is free and keyless.
+Wikipedia and stockanalysis.com for the ticker lists, Google News RSS for headlines)
+is free and keyless.
+
+Prices are shown in each ticker's own currency (USD for US names, SEK for
+Stockholm-listed names) — the dashboard has a Market filter to isolate one or the
+other.
 
 ## How it works
 
 ```
 GitHub Actions (daily, scheduled)
-  -> scripts/universe.py     pull S&P 500 + Nasdaq-100 tickers from Wikipedia
+  -> scripts/universe.py     pull S&P 500 + Nasdaq-100 tickers from Wikipedia, plus
+                              the Nasdaq Stockholm all-share list from stockanalysis.com
   -> scripts/collect.py      pull 2y OHLCV per ticker (yfinance) + recent headlines (Google News RSS)
   -> scripts/features.py     momentum, volatility, relative volume, RSI, distance from 52w high
   -> scripts/pattern_model.py  train a small logistic regression: does today's feature
@@ -101,12 +108,40 @@ push — the next scheduled or manual run picks it up.
 - **Sentiment is a rough signal.** VADER is a general-purpose lexicon, not tuned for
   financial language ("shares fell on strong earnings" reads oddly to a plain lexicon).
   Treat the sentiment column as buzz/tone, not precision.
+- **Yahoo/yfinance rate limiting will happen sometimes, and the tickers-scanned
+  count will wobble day to day because of it.** At ~1,500 tickers this is normal,
+  not a sign anything's broken. `scripts/collect.py` retries once after a pause if
+  a chunk of tickers fails; `config.PRICE_DOWNLOAD_MAX_RETRIES` /
+  `PRICE_DOWNLOAD_RETRY_PAUSE_SECONDS` control that. If the scanned count trends
+  down hard over several days rather than just wobbling, check the Actions log for
+  `YFRateLimitError` or `Failed downloads` — that's the tell.
 - **Google News RSS is not an official, documented API.** It's a commonly used free
   endpoint, but it can change or rate-limit without notice. `scripts/collect.py` is
   written to fail soft (a broken news fetch just zeroes out sentiment for that run,
   it won't crash the pipeline) — check the Actions logs occasionally. If it breaks
   for good, the cleanest fix is swapping in a proper news API (e.g. NewsAPI.org's
   free tier) and storing the key as a GitHub Actions secret rather than in the repo.
+- **The Nasdaq Stockholm list is confirmed capped at ~500 of ~752 listed names.**
+  stockanalysis.com's page reports 752 Nasdaq Stockholm stocks, but the plain HTML
+  our scraper reads only ever contains the first 500 — the rest loads later via
+  client-side JavaScript (infinite scroll), which a simple `requests.get()` can't
+  trigger. This isn't a header-matching bug like the earlier Wikipedia ones and
+  isn't something `scripts/universe.py` can fix by parsing more carefully. There's
+  an undocumented endpoint the site's own JS uses to fetch the rest, but it needs
+  auth for anything beyond the free tier and its exact data format wasn't something
+  that could be safely reverse-engineered and verified from this project's
+  development environment — a fix that turned out wrong would silently corrupt
+  ticker data rather than fail loudly, which is worse than the current honest
+  500-name cap. Check the Actions log line `OMX Stockholm: got N tickers` after a
+  run; it'll keep reading ~500 until this is revisited with a proper fix (a
+  different data source, or a headless-browser fetch). It also has no sector data, so `scripts/universe.py`
+  backfills sector/industry for any ticker still marked "Unknown" with a per-ticker
+  `yfinance` lookup — a much heavier call than the bulk price download, so it's
+  capped (`SECTOR_ENRICH_MAX_PER_RUN` in `config.py`), threaded gently, best-effort,
+  and cached in `data/universe.csv` so a ticker only gets looked up once, not every
+  day. A few names may still end up "Unknown" if Yahoo doesn't have sector data for
+  them either (common for very small/thin names) — filter by Market if that's
+  annoying rather than Sector.
 - **Built and tested against synthetic data.** The environment this project was
   developed in has a network policy that blocks financial data hosts and can't
   install `yfinance`/`feedparser`/`vaderSentiment` from PyPI (see below) — so the full
