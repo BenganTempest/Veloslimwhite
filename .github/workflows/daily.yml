@@ -32,13 +32,41 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Check repo staleness (alerts at 30/45 days of no commits)
+        # Runs BEFORE the pipeline and BEFORE today's own commit, so it's
+        # reading the true gap since the repo was last updated -- and with
+        # if: always() it still runs (and can still alert) even on a day
+        # the pipeline step below fails outright. See scripts/staleness_check.py.
+        if: always()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          LAST_COMMIT_EPOCH=$(git log -1 --format=%ct)
+          python scripts/staleness_check.py "$LAST_COMMIT_EPOCH"
+
       - name: Run pipeline
+        env:
+          # Optional -- only needed for the Telegram alert feature. If
+          # these secrets aren't set in the repo, the pipeline just skips
+          # sending alerts (see scripts/notify.py and the README).
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python scripts/run_pipeline.py
 
       - name: Commit updated data + dashboard
+        # if: always() so the staleness-check state file above still gets
+        # committed even on a day the pipeline step failed -- otherwise a
+        # broken run would also silently reset the staleness alert's memory.
+        if: always()
         run: |
           git config user.name "trend-scanner-bot"
           git config user.email "actions@users.noreply.github.com"
           git add docs/data.json data/history.csv data/universe.csv
+          # staleness_state.json only ever gets created once a stale streak
+          # actually happens (see scripts/staleness_check.py) -- it won't
+          # exist on a normal healthy run, so this has to be conditional or
+          # `git add` on a missing path would fail the whole step.
+          if [ -f data/staleness_state.json ]; then git add data/staleness_state.json; fi
           git diff --cached --quiet || git commit -m "Daily scan: $(date -u +'%Y-%m-%d')"
           git push
