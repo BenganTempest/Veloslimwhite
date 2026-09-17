@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import StringIO
 from pathlib import Path
 
@@ -131,6 +132,56 @@ def fetch_omx_stockholm() -> pd.DataFrame:
     return df
 
 
+def _fetch_sector_one(ticker: str) -> tuple[str, str]:
+    # Imported lazily, same reasoning as vaderSentiment in score.py: keeps
+    # this module importable/testable without yfinance installed.
+    import yfinance as yf
+
+    try:
+        info = yf.Ticker(ticker).info
+        sector = info.get("sector") or info.get("industry") or "Unknown"
+        return ticker, str(sector)
+    except Exception:  # noqa: BLE001
+        return ticker, "Unknown"
+
+
+def enrich_missing_sectors(agg: pd.DataFrame) -> pd.DataFrame:
+    """
+    Wikipedia's S&P 500 / Nasdaq-100 tables come with a sector column built
+    in; the Stockholm all-share scrape doesn't. This fills in "Unknown" rows
+    with sector/industry from yfinance's per-ticker `.info` -- a much
+    heavier call than the bulk price download, so it's capped, threaded
+    gently, and entirely best-effort: any ticker that fails or times out
+    just stays "Unknown" rather than blocking the pipeline.
+    """
+    missing = agg.loc[agg["sector"] == "Unknown", "ticker"].tolist()
+    if not missing:
+        return agg
+    if len(missing) > config.SECTOR_ENRICH_MAX_PER_RUN:
+        log.warning(
+            "%d tickers missing sector, capping enrichment at %d this run "
+            "(the rest stay Unknown and get a chance on a later run once cached)",
+            len(missing), config.SECTOR_ENRICH_MAX_PER_RUN,
+        )
+        missing = missing[: config.SECTOR_ENRICH_MAX_PER_RUN]
+
+    log.info("Fetching sector/industry for %d tickers with unknown sector...", len(missing))
+    found: dict[str, str] = {}
+    with ThreadPoolExecutor(max_workers=config.SECTOR_ENRICH_MAX_WORKERS) as pool:
+        futures = {pool.submit(_fetch_sector_one, t): t for t in missing}
+        for fut in as_completed(futures):
+            t, sector = fut.result()
+            found[t] = sector
+
+    resolved = sum(1 for v in found.values() if v != "Unknown")
+    log.info("Sector enrichment: resolved %d/%d tickers", resolved, len(missing))
+
+    agg = agg.copy()
+    mask = agg["ticker"].isin(found)
+    agg.loc[mask, "sector"] = agg.loc[mask, "ticker"].map(found)
+    return agg
+
+
 def build_universe() -> pd.DataFrame:
     frames = []
     if config.INCLUDE_SP500:
@@ -162,6 +213,22 @@ def build_universe() -> pd.DataFrame:
         .agg({"name": "first", "sector": "first", "index": lambda s: "+".join(sorted(set(s)))})
     )
     agg = agg.sort_values("ticker").reset_index(drop=True)
+
+    # Reuse sectors already resolved on a previous run (cached on disk and
+    # committed to the repo each day) before paying for any new lookups --
+    # sector essentially never changes, so there's no reason to re-fetch it
+    # daily once it's known.
+    if config.UNIVERSE_CACHE.exists():
+        try:
+            prior = pd.read_csv(config.UNIVERSE_CACHE)[["ticker", "sector"]].dropna()
+            prior_map = dict(zip(prior["ticker"], prior["sector"]))
+            still_unknown = agg["sector"] == "Unknown"
+            agg.loc[still_unknown, "sector"] = agg.loc[still_unknown, "ticker"].map(prior_map).fillna("Unknown")
+        except Exception as exc:  # noqa: BLE001
+            log.warning("Could not reuse cached sectors: %s", exc)
+
+    if config.ENRICH_MISSING_SECTORS:
+        agg = enrich_missing_sectors(agg)
 
     config.DATA_DIR.mkdir(parents=True, exist_ok=True)
     agg.to_csv(config.UNIVERSE_CACHE, index=False)

@@ -22,6 +22,13 @@ INCLUDE_SP500 = True
 INCLUDE_NASDAQ100 = True
 INCLUDE_OMX_STOCKHOLM_ALL = True  # Nasdaq Stockholm all-share, incl. First North small-caps
 
+# The Stockholm list has no built-in sector column, so missing sectors are
+# backfilled with a per-ticker yfinance lookup (much heavier than the bulk
+# price download, hence capped/threaded gently and cached across runs).
+ENRICH_MISSING_SECTORS = True
+SECTOR_ENRICH_MAX_WORKERS = 4
+SECTOR_ENRICH_MAX_PER_RUN = 600
+
 # --- Price / feature settings --------------------------------------------
 PRICE_LOOKBACK = "2y"        # yfinance period string used for both training + features
 MOMENTUM_WINDOWS = [5, 20, 60]   # trading days
