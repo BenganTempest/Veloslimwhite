@@ -27,7 +27,25 @@ INCLUDE_OMX_STOCKHOLM_ALL = True  # Nasdaq Stockholm all-share, incl. First Nort
 # price download, hence capped/threaded gently and cached across runs).
 ENRICH_MISSING_SECTORS = True
 SECTOR_ENRICH_MAX_WORKERS = 4
-SECTOR_ENRICH_MAX_PER_RUN = 600
+# Kept low on purpose: this is a burst of individual Yahoo requests right
+# before the much bigger bulk price download, and a big burst here was
+# observed to trip Yahoo's rate limiter for the price-download step right
+# after it (160+ tickers failed with YFRateLimitError in one run). Because
+# resolved sectors are cached in data/universe.csv and reused daily, a low
+# cap here just means the one-time Swedish sector backfill trickles in over
+# several days instead of happening in one risky burst.
+SECTOR_ENRICH_MAX_PER_RUN = 150
+# Give Yahoo's short-term rate-limit window a chance to reset between the
+# sector-enrichment burst and the much larger bulk price download.
+PAUSE_AFTER_SECTOR_ENRICHMENT_SECONDS = 20
+
+# --- Price download resilience --------------------------------------------
+# yfinance/Yahoo rate-limiting is common at this scale (~1000+ tickers) and
+# is usually transient. One retry of just the tickers that failed the first
+# pass, after a pause, recovers most of them without re-downloading
+# everything that already succeeded.
+PRICE_DOWNLOAD_MAX_RETRIES = 1
+PRICE_DOWNLOAD_RETRY_PAUSE_SECONDS = 60
 
 # --- Price / feature settings --------------------------------------------
 PRICE_LOOKBACK = "2y"        # yfinance period string used for both training + features

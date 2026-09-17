@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import time
 from pathlib import Path
 
 import pandas as pd
@@ -35,6 +36,14 @@ log = logging.getLogger("run_pipeline")
 def main() -> None:
     universe = build_universe()
     tickers = universe["ticker"].tolist()
+
+    # build_universe() may have just made a burst of individual Yahoo
+    # requests (per-ticker sector backfill for Stockholm names). Give its
+    # short-term rate limit a moment to reset before the much larger bulk
+    # price download right below -- observed to matter in practice.
+    if config.PAUSE_AFTER_SECTOR_ENRICHMENT_SECONDS:
+        log.info("Pausing %ds before the bulk price download...", config.PAUSE_AFTER_SECTOR_ENRICHMENT_SECONDS)
+        time.sleep(config.PAUSE_AFTER_SECTOR_ENRICHMENT_SECONDS)
 
     prices = fetch_prices(tickers)
     if not prices:

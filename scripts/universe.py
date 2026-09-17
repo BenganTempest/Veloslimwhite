@@ -74,24 +74,40 @@ def fetch_sp500() -> pd.DataFrame:
     return df[["ticker", "name", "sector", "index"]]
 
 
+def _find_column(columns, *substrings) -> str | None:
+    """Case-insensitive substring match, e.g. 'Ticker symbol' matches 'ticker'.
+    More resilient to Wikipedia renaming a header slightly than an exact match."""
+    for col in columns:
+        low = str(col).strip().lower()
+        if any(s in low for s in substrings):
+            return col
+    return None
+
+
 def fetch_nasdaq100() -> pd.DataFrame:
     tables = _fetch_table(NASDAQ100_URL)
-    # The constituents table is identified by having a Ticker/Symbol column;
-    # its position on the page has moved before, so search for it instead of
-    # hardcoding a table index.
+    # The constituents table is identified by having a ticker-like AND a
+    # company-like column; its position on the page has moved before, so
+    # search for it (by substring, not exact name) instead of hardcoding a
+    # table index or an exact header string.
     candidate = None
+    sym_col = name_col = None
     for t in tables:
-        cols = {c.strip().lower() for c in t.columns.astype(str)}
-        if {"ticker", "company"} & cols or {"symbol", "company"} & cols:
-            candidate = t
+        t = t.rename(columns=lambda c: str(c).strip())
+        sc = _find_column(t.columns, "ticker", "symbol")
+        nc = _find_column(t.columns, "company")
+        if sc and nc:
+            candidate, sym_col, name_col = t, sc, nc
             break
     if candidate is None:
-        raise ValueError("Could not locate Nasdaq-100 constituents table")
+        # Log every table's columns so a future failure is diagnosable
+        # straight from the Actions log instead of needing another round trip.
+        seen = [list(t.columns.astype(str)) for t in tables]
+        log.error("Nasdaq-100: no table had both a ticker-like and company-like column. "
+                  "Tables found on the page: %s", seen)
+        raise ValueError(f"Could not locate Nasdaq-100 constituents table (saw {len(tables)} tables, see log for their columns)")
 
-    candidate = candidate.rename(columns=lambda c: str(c).strip())
-    sym_col = "Ticker" if "Ticker" in candidate.columns else "Symbol"
-    name_col = "Company" if "Company" in candidate.columns else candidate.columns[0]
-    sector_col = "GICS Sector" if "GICS Sector" in candidate.columns else None
+    sector_col = _find_column(candidate.columns, "gics sector", "sector")
 
     df = pd.DataFrame(
         {

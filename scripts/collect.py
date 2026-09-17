@@ -24,13 +24,9 @@ import config  # noqa: E402
 log = logging.getLogger("collect")
 
 
-def fetch_prices(tickers: list[str]) -> dict[str, pd.DataFrame]:
-    """
-    Bulk-download daily OHLCV for every ticker. yfinance batches this
-    internally far more efficiently than one request per ticker.
-    Returns {ticker: DataFrame} for tickers that returned usable data.
-    """
-    log.info("Downloading price history for %d tickers...", len(tickers))
+def _download_batch(tickers: list[str]) -> dict[str, pd.DataFrame]:
+    if not tickers:
+        return {}
     raw = yf.download(
         tickers=tickers,
         period=config.PRICE_LOOKBACK,
@@ -55,6 +51,35 @@ def fetch_prices(tickers: list[str]) -> dict[str, pd.DataFrame]:
         # single-ticker call falls back to a flat frame
         if not raw.empty and len(raw) >= 60:
             out[tickers[0]] = raw.dropna(how="all")
+    return out
+
+
+def fetch_prices(tickers: list[str]) -> dict[str, pd.DataFrame]:
+    """
+    Bulk-download daily OHLCV for every ticker. yfinance batches this
+    internally far more efficiently than one request per ticker.
+    Returns {ticker: DataFrame} for tickers that returned usable data.
+
+    A ticker can come back missing either because it's genuinely delisted/
+    invalid, or because Yahoo rate-limited the batch (YFRateLimitError) --
+    common at this scale and usually transient. One retry, after a pause,
+    of just the tickers still missing recovers most of the rate-limited
+    ones without re-downloading everything that already succeeded.
+    """
+    log.info("Downloading price history for %d tickers...", len(tickers))
+    out = _download_batch(tickers)
+
+    missing = [t for t in tickers if t not in out]
+    if missing and config.PRICE_DOWNLOAD_MAX_RETRIES > 0:
+        log.warning(
+            "%d/%d tickers missing after the first pass (delistings and/or rate "
+            "limiting) -- waiting %ds and retrying that subset once",
+            len(missing), len(tickers), config.PRICE_DOWNLOAD_RETRY_PAUSE_SECONDS,
+        )
+        time.sleep(config.PRICE_DOWNLOAD_RETRY_PAUSE_SECONDS)
+        retry_out = _download_batch(missing)
+        out.update(retry_out)
+        log.info("Retry recovered %d/%d previously-missing tickers", len(retry_out), len(missing))
 
     log.info("Got usable price history for %d/%d tickers", len(out), len(tickers))
     return out
