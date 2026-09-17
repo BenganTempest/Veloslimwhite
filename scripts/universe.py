@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from io import StringIO
 from pathlib import Path
 
 import pandas as pd
@@ -35,7 +36,7 @@ def _clean_symbol(sym: str) -> str:
 def _fetch_table(url: str) -> list[pd.DataFrame]:
     resp = requests.get(url, headers=HEADERS, timeout=20)
     resp.raise_for_status()
-    return pd.read_html(resp.text)
+    return pd.read_html(StringIO(resp.text))
 
 
 def fetch_sp500() -> pd.DataFrame:
