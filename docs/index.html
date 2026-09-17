@@ -143,7 +143,16 @@
     font-variant-numeric: tabular-nums; }
   tbody tr:hover { background: var(--surface-2); }
   .ticker-cell { font-weight: 650; font-variant-numeric: normal; }
+  .ticker-row { display: flex; align-items: center; gap: 3px; }
   .name-cell { color: var(--text-secondary); font-variant-numeric: normal; font-size: 12.5px; }
+  .ext-links { display: inline-flex; gap: 3px; margin-left: 4px; }
+  .ext-link {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 19px; height: 19px; border-radius: 6px; flex: none;
+    color: var(--text-muted); border: 1px solid var(--border); text-decoration: none;
+  }
+  .ext-link:hover { color: var(--text-primary); background: var(--surface-2); border-color: var(--text-muted); }
+  .ext-link svg { width: 11px; height: 11px; }
   .tag {
     display: inline-block; font-size: 10.5px; padding: 1px 6px; border-radius: 999px;
     background: var(--surface-2); color: var(--text-secondary); margin: 1px 3px 1px 0; border: 1px solid var(--border);
@@ -196,7 +205,9 @@
 
   <section>
     <h2>Full scan</h2>
-    <p class="desc">Every ticker scanned today. Click a column header to sort.</p>
+    <p class="desc">Every ticker scanned today. Click a column header to sort. The small icons next to
+      each ticker open its Yahoo Finance quote page and a live Google News search for it, in a new tab &mdash;
+      useful for checking a score against the actual news rather than taking the sentiment number on faith.</p>
     <div class="card">
       <div class="filters">
         <input type="search" id="searchBox" placeholder="Search ticker or name…">
@@ -292,6 +303,32 @@
     var d = document.createElement("div");
     d.textContent = s == null ? "" : String(s);
     return d.innerHTML;
+  }
+
+  // Small inline icons (no external icon font/library -- keeps the page
+  // fully self-contained). Chart glyph for the Yahoo Finance quote page,
+  // document glyph for the Google News search.
+  var ICON_CHART = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" ' +
+    'stroke-linecap="round"><path d="M2 13.5V2M2 13.5H14"/><path d="M4.5 11V8M8 11V5M11.5 11V6.5"/></svg>';
+  var ICON_NEWS = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="10" rx="1.5"/>' +
+    '<path d="M4.5 6H11.5M4.5 8.5H11.5M4.5 11H8.5"/></svg>';
+
+  function externalLinksHtml(r) {
+    // The ticker we store is already Yahoo's own symbol format (it's what
+    // feeds yfinance directly), so no transformation/guessing is needed --
+    // this works the same way for US and Stockholm (.ST) names alike.
+    var yahooUrl = "https://finance.yahoo.com/quote/" + encodeURIComponent(r.ticker);
+    var newsQuery = encodeURIComponent(r.ticker + " stock OR " + r.name);
+    var newsUrl = "https://news.google.com/search?q=" + newsQuery + "&hl=en-US&gl=US&ceid=US:en";
+    return '<span class="ext-links">' +
+      '<a class="ext-link" href="' + yahooUrl + '" target="_blank" rel="noopener noreferrer" ' +
+        'title="Yahoo Finance quote: ' + esc(r.ticker) + '" aria-label="Yahoo Finance quote for ' + esc(r.ticker) +
+        '" onclick="event.stopPropagation();">' + ICON_CHART + "</a>" +
+      '<a class="ext-link" href="' + newsUrl + '" target="_blank" rel="noopener noreferrer" ' +
+        'title="Google News search: ' + esc(r.ticker) + '" aria-label="Google News search for ' + esc(r.ticker) +
+        '" onclick="event.stopPropagation();">' + ICON_NEWS + "</a>" +
+      "</span>";
   }
 
   function sparklineSvg(points) {
@@ -399,7 +436,8 @@
     var html = rows.map(function (r) {
       var tags = (r.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
       return "<tr>" +
-        '<td class="ticker-cell">' + esc(r.ticker) + '<div class="name-cell">' + esc(r.name) + "</div></td>" +
+        '<td class="ticker-cell"><div class="ticker-row"><span>' + esc(r.ticker) + "</span>" +
+          externalLinksHtml(r) + '</div><div class="name-cell">' + esc(r.name) + "</div></td>" +
         "<td>" + esc(r.market) + "</td>" +
         "<td>" + esc(r.sector) + "</td>" +
         '<td class="num">' + fmtPrice(r) + "</td>" +
