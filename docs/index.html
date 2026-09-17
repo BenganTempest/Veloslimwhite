@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trend Scanner</title>
+<meta name="description" content="Daily research dashboard: momentum, news sentiment, and historical breakout pattern-matching across the S&amp;P 500 + Nasdaq-100. Not investment advice.">
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --surface-2:      #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #2a78d6;   /* blue - sequential base */
+    --seq-250: #86b6ef; --seq-350: #5598e7; --seq-450: #2a78d6;
+    --seq-550: #1c5cab; --seq-650: #104281; --seq-700: #0d366b;
+    --good:     #0ca30c;
+    --critical: #d03b3b;
+    --warning:  #fab219;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --surface-2:      #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #3987e5;
+      --seq-250: #5598e7; --seq-350: #2a78d6; --seq-450: #3987e5;
+      --seq-550: #184f95; --seq-650: #0d366b; --seq-700: #0d366b;
+      --good:     #0ca30c;
+      --critical: #e66767;
+      --warning:  #fab219;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --surface-2:      #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;
+    --seq-250: #5598e7; --seq-350: #2a78d6; --seq-450: #3987e5;
+    --seq-550: #184f95; --seq-650: #0d366b; --seq-700: #0d366b;
+    --good:     #0ca30c;
+    --critical: #e66767;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  body { padding: 0 16px 64px; }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header.top { padding: 28px 0 16px; }
+  header.top h1 { font-size: 22px; margin: 0 0 4px; font-weight: 650; }
+  header.top .sub { color: var(--text-secondary); font-size: 14px; }
+  .theme-toggle {
+    float: right; margin-top: 4px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 12px; color: var(--text-primary);
+    font-size: 13px; cursor: pointer;
+  }
+
+  .disclaimer {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; font-size: 13px; color: var(--text-secondary); line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  .disclaimer strong { color: var(--text-primary); }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  @media (max-width: 720px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .stat-tile {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .stat-tile .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .stat-tile .value { font-size: 24px; font-weight: 650; }
+  .stat-tile .delta { font-size: 12px; margin-top: 4px; }
+  .stat-tile .delta.good { color: var(--good); }
+  .stat-tile .delta.critical { color: var(--critical); }
+
+  section { margin-bottom: 28px; }
+  section h2 { font-size: 15px; margin: 0 0 4px; font-weight: 650; }
+  section .desc { font-size: 13px; color: var(--text-secondary); margin: 0 0 12px; }
+
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px;
+  }
+
+  /* leaderboard bars */
+  .bar-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; position: relative; }
+  .bar-row .bar-label { width: 190px; flex: none; font-size: 12.5px; color: var(--text-secondary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-track { flex: 1; height: 16px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; min-width: 2px; }
+  .bar-value { width: 46px; flex: none; text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .bar-row:hover .bar-fill { filter: brightness(1.08); }
+  .bar-tooltip {
+    position: absolute; right: 46px; top: -30px; background: var(--text-primary); color: var(--surface-1);
+    padding: 4px 8px; border-radius: 6px; font-size: 12px; white-space: nowrap;
+    opacity: 0; pointer-events: none; transition: opacity 0.1s;
+  }
+  .bar-row:hover .bar-tooltip { opacity: 1; }
+
+  /* filters */
+  .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .filters input, .filters select {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 10px; font-size: 13px; color: var(--text-primary);
+  }
+  .filters input[type="search"] { min-width: 200px; }
+  .filters .count { margin-left: auto; font-size: 12.5px; color: var(--text-muted); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    text-align: left; font-weight: 600; color: var(--text-secondary); font-size: 12px;
+    padding: 8px 10px; border-bottom: 1px solid var(--gridline); cursor: pointer; white-space: nowrap;
+    position: sticky; top: 0; background: var(--surface-1);
+  }
+  thead th.num, td.num { text-align: right; }
+  thead th:hover { color: var(--text-primary); }
+  tbody td { padding: 8px 10px; border-bottom: 1px solid var(--gridline); vertical-align: middle;
+    font-variant-numeric: tabular-nums; }
+  tbody tr:hover { background: var(--surface-2); }
+  .ticker-cell { font-weight: 650; font-variant-numeric: normal; }
+  .name-cell { color: var(--text-secondary); font-variant-numeric: normal; font-size: 12.5px; }
+  .tag {
+    display: inline-block; font-size: 10.5px; padding: 1px 6px; border-radius: 999px;
+    background: var(--surface-2); color: var(--text-secondary); margin: 1px 3px 1px 0; border: 1px solid var(--border);
+  }
+  .score-pill {
+    display: inline-block; min-width: 34px; text-align: center; padding: 2px 8px; border-radius: 999px;
+    color: #fff; font-weight: 650; font-variant-numeric: tabular-nums;
+  }
+  .up { color: var(--good); }
+  .down { color: var(--critical); }
+  .sparkline { vertical-align: middle; }
+
+  .methodology { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+  .methodology code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+
+  .backtest-block { margin-bottom: 16px; }
+  .backtest-block h3 { font-size: 13.5px; margin: 0 0 8px; }
+  .not-ready { font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+  footer { font-size: 12px; color: var(--text-muted); text-align: center; padding-top: 24px; }
+  footer a { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <button class="theme-toggle" id="themeToggle" type="button">Toggle theme</button>
+    <h1>Trend Scanner</h1>
+    <div class="sub" id="lastUpdated">Loading…</div>
+  </header>
+
+  <div class="disclaimer">
+    <strong>This is a research toy, not investment advice.</strong> The "Trend Score" blends a
+    backward-looking pattern-similarity model, recent price/volume momentum, and news sentiment
+    volume. It measures how much a stock <em>resembles stocks that broke out before</em> and how
+    much it's currently moving and being talked about &mdash; it is not a probability that any stock
+    will go up, and past patterns are no guarantee of future returns. See
+    <a href="#methodology">Methodology</a> and the <a href="#honesty">honesty panel</a> below, which
+    tracks whether this tool's own past scores actually predicted anything.
+  </div>
+
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <section>
+    <h2>Today's leaderboard</h2>
+    <p class="desc">Highest Trend Score across the scanned universe right now.</p>
+    <div class="card" id="leaderboard"></div>
+  </section>
+
+  <section>
+    <h2>Full scan</h2>
+    <p class="desc">Every ticker scanned today. Click a column header to sort.</p>
+    <div class="card">
+      <div class="filters">
+        <input type="search" id="searchBox" placeholder="Search ticker or name…">
+        <select id="sectorFilter"><option value="">All sectors</option></select>
+        <label style="font-size:13px;color:var(--text-secondary);">Min score
+          <input type="range" id="minScore" min="0" max="100" value="0" style="vertical-align:middle;">
+          <span id="minScoreVal">0</span>
+        </label>
+        <span class="count" id="rowCount"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="mainTable">
+          <thead>
+            <tr>
+              <th data-key="ticker">Ticker</th>
+              <th data-key="sector">Sector</th>
+              <th class="num" data-key="price">Price</th>
+              <th class="num" data-key="mom_5d">5d %</th>
+              <th class="num" data-key="mom_20d">20d %</th>
+              <th class="num" data-key="rel_volume">Rel. vol</th>
+              <th class="num" data-key="sentiment_score">Sentiment</th>
+              <th>Trend</th>
+              <th class="num" data-key="trend_score">Score</th>
+              <th>Tags</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="honesty">
+    <h2>Honesty panel</h2>
+    <p class="desc">
+      Did stocks this tool scored highly actually go on to do better? Computed from this
+      scanner's own accumulated daily snapshots &mdash; not backtested on hindsight, and it will
+      say "not enough data yet" until enough days have passed to check a given horizon.
+    </p>
+    <div class="card" id="backtestPanel"></div>
+  </section>
+
+  <section id="methodology">
+    <h2>Methodology</h2>
+    <div class="card methodology" id="methodologyBody"></div>
+  </section>
+
+  <footer>
+    Data: Yahoo Finance (via yfinance) and Google News RSS, both free/keyless. Runs daily via
+    GitHub Actions. Source and schedule live in this repository's <code>.github/workflows</code>.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var state = { rows: [], sortKey: "trend_score", sortDir: -1, data: null };
+
+  var seqSteps = [
+    { max: 20, css: "var(--seq-250)" },
+    { max: 40, css: "var(--seq-350)" },
+    { max: 60, css: "var(--seq-450)" },
+    { max: 80, css: "var(--seq-550)" },
+    { max: 101, css: "var(--seq-700)" },
+  ];
+  function scoreColor(v) {
+    for (var i = 0; i < seqSteps.length; i++) if (v < seqSteps[i].max) return seqSteps[i].css;
+    return "var(--seq-700)";
+  }
+
+  function fmtPct(v) {
+    if (v === null || v === undefined || isNaN(v)) return "—";
+    var cls = v > 0 ? "up" : (v < 0 ? "down" : "");
+    var sign = v > 0 ? "+" : "";
+    return '<span class="' + cls + '">' + sign + v.toFixed(1) + "%</span>";
+  }
+  function fmtNum(v, digits) {
+    if (v === null || v === undefined || isNaN(v)) return "—";
+    return v.toFixed(digits === undefined ? 1 : digits);
+  }
+  function esc(s) {
+    var d = document.createElement("div");
+    d.textContent = s == null ? "" : String(s);
+    return d.innerHTML;
+  }
+
+  function sparklineSvg(points) {
+    if (!points || points.length < 2) return "";
+    var w = 90, h = 26, pad = 2;
+    var min = Math.min.apply(null, points), max = Math.max.apply(null, points);
+    var range = (max - min) || 1;
+    var stepX = (w - pad * 2) / (points.length - 1);
+    var coords = points.map(function (p, i) {
+      var x = pad + i * stepX;
+      var y = pad + (1 - (p - min) / range) * (h - pad * 2);
+      return x.toFixed(1) + "," + y.toFixed(1);
+    }).join(" ");
+    var up = points[points.length - 1] >= points[0];
+    var color = up ? "var(--good)" : "var(--critical)";
+    return '<svg class="sparkline" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + " " + h + '">' +
+      '<polyline points="' + coords + '" fill="none" stroke="' + color + '" stroke-width="2" ' +
+      'stroke-linejoin="round" stroke-linecap="round"/></svg>';
+  }
+
+  function renderKpis(d) {
+    var rows = d.rows;
+    var avg = rows.reduce(function (a, r) { return a + (r.trend_score || 0); }, 0) / (rows.length || 1);
+    var top = rows.length ? rows[0] : null;
+    var auc = d.model && d.model.validation_auc;
+    var kpis = [
+      { label: "Tickers scanned", value: String(d.universe_size) },
+      { label: "Average trend score", value: avg.toFixed(1) },
+      { label: "Top today", value: top ? top.ticker : "—", delta: top ? top.trend_score.toFixed(1) : "" },
+      { label: "Model out-of-sample AUC", value: (auc === null || auc === undefined) ? "n/a" : auc.toFixed(2),
+        delta: "0.50 = no skill, 1.0 = perfect" },
+    ];
+    document.getElementById("kpiRow").innerHTML = kpis.map(function (k) {
+      return '<div class="stat-tile"><div class="label">' + esc(k.label) + '</div>' +
+        '<div class="value">' + esc(k.value) + "</div>" +
+        (k.delta ? '<div class="delta">' + esc(k.delta) + "</div>" : "") + "</div>";
+    }).join("");
+  }
+
+  function renderLeaderboard(d) {
+    var top = d.rows.slice(0, 20);
+    var max = top.length ? top[0].trend_score : 100;
+    var html = top.map(function (r) {
+      var pct = Math.max(2, (r.trend_score / (max || 1)) * 100);
+      return '<div class="bar-row">' +
+        '<div class="bar-label">' + esc(r.ticker) + " · " + esc(r.name) + "</div>" +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + pct + "%;background:" +
+          scoreColor(r.trend_score) + ';"></div></div>' +
+        '<div class="bar-value">' + fmtNum(r.trend_score, 1) + "</div>" +
+        '<div class="bar-tooltip">' + esc(r.ticker) + ": " + fmtNum(r.trend_score, 1) + "/100</div>" +
+        "</div>";
+    }).join("");
+    document.getElementById("leaderboard").innerHTML = html || '<p class="not-ready">No rows.</p>';
+  }
+
+  function populateSectorFilter(d) {
+    var sectors = Array.from(new Set(d.rows.map(function (r) { return r.sector; }))).sort();
+    var sel = document.getElementById("sectorFilter");
+    sectors.forEach(function (s) {
+      var opt = document.createElement("option");
+      opt.value = s; opt.textContent = s;
+      sel.appendChild(opt);
+    });
+  }
+
+  function currentFilters() {
+    return {
+      q: document.getElementById("searchBox").value.trim().toLowerCase(),
+      sector: document.getElementById("sectorFilter").value,
+      minScore: Number(document.getElementById("minScore").value),
+    };
+  }
+
+  function applyFiltersAndSort(d) {
+    var f = currentFilters();
+    var rows = d.rows.filter(function (r) {
+      if (f.sector && r.sector !== f.sector) return false;
+      if (f.minScore && (r.trend_score || 0) < f.minScore) return false;
+      if (f.q && r.ticker.toLowerCase().indexOf(f.q) === -1 && r.name.toLowerCase().indexOf(f.q) === -1) return false;
+      return true;
+    });
+    rows.sort(function (a, b) {
+      var av = a[state.sortKey], bv = b[state.sortKey];
+      if (av === null || av === undefined) av = -Infinity;
+      if (bv === null || bv === undefined) bv = -Infinity;
+      if (typeof av === "string") return state.sortDir * av.localeCompare(bv);
+      return state.sortDir * (av - bv);
+    });
+    return rows;
+  }
+
+  function renderTable(d) {
+    var rows = applyFiltersAndSort(d);
+    document.getElementById("rowCount").textContent = rows.length + " of " + d.rows.length + " tickers";
+    var body = document.getElementById("tableBody");
+    var html = rows.map(function (r) {
+      var tags = (r.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
+      return "<tr>" +
+        '<td class="ticker-cell">' + esc(r.ticker) + '<div class="name-cell">' + esc(r.name) + "</div></td>" +
+        "<td>" + esc(r.sector) + "</td>" +
+        '<td class="num">' + (r.price !== null ? "$" + fmtNum(r.price, 2) : "—") + "</td>" +
+        '<td class="num">' + fmtPct(r.mom_5d) + "</td>" +
+        '<td class="num">' + fmtPct(r.mom_20d) + "</td>" +
+        '<td class="num">' + fmtNum(r.rel_volume, 2) + "×</td>" +
+        '<td class="num">' + fmtNum(r.sentiment_score, 0) + (r.headline_count ? "" : " (no coverage)") + "</td>" +
+        "<td>" + sparklineSvg(r.sparkline) + "</td>" +
+        '<td class="num"><span class="score-pill" style="background:' + scoreColor(r.trend_score) + '">' +
+          fmtNum(r.trend_score, 1) + "</span></td>" +
+        "<td>" + tags + "</td>" +
+        "</tr>";
+    }).join("");
+    body.innerHTML = html || '<tr><td colspan="10" class="not-ready">No rows match these filters.</td></tr>';
+  }
+
+  function renderBacktests(d) {
+    var el = document.getElementById("backtestPanel");
+    if (!d.backtests || !d.backtests.length) {
+      el.innerHTML = '<p class="not-ready">No snapshot history yet.</p>';
+      return;
+    }
+    el.innerHTML = d.backtests.map(function (b) {
+      if (!b.ready) {
+        return '<div class="backtest-block"><h3>' + esc(b.horizon) + '</h3>' +
+          '<p class="not-ready">Not enough daily snapshots yet to check this horizon. ' +
+          "Check back once the scanner has been running for " + esc(b.horizon) + ".</p></div>";
+      }
+      var deciles = Object.keys(b.decile_avg_return).map(Number).sort(function (a, c) { return a - c; });
+      var maxAbs = Math.max.apply(null, deciles.map(function (k) { return Math.abs(b.decile_avg_return[k]); }).concat([0.001]));
+      var bars = deciles.map(function (k) {
+        var v = b.decile_avg_return[k];
+        var pct = Math.max(2, (Math.abs(v) / maxAbs) * 100);
+        var tag = k === deciles[deciles.length - 1] ? " (highest score)" : k === deciles[0] ? " (lowest score)" : "";
+        var label = "decile " + (k + 1) + tag;
+        return '<div class="bar-row">' +
+          '<div class="bar-label">' + esc(label) + "</div>" +
+          '<div class="bar-track"><div class="bar-fill" style="width:' + pct + "%;background:" +
+            (v >= 0 ? "var(--good)" : "var(--critical)") + ';"></div></div>' +
+          '<div class="bar-value">' + (v * 100).toFixed(1) + "%</div>" +
+          "</div>";
+      }).join("");
+      var spreadTxt = (b.top_vs_bottom_spread === null || b.top_vs_bottom_spread === undefined)
+        ? "" : "<p style='font-size:13px;color:var(--text-secondary);margin:8px 0 0;'>Top-decile minus bottom-decile forward return: <strong>" +
+          (b.top_vs_bottom_spread * 100).toFixed(1) + "%</strong> over " + esc(b.n_pairs) + " observed pairs.</p>";
+      return '<div class="backtest-block"><h3>' + esc(b.horizon) + " forward return by score decile</h3>" + bars + spreadTxt + "</div>";
+    }).join("");
+  }
+
+  function renderMethodology(d) {
+    var w = d.weights || {};
+    var bd = d.breakout_definition || {};
+    var m = d.model || {};
+    document.getElementById("methodologyBody").innerHTML =
+      "<p><strong>Trend Score</strong> = " + (w.pattern * 100).toFixed(0) + "% pattern-similarity + " +
+      (w.momentum * 100).toFixed(0) + "% momentum + " + (w.sentiment * 100).toFixed(0) + "% news sentiment, 0–100.</p>" +
+      "<p><strong>Pattern-similarity</strong> is a logistic regression trained on this universe's own price/volume " +
+      "history, labeled by a mechanical rule: did the stock gain at least " + (bd.return * 100).toFixed(0) +
+      "% over the following " + esc(bd.window_trading_days) + " trading days. It scores how closely today's " +
+      "momentum/volume/volatility shape resembles the run-up before those past moves &mdash; it does not know the " +
+      "future and is not a forecast. " +
+      (m.trained
+        ? "Out-of-sample (time-split, never shuffled) validation on this run: AUC " +
+          (m.validation_auc === null ? "n/a" : m.validation_auc) + ", precision in the top decile " +
+          (m.validation_precision_at_top_decile === null ? "n/a" : m.validation_precision_at_top_decile) +
+          ", trained on " + esc(m.n_train_rows) + " rows (" + esc(m.n_positive_train) + " positive)."
+        : "Could not be trained this run (not enough history) &mdash; the score falls back to momentum + sentiment only.") +
+      "</p>" +
+      "<p><strong>Momentum</strong> is a percentile rank (within today's scan) of blended 5/20/60-day price momentum.</p>" +
+      "<p><strong>Sentiment</strong> is an average VADER lexicon score over each ticker's recent Google News headlines " +
+      "&mdash; a lightweight, general-purpose sentiment tool, not finance-tuned, so treat it as a rough buzz/tone signal " +
+      "rather than a precise read.</p>" +
+      "<p>Universe: S&amp;P 500 + Nasdaq-100 constituents, refreshed from Wikipedia each run.</p>";
+  }
+
+  function render() {
+    var d = state.data;
+    renderKpis(d);
+    renderLeaderboard(d);
+    renderTable(d);
+    renderBacktests(d);
+    renderMethodology(d);
+    var updated = new Date(d.generated_at);
+    document.getElementById("lastUpdated").textContent = "Last updated " + updated.toLocaleString() +
+      " · " + d.universe_size + " tickers scanned";
+  }
+
+  function wireControls() {
+    document.getElementById("searchBox").addEventListener("input", function () { renderTable(state.data); });
+    document.getElementById("sectorFilter").addEventListener("change", function () { renderTable(state.data); });
+    document.getElementById("minScore").addEventListener("input", function (e) {
+      document.getElementById("minScoreVal").textContent = e.target.value;
+      renderTable(state.data);
+    });
+    document.querySelectorAll("thead th[data-key]").forEach(function (th) {
+      th.addEventListener("click", function () {
+        var key = th.getAttribute("data-key");
+        if (state.sortKey === key) state.sortDir *= -1; else { state.sortKey = key; state.sortDir = -1; }
+        renderTable(state.data);
+      });
+    });
+    document.getElementById("themeToggle").addEventListener("click", function () {
+      var cur = document.documentElement.getAttribute("data-theme");
+      var next = cur === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try { localStorage.setItem("theme", next); } catch (e) {}
+    });
+    try {
+      var saved = localStorage.getItem("theme");
+      if (saved) document.documentElement.setAttribute("data-theme", saved);
+    } catch (e) {}
+  }
+
+  function boot() {
+    wireControls();
+    fetch("data.json", { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        state.data = d;
+        populateSectorFilter(d);
+        render();
+      })
+      .catch(function (err) {
+        document.getElementById("lastUpdated").textContent =
+          "Could not load data.json yet — the first pipeline run may not have completed.";
+        console.error(err);
+      });
+  }
+
+  document.addEventListener("DOMContentLoaded", boot);
+})();
+</script>
+</body>
+</html>
