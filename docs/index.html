@@ -102,6 +102,21 @@
   section h2 { font-size: 15px; margin: 0 0 4px; font-weight: 650; }
   section .desc { font-size: 13px; color: var(--text-secondary); margin: 0 0 12px; }
 
+  .help-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%; padding: 0; margin-left: 6px;
+    background: var(--surface-1); border: 1px solid var(--border); color: var(--text-secondary);
+    font-size: 11px; font-weight: 700; line-height: 1; cursor: pointer; vertical-align: middle;
+  }
+  .help-btn:hover, .help-btn[aria-expanded="true"] { color: var(--text-primary); border-color: var(--text-muted); }
+  .help-panel {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 16px; margin: 0 0 12px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.6;
+  }
+  .help-panel dt { color: var(--text-primary); font-weight: 650; margin-top: 9px; }
+  .help-panel dt:first-child { margin-top: 0; }
+  .help-panel dd { margin: 0 0 2px; }
+
   .card {
     background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
     padding: 16px;
@@ -204,10 +219,40 @@
   </section>
 
   <section>
-    <h2>Full scan</h2>
+    <h2>Full scan
+      <button class="help-btn" id="scanHelpBtn" type="button" aria-expanded="false" aria-controls="scanHelpPanel"
+        aria-label="What do these columns mean?" title="What do these columns mean?">?</button>
+    </h2>
     <p class="desc">Every ticker scanned today. Click a column header to sort. The small icons next to
       each ticker open its Yahoo Finance quote page and a live Google News search for it, in a new tab &mdash;
       useful for checking a score against the actual news rather than taking the sentiment number on faith.</p>
+    <dl class="help-panel" id="scanHelpPanel" hidden>
+      <dt>Market / Sector</dt>
+      <dd>Which universe the ticker is scanned from (US or Sweden) and its Yahoo-reported sector/industry.
+        Some Swedish small-caps show "Unknown" if Yahoo has no sector data for them.</dd>
+      <dt>Price</dt>
+      <dd>Latest close in the ticker's own currency &mdash; $ for US names, kr for Stockholm-listed (.ST) names.</dd>
+      <dt>5d % / 20d %</dt>
+      <dd>Price change over the last 5 and 20 trading days.</dd>
+      <dt>Rel. vol</dt>
+      <dd>Today's trading volume divided by its recent average. 1.0&times; is normal; well above 2&times; means
+        unusually heavy trading and triggers the "volume spike" tag.</dd>
+      <dt>Sentiment</dt>
+      <dd>0&ndash;100, from averaging a fixed word-list (VADER) reading of recent Google News headlines &mdash;
+        not AI, just word scoring &mdash; rescaled so 50 = neutral. "(no coverage)" means no recent headlines were
+        found, not that sentiment is genuinely neutral. Click the news icon next to a ticker to read the actual
+        headlines it's based on.</dd>
+      <dt>Trend</dt>
+      <dd>A 30-trading-day sparkline of closing prices &mdash; green if higher than 30 days ago, red if lower.</dd>
+      <dt>Score</dt>
+      <dd>The blended 0&ndash;100 Trend Score (pattern-similarity + momentum + sentiment). See
+        <a href="#methodology">Methodology</a> below for the exact weights and what it does and doesn't mean.</dd>
+      <dt>Tags</dt>
+      <dd>Quick flags, not part of the score itself: <strong>volume spike</strong> (rel. vol &ge; 2&times;),
+        <strong>near 52w high</strong> (within 3% of its 52-week high), <strong>sentiment surge</strong> (8+
+        recent headlines, clearly positive on average), <strong>overbought (RSI)</strong> (14-day RSI &ge; 70,
+        a classic technical-analysis "may be due for a pullback" signal).</dd>
+    </dl>
     <div class="card">
       <div class="filters">
         <input type="search" id="searchBox" placeholder="Search ticker or name…">
@@ -542,6 +587,12 @@
         if (state.sortKey === key) state.sortDir *= -1; else { state.sortKey = key; state.sortDir = -1; }
         renderTable(state.data);
       });
+    });
+    document.getElementById("scanHelpBtn").addEventListener("click", function () {
+      var panel = document.getElementById("scanHelpPanel");
+      var open = panel.hidden;
+      panel.hidden = !open;
+      this.setAttribute("aria-expanded", String(open));
     });
     document.getElementById("themeToggle").addEventListener("click", function () {
       var cur = document.documentElement.getAttribute("data-theme");
