@@ -27,6 +27,20 @@ def _sparkline(closes: pd.Series, n: int = 30) -> list[float]:
     return [round(float(x), 4) for x in tail.tolist()]
 
 
+def _currency_for(ticker: str) -> str:
+    """
+    Cheap heuristic instead of an extra API call per ticker: this project
+    only scans US-listed names and Nasdaq Stockholm (.ST suffix) right now,
+    and those trade in USD and SEK respectively. If another exchange gets
+    added later, extend this mapping.
+    """
+    return "SEK" if ticker.endswith(".ST") else "USD"
+
+
+def _market_for(ticker: str) -> str:
+    return "Sweden" if ticker.endswith(".ST") else "US"
+
+
 def build_data_json(
     scored: pd.DataFrame,
     universe: pd.DataFrame,
@@ -48,6 +62,8 @@ def build_data_json(
                 "sector": str(info["sector"]) if info is not None else "Unknown",
                 "index": str(info["index"]) if info is not None else "",
                 "price": last_close,
+                "currency": _currency_for(ticker),
+                "market": _market_for(ticker),
                 "mom_5d": round(float(r.get("mom_5d", float("nan"))) * 100, 2) if pd.notna(r.get("mom_5d")) else None,
                 "mom_20d": round(float(r.get("mom_20d", float("nan"))) * 100, 2) if pd.notna(r.get("mom_20d")) else None,
                 "mom_60d": round(float(r.get("mom_60d", float("nan"))) * 100, 2) if pd.notna(r.get("mom_60d")) else None,

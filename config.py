@@ -20,6 +20,7 @@ SNAPSHOT_HISTORY_CSV = DATA_DIR / "history.csv"  # small, committed, grows over 
 # Which index constituent lists to combine into the scan universe.
 INCLUDE_SP500 = True
 INCLUDE_NASDAQ100 = True
+INCLUDE_OMX_STOCKHOLM_ALL = True  # Nasdaq Stockholm all-share, incl. First North small-caps
 
 # --- Price / feature settings --------------------------------------------
 PRICE_LOOKBACK = "2y"        # yfinance period string used for both training + features

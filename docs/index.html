@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trend Scanner</title>
-<meta name="description" content="Daily research dashboard: momentum, news sentiment, and historical breakout pattern-matching across the S&amp;P 500 + Nasdaq-100. Not investment advice.">
+<meta name="description" content="Daily research dashboard: momentum, news sentiment, and historical breakout pattern-matching across the S&amp;P 500 + Nasdaq-100 + Nasdaq Stockholm all-share. Not investment advice.">
 <style>
   :root {
     color-scheme: light;
@@ -200,6 +200,7 @@
     <div class="card">
       <div class="filters">
         <input type="search" id="searchBox" placeholder="Search ticker or name…">
+        <select id="marketFilter"><option value="">All markets</option></select>
         <select id="sectorFilter"><option value="">All sectors</option></select>
         <label style="font-size:13px;color:var(--text-secondary);">Min score
           <input type="range" id="minScore" min="0" max="100" value="0" style="vertical-align:middle;">
@@ -212,6 +213,7 @@
           <thead>
             <tr>
               <th data-key="ticker">Ticker</th>
+              <th data-key="market">Market</th>
               <th data-key="sector">Sector</th>
               <th class="num" data-key="price">Price</th>
               <th class="num" data-key="mom_5d">5d %</th>
@@ -245,8 +247,8 @@
   </section>
 
   <footer>
-    Data: Yahoo Finance (via yfinance) and Google News RSS, both free/keyless. Runs daily via
-    GitHub Actions. Source and schedule live in this repository's <code>.github/workflows</code>.
+    Data: Yahoo Finance (via yfinance), Google News RSS, Wikipedia, and stockanalysis.com, all free/keyless.
+    Runs daily via GitHub Actions. Source and schedule live in this repository's <code>.github/workflows</code>.
   </footer>
 
 </div>
@@ -278,6 +280,13 @@
   function fmtNum(v, digits) {
     if (v === null || v === undefined || isNaN(v)) return "—";
     return v.toFixed(digits === undefined ? 1 : digits);
+  }
+  function fmtPrice(r) {
+    if (r.price === null || r.price === undefined || isNaN(r.price)) return "—";
+    // Different exchanges price in different currencies (US in USD, Nasdaq
+    // Stockholm in SEK) -- label it rather than showing a bare number, since
+    // a $ sign on a SEK price would just be wrong.
+    return r.currency === "SEK" ? fmtNum(r.price, 2) + " kr" : "$" + fmtNum(r.price, 2);
   }
   function esc(s) {
     var d = document.createElement("div");
@@ -346,12 +355,20 @@
       opt.value = s; opt.textContent = s;
       sel.appendChild(opt);
     });
+    var markets = Array.from(new Set(d.rows.map(function (r) { return r.market; }))).sort();
+    var msel = document.getElementById("marketFilter");
+    markets.forEach(function (m) {
+      var opt = document.createElement("option");
+      opt.value = m; opt.textContent = m;
+      msel.appendChild(opt);
+    });
   }
 
   function currentFilters() {
     return {
       q: document.getElementById("searchBox").value.trim().toLowerCase(),
       sector: document.getElementById("sectorFilter").value,
+      market: document.getElementById("marketFilter").value,
       minScore: Number(document.getElementById("minScore").value),
     };
   }
@@ -360,6 +377,7 @@
     var f = currentFilters();
     var rows = d.rows.filter(function (r) {
       if (f.sector && r.sector !== f.sector) return false;
+      if (f.market && r.market !== f.market) return false;
       if (f.minScore && (r.trend_score || 0) < f.minScore) return false;
       if (f.q && r.ticker.toLowerCase().indexOf(f.q) === -1 && r.name.toLowerCase().indexOf(f.q) === -1) return false;
       return true;
@@ -382,8 +400,9 @@
       var tags = (r.tags || []).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
       return "<tr>" +
         '<td class="ticker-cell">' + esc(r.ticker) + '<div class="name-cell">' + esc(r.name) + "</div></td>" +
+        "<td>" + esc(r.market) + "</td>" +
         "<td>" + esc(r.sector) + "</td>" +
-        '<td class="num">' + (r.price !== null ? "$" + fmtNum(r.price, 2) : "—") + "</td>" +
+        '<td class="num">' + fmtPrice(r) + "</td>" +
         '<td class="num">' + fmtPct(r.mom_5d) + "</td>" +
         '<td class="num">' + fmtPct(r.mom_20d) + "</td>" +
         '<td class="num">' + fmtNum(r.rel_volume, 2) + "×</td>" +
@@ -394,7 +413,7 @@
         "<td>" + tags + "</td>" +
         "</tr>";
     }).join("");
-    body.innerHTML = html || '<tr><td colspan="10" class="not-ready">No rows match these filters.</td></tr>';
+    body.innerHTML = html || '<tr><td colspan="11" class="not-ready">No rows match these filters.</td></tr>';
   }
 
   function renderBacktests(d) {
@@ -453,7 +472,10 @@
       "<p><strong>Sentiment</strong> is an average VADER lexicon score over each ticker's recent Google News headlines " +
       "&mdash; a lightweight, general-purpose sentiment tool, not finance-tuned, so treat it as a rough buzz/tone signal " +
       "rather than a precise read.</p>" +
-      "<p>Universe: S&amp;P 500 + Nasdaq-100 constituents, refreshed from Wikipedia each run.</p>";
+      "<p>Universe: S&amp;P 500 + Nasdaq-100 constituents (refreshed from Wikipedia each run) plus the " +
+      "Nasdaq Stockholm all-share list, including smaller First North names (refreshed from stockanalysis.com " +
+      "each run). Prices are shown in each ticker's own currency (USD for US names, SEK for Stockholm-listed " +
+      "names) &mdash; use the Market filter above the table to isolate one or the other.</p>";
   }
 
   function render() {
@@ -471,6 +493,7 @@
   function wireControls() {
     document.getElementById("searchBox").addEventListener("input", function () { renderTable(state.data); });
     document.getElementById("sectorFilter").addEventListener("change", function () { renderTable(state.data); });
+    document.getElementById("marketFilter").addEventListener("change", function () { renderTable(state.data); });
     document.getElementById("minScore").addEventListener("input", function (e) {
       document.getElementById("minScoreVal").textContent = e.target.value;
       renderTable(state.data);

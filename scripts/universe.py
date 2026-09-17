@@ -1,10 +1,21 @@
 """
-Build the ticker universe to scan: S&P 500 + Nasdaq-100 constituents,
-pulled from their Wikipedia pages (no API key, no rate limit issues).
+Build the ticker universe to scan: S&P 500 + Nasdaq-100 constituents from
+Wikipedia, plus (optionally) the Nasdaq Stockholm all-share list from
+stockanalysis.com -- covering everything from Volvo/Ericsson down to small
+First North names, since small-caps are exactly where a big % move is most
+plausible.
 
 Wikipedia's tables occasionally change column names or structure -- if a
 table fetch fails, we log a warning and fall back to whatever is already
 cached on disk (data/universe.csv) rather than crashing the whole pipeline.
+Same fail-soft treatment for the Stockholm list: it's a less-proven scrape
+than Wikipedia (an ordinary web page, not a documented API, and its exact
+completeness -- full all-share vs. a partial page -- wasn't verifiable from
+the environment this project was built in, which can't reach financial data
+hosts; see the README). Check the Actions log line "OMX Stockholm: got N
+tickers" after a run -- if N looks too low (a few hundred when ~700+ are
+expected), the scraper likely needs adjusting for a page-structure change,
+the same kind of fix already made once for the Wikipedia sources.
 """
 
 from __future__ import annotations
@@ -24,6 +35,7 @@ log = logging.getLogger("universe")
 
 SP500_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 NASDAQ100_URL = "https://en.wikipedia.org/wiki/Nasdaq-100"
+OMX_STOCKHOLM_URL = "https://stockanalysis.com/list/nasdaq-stockholm/"
 
 HEADERS = {"User-Agent": config.REQUEST_USER_AGENT}
 
@@ -33,9 +45,22 @@ def _clean_symbol(sym: str) -> str:
     return str(sym).strip().upper().replace(".", "-")
 
 
+def _clean_symbol_stockholm(sym: str) -> str:
+    """
+    stockanalysis.com lists Stockholm tickers like 'VOLV.B', 'ATCO.B' with no
+    exchange suffix. Yahoo Finance (and so yfinance) needs the share-class
+    dot turned into a hyphen AND a '.ST' exchange suffix, e.g. 'VOLV-B.ST'.
+    """
+    cleaned = str(sym).strip().upper().replace(".", "-")
+    return cleaned if cleaned.endswith(".ST") else f"{cleaned}.ST"
+
+
 def _fetch_table(url: str) -> list[pd.DataFrame]:
     resp = requests.get(url, headers=HEADERS, timeout=20)
     resp.raise_for_status()
+    # pandas needs a file-like object here, not a raw string -- passing
+    # resp.text directly makes newer pandas try to treat the HTML text
+    # itself as a file path and fail with FileNotFoundError.
     return pd.read_html(StringIO(resp.text))
 
 
@@ -78,6 +103,34 @@ def fetch_nasdaq100() -> pd.DataFrame:
     return df
 
 
+def fetch_omx_stockholm() -> pd.DataFrame:
+    tables = _fetch_table(OMX_STOCKHOLM_URL)
+    candidate = None
+    for t in tables:
+        cols = {c.strip().lower() for c in t.columns.astype(str)}
+        if {"symbol", "company name"} & cols or {"symbol"} & cols:
+            candidate = t
+            break
+    if candidate is None:
+        raise ValueError("Could not locate Nasdaq Stockholm constituents table")
+
+    candidate = candidate.rename(columns=lambda c: str(c).strip())
+    sym_col = "Symbol"
+    name_col = "Company Name" if "Company Name" in candidate.columns else candidate.columns[1]
+
+    df = pd.DataFrame(
+        {
+            "ticker": candidate[sym_col].map(_clean_symbol_stockholm),
+            "name": candidate[name_col],
+            "sector": "Unknown",  # this source doesn't provide a sector column
+        }
+    )
+    df = df.dropna(subset=["ticker", "name"])
+    df["index"] = "OMX Stockholm"
+    log.info("OMX Stockholm: got %d tickers", len(df))
+    return df
+
+
 def build_universe() -> pd.DataFrame:
     frames = []
     if config.INCLUDE_SP500:
@@ -90,6 +143,11 @@ def build_universe() -> pd.DataFrame:
             frames.append(fetch_nasdaq100())
         except Exception as exc:  # noqa: BLE001
             log.warning("Nasdaq-100 fetch failed: %s", exc)
+    if config.INCLUDE_OMX_STOCKHOLM_ALL:
+        try:
+            frames.append(fetch_omx_stockholm())
+        except Exception as exc:  # noqa: BLE001
+            log.warning("OMX Stockholm fetch failed: %s", exc)
 
     if not frames:
         if config.UNIVERSE_CACHE.exists():
