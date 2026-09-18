@@ -153,8 +153,14 @@ def main() -> None:
     # --- append today's snapshot to the accumulating honesty log
     snapshot_rows = []
     for ticker, r in scored.iterrows():
-        close = prices[ticker]["Close"].iloc[-1] if ticker in prices else None
-        if close is None:
+        close_series = prices[ticker]["Close"] if ticker in prices else pd.Series(dtype=float)
+        close = close_series.iloc[-1] if not close_series.empty else None
+        # A halted/delisted/gapped ticker can have a non-empty price series
+        # whose LAST value is still NaN -- `close is None` alone doesn't
+        # catch that (NaN is not None), and writing a NaN into history.csv
+        # would silently corrupt the honesty log's backtest math later.
+        # Same underlying issue as the price field in build_dashboard.py.
+        if close is None or pd.isna(close):
             continue
         snapshot_rows.append(
             {"date": today_str, "ticker": ticker, "close": float(close), "trend_score": float(r["trend_score"])}

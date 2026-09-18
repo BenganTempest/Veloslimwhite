@@ -80,6 +80,17 @@ def run():
     universe, prices = build_synthetic_universe()
     assert len(universe) == len(prices) == 46
 
+    # Regression case for a real bug found on the live site: a ticker whose
+    # latest Close came back NaN from Yahoo (halted/delisted/just-listed --
+    # a non-empty price series with a NaN *last* value, which `close is
+    # None` alone does not catch). Unguarded, this produced a literal `NaN`
+    # token in data.json, which is not valid JSON -- JS's JSON.parse()
+    # rejected the ENTIRE file, not just that one ticker, taking down the
+    # whole dashboard. NAN_PRICE_TICKER is asserted on explicitly below.
+    NAN_PRICE_TICKER = "SYN001"
+    nan_idx = prices[NAN_PRICE_TICKER].index[-1]
+    prices[NAN_PRICE_TICKER].at[nan_idx, "Close"] = float("nan")
+
     print("2. compute_features on every ticker...")
     today_features = {}
     for t, df in prices.items():
@@ -163,6 +174,13 @@ def run():
     for key in ("ticker", "trend_score", "sparkline", "tags", "currency", "market", "score_change"):
         assert key in payload["rows"][0], f"missing key {key} in dashboard row payload"
     assert "movers_top_n" in payload and "earnings_check_top_n" in payload and "telegram_score_threshold" in payload
+    payload_by_ticker = {r["ticker"]: r for r in payload["rows"]}
+    assert payload_by_ticker[NAN_PRICE_TICKER]["price"] is None, \
+        "a NaN last close must become JSON null, not a raw NaN token that breaks JSON.parse() for every ticker"
+    # write_data_json uses allow_nan=False -- this call itself is the real
+    # regression check: it would raise ValueError here if the NaN price (or
+    # any other stray NaN) leaked into the payload unguarded, exactly the
+    # class of bug that broke the live site.
     write_data_json(payload)
     import json
     reloaded = json.load(open(config.DOCS_DIR / "data.json"))

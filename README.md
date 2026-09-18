@@ -208,6 +208,17 @@ push — the next scheduled or manual run picks it up.
   `score_change: null` ("new" on the dashboard) on the scanner's first-ever run, or
   the first day a given ticker appears in the universe — nothing wrong, just nothing
   to diff against yet. It fills in from the second run onward.
+- **A ticker with no valid last-close price (halted, delisted, just listed) shows a
+  "–" for price instead of breaking the page.** This was a real bug found on the
+  live site: Yahoo returned `NaN` for one ticker's latest close, and Python's `json`
+  module writes that out as a bare `NaN` token by default, which isn't valid JSON —
+  the browser's `JSON.parse()` then rejected the *entire* file, not just that one
+  row, so nothing loaded at all. Fixed in `scripts/build_dashboard.py` (a NaN close
+  now becomes `null`, same as any other missing value) and hardened generally:
+  `write_data_json()` now writes with `allow_nan=False`, so if any *other* field
+  ever leaks a stray NaN/Infinity in the future, the pipeline fails loudly in the
+  Actions log instead of silently shipping a `data.json` that breaks the dashboard
+  for everyone until someone notices.
 
 ## Development notes
 

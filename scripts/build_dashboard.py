@@ -56,7 +56,19 @@ def build_data_json(
     for ticker, r in scored.iterrows():
         info = universe_idx.loc[ticker] if ticker in universe_idx.index else None
         close_series = prices[ticker]["Close"] if ticker in prices else pd.Series(dtype=float)
-        last_close = float(close_series.iloc[-1]) if not close_series.empty else None
+        # A non-empty series can still have a NaN *last* value (a halted,
+        # delisted, or just-listed ticker with a gap in its price history --
+        # this happened for real on the live site: Yahoo returned a NaN
+        # close for one ticker, json.dump() wrote it out as the bare token
+        # `NaN`, which isn't valid JSON, and JS's JSON.parse() rejected the
+        # ENTIRE file for every ticker, not just that one row). Treat it the
+        # same as "no price data" -- None becomes JSON null, which the
+        # dashboard already renders as "--" for every other numeric field.
+        last_close = None
+        if not close_series.empty:
+            candidate = close_series.iloc[-1]
+            if pd.notna(candidate):
+                last_close = float(candidate)
         rows.append(
             {
                 "ticker": ticker,
@@ -119,7 +131,16 @@ def build_data_json(
 def write_data_json(payload: dict) -> None:
     config.DOCS_DIR.mkdir(parents=True, exist_ok=True)
     with open(config.DOCS_DIR / "data.json", "w") as f:
-        json.dump(payload, f, separators=(",", ":"))
+        # allow_nan=False is deliberate, not a default we forgot to
+        # override: Python's json module otherwise happily writes NaN /
+        # Infinity as bare (invalid) JSON tokens instead of raising, which
+        # is exactly how one bad ticker price took down the entire live
+        # dashboard (see the price-field fix above). With this set, ANY
+        # stray NaN/Infinity anywhere in the payload -- this field or a
+        # future one -- fails the pipeline run loudly right here, in the
+        # Actions log, instead of silently shipping a data.json that
+        # JSON.parse() rejects wholesale days later with no error anywhere.
+        json.dump(payload, f, separators=(",", ":"), allow_nan=False)
 
 
 def ensure_html_shell() -> None:
