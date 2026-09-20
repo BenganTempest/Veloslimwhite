@@ -82,7 +82,6 @@ ARJO-B.ST,Arjo AB (publ),Healthcare,OMX Stockholm
 ARM,Arm Holdings,Technology,Nasdaq-100
 ARP.ST,Arctic Paper S.A.,Basic Materials,OMX Stockholm
 ARPL.ST,Arla Plast AB,Basic Materials,OMX Stockholm
-ARRO.ST,Arribatec Group ASA,Unknown,OMX Stockholm
 ASKER.ST,Asker Healthcare Group AB (publ),Healthcare,OMX Stockholm
 ASMDEE-B.ST,Asmodee Group AB (publ),Consumer Cyclical,OMX Stockholm
 ASML,ASML Holding,Technology,Nasdaq-100
@@ -90,6 +89,7 @@ ASSA-B.ST,ASSA ABLOY AB (publ),Industrials,OMX Stockholm
 ATCO-A.ST,Atlas Copco AB (publ),Industrials,OMX Stockholm
 ATCO-B.ST,Atlas Copco AB (publ),Industrials,OMX Stockholm
 ATIC.ST,Actic Group AB (publ),Consumer Cyclical,OMX Stockholm
+ATIN.ST,Athanase Innovation AB,Financial Services,OMX Stockholm
 ATO,Atmos Energy,Utilities,S&P 500
 ATRLJ-B.ST,Atrium Ljungberg AB (publ),Real Estate,OMX Stockholm
 ATT.ST,Attendo AB (publ),Healthcare,OMX Stockholm
@@ -172,6 +172,7 @@ C,Citigroup,Financials,S&P 500
 CAG.ST,CAG Group AB (publ),Technology,OMX Stockholm
 CAH,Cardinal Health,Health Care,S&P 500
 CAMX.ST,Camurus AB (publ),Healthcare,OMX Stockholm
+CANTA.ST,Cantargia AB (publ),Healthcare,OMX Stockholm
 CARA.ST,Carasent AB (publ),Healthcare,OMX Stockholm
 CARE.ST,Careium AB (Publ),Industrials,OMX Stockholm
 CARR,Carrier Global,Industrials,S&P 500
@@ -519,7 +520,6 @@ JM.ST,JM AB (publ),Consumer Cyclical,OMX Stockholm
 JNJ,Johnson & Johnson,Health Care,S&P 500
 JOMA.ST,John Mattson FastighetsfÃ¶retagen AB (publ),Real Estate,OMX Stockholm
 JPM,JPMorgan Chase,Financials,S&P 500
-K2A-B.ST,K2A Knaust & Andersson Fastigheter AB (publ),Real Estate,OMX Stockholm
 KABE-B.ST,KABE Group AB (publ.),Consumer Cyclical,OMX Stockholm
 KAMBI.ST,Kambi Group plc,Consumer Cyclical,OMX Stockholm
 KAPIAB.ST,KallebÃ¤ck Property Invest AB (publ),Real Estate,OMX Stockholm
@@ -532,7 +532,7 @@ KEOC.ST,Keo Capital AB (publ),Technology,OMX Stockholm
 KEY,KeyCorp,Financials,S&P 500
 KEYS,Keysight Technologies,Information Technology,S&P 500
 KFAST-B.ST,K-Fast Holding AB (publ),Consumer Cyclical,OMX Stockholm
-KHC,Kraft Heinz,Consumer Staples,Nasdaq-100+S&P 500
+KHC,Kraft Heinz,Consumer Staples,S&P 500
 KIM,Kimco Realty,Real Estate,S&P 500
 KINV-A.ST,Kinnevik AB,Financial Services,OMX Stockholm
 KINV-B.ST,Kinnevik AB,Financial Services,OMX Stockholm
@@ -868,7 +868,7 @@ STUDBO.ST,StudentbostÃ¤der i Norden AB (publ),Real Estate,OMX Stockholm
 STX,Seagate Technology,Information Technology,Nasdaq-100+S&P 500
 STZ,Constellation Brands,Consumer Staples,S&P 500
 SUS.ST,Surgical Science Sweden AB (publ),Healthcare,OMX Stockholm
-SVEAF.ST,Sveafastigheter AB (publ),Real Estate,OMX Stockholm
+SVEAF-B.ST,Sveafastigheter AB (publ),Real Estate,OMX Stockholm
 SVED-B.ST,Svedbergs Group AB (publ),Industrials,OMX Stockholm
 SVIK.ST,Studsvik AB (publ),Industrials,OMX Stockholm
 SVOL-A.ST,Svolder AB (publ),Financial Services,OMX Stockholm
