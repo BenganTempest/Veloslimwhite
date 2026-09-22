@@ -82,6 +82,7 @@ ARJO-B.ST,Arjo AB (publ),Healthcare,OMX Stockholm
 ARM,Arm Holdings,Technology,Nasdaq-100
 ARP.ST,Arctic Paper S.A.,Basic Materials,OMX Stockholm
 ARPL.ST,Arla Plast AB,Basic Materials,OMX Stockholm
+ARRO.ST,Arribatec Group ASA,Unknown,OMX Stockholm
 ASKER.ST,Asker Healthcare Group AB (publ),Healthcare,OMX Stockholm
 ASMDEE-B.ST,Asmodee Group AB (publ),Consumer Cyclical,OMX Stockholm
 ASML,ASML Holding,Technology,Nasdaq-100
@@ -165,7 +166,6 @@ BTS-B.ST,BTS Group AB (publ),Industrials,OMX Stockholm
 BUFAB.ST,Bufab AB (publ),Industrials,OMX Stockholm
 BULTEN.ST,Bulten AB (publ),Consumer Cyclical,OMX Stockholm
 BURE.ST,Bure Equity AB (publ),Financial Services,OMX Stockholm
-BWEO.ST,BW Energy Limited,Unknown,OMX Stockholm
 BX,Blackstone Inc.,Financials,S&P 500
 BXP,"BXP, Inc.",Real Estate,S&P 500
 BYGGP.ST,ByggPartner Gruppen AB (publ),Industrials,OMX Stockholm
@@ -325,7 +325,6 @@ ENGCON-B.ST,engcon AB (publ),Industrials,OMX Stockholm
 ENITY.ST,Enity Holding AB (publ),Financial Services,OMX Stockholm
 ENRO.ST,Eniro Group AB (publ),Communication Services,OMX Stockholm
 ENVAR.ST,Envar Holding AB (publ),Communication Services,OMX Stockholm
-ENVIPO.ST,Envipco Holding N.V.,Unknown,OMX Stockholm
 ENZY.ST,Enzymatica AB (publ),Healthcare,OMX Stockholm
 EOG,EOG Resources,Energy,S&P 500
 EOLU-B.ST,Eolus Aktiebolag (publ),Utilities,OMX Stockholm
@@ -393,7 +392,6 @@ FPAR-D.ST,FastPartner AB (publ),Real Estate,OMX Stockholm
 FRACTL.ST,Fractal Gaming Group AB (publ),Technology,OMX Stockholm
 FREEM.ST,Freemelt Holding AB (publ),Industrials,OMX Stockholm
 FREJA.ST,Freja eID Group AB (publ),Technology,OMX Stockholm
-FROO.ST,Frontline plc,Unknown,OMX Stockholm
 FRT,Federal Realty Investment Trust,Real Estate,S&P 500
 FSLR,First Solar,Information Technology,S&P 500
 FTNT,Fortinet,Information Technology,Nasdaq-100+S&P 500
@@ -488,6 +486,7 @@ INCY,Incyte,Health Care,S&P 500
 INDT.ST,Indutrade AB (publ),Industrials,OMX Stockholm
 INDU-A.ST,AB IndustrivÃ¤rden (publ),Financial Services,OMX Stockholm
 INDU-C.ST,AB IndustrivÃ¤rden (publ),Financial Services,OMX Stockholm
+INFREA.ST,Infrea AB,Industrials,OMX Stockholm
 INISS-B.ST,Inission AB (publ),Technology,OMX Stockholm
 INSTAL.ST,Instalco AB (publ),Industrials,OMX Stockholm
 INTC,Intel,Information Technology,Nasdaq-100+S&P 500
@@ -511,7 +510,6 @@ ITECH.ST,I-Tech AB,Basic Materials,OMX Stockholm
 ITW,Illinois Tool Works,Industrials,S&P 500
 IVSO.ST,Invisio AB (publ),Technology,OMX Stockholm
 IVZ,Invesco,Financials,S&P 500
-IWSO.ST,Integrated Wind Solutions ASA,Unknown,OMX Stockholm
 J,Jacobs Solutions,Industrials,S&P 500
 JBHT,J.B. Hunt,Industrials,S&P 500
 JBL,Jabil,Information Technology,S&P 500
@@ -521,6 +519,7 @@ JM.ST,JM AB (publ),Consumer Cyclical,OMX Stockholm
 JNJ,Johnson & Johnson,Health Care,S&P 500
 JOMA.ST,John Mattson FastighetsfÃ¶retagen AB (publ),Real Estate,OMX Stockholm
 JPM,JPMorgan Chase,Financials,S&P 500
+K2A-B.ST,K2A Knaust & Andersson Fastigheter AB (publ),Real Estate,OMX Stockholm
 KABE-B.ST,KABE Group AB (publ.),Consumer Cyclical,OMX Stockholm
 KAMBI.ST,Kambi Group plc,Consumer Cyclical,OMX Stockholm
 KAPIAB.ST,KallebÃ¤ck Property Invest AB (publ),Real Estate,OMX Stockholm
@@ -641,6 +640,7 @@ MYCR.ST,Mycronic AB (publ),Industrials,OMX Stockholm
 NANEXA.ST,Nanexa AB (publ),Healthcare,OMX Stockholm
 NANOFS.ST,Nanoform Finland Oyj,Healthcare,OMX Stockholm
 NAVIGO-STAM.ST,Navigo Invest AB (publ),Financial Services,OMX Stockholm
+NAXS.ST,NAXS AB (publ),Financial Services,OMX Stockholm
 NBIS,Nebius Group,Technology,Nasdaq-100
 NCAB.ST,NCAB Group AB (publ),Technology,OMX Stockholm
 NCC-A.ST,NCC AB (publ),Industrials,OMX Stockholm
@@ -667,9 +667,7 @@ NOC,Northrop Grumman,Industrials,S&P 500
 NOKIA-SEK.ST,Nokia Oyj,Technology,OMX Stockholm
 NOLA-B.ST,Nolato AB (publ),Healthcare,OMX Stockholm
 NORB-B.ST,Nordisk Bergteknik AB (publ),Industrials,OMX Stockholm
-NORCOO.ST,Norconsult ASA,Unknown,OMX Stockholm
 NORION.ST,Norion Bank AB (publ),Financial Services,OMX Stockholm
-NORSEO.ST,Norse Atlantic ASA,Unknown,OMX Stockholm
 NOTE.ST,NOTE AB (publ),Technology,OMX Stockholm
 NOW,ServiceNow,Information Technology,S&P 500
 NP3.ST,NP3 Fastigheter AB (publ),Real Estate,OMX Stockholm
@@ -687,6 +685,7 @@ NWS,News Corp (Class B),Communication Services,S&P 500
 NWSA,News Corp (Class A),Communication Services,S&P 500
 NXPI,NXP Semiconductors,Information Technology,Nasdaq-100+S&P 500
 NYAB.ST,Nyab AB (publ),Industrials,OMX Stockholm
+NYOR.ST,Nyorda AB,Communication Services,OMX Stockholm
 O,Realty Income,Real Estate,S&P 500
 OBAB.ST,Online Brands Nordic AB (publ),Consumer Cyclical,OMX Stockholm
 OCTV-SDB.ST,Octave Intelligence plc,Technology,OMX Stockholm
@@ -704,6 +703,7 @@ ORES.ST,Investment AB Ãresund (publ),Financial Services,OMX Stockholm
 ORLY,O'Reilly Automotive,Consumer Discretionary,Nasdaq-100+S&P 500
 ORRON.ST,OrrÃ¶n Energy AB (publ),Utilities,OMX Stockholm
 ORX.ST,Orexo AB (publ),Healthcare,OMX Stockholm
+OSSD.ST,OssDsign AB (publ),Healthcare,OMX Stockholm
 OTIS,Otis Worldwide,Industrials,S&P 500
 OVZON.ST,Ovzon AB (publ),Communication Services,OMX Stockholm
 OXY,Occidental Petroleum,Energy,S&P 500
