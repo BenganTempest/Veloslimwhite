@@ -100,6 +100,7 @@ AWK,American Water Works,Utilities,S&P 500
 AXFO.ST,Axfood AB (publ),Consumer Defensive,OMX Stockholm
 AXON,Axon Enterprise,Industrials,Nasdaq-100+S&P 500
 AXP,American Express,Financials,S&P 500
+AXVIK.ST,Axvik Group Ab,Industrials,OMX Stockholm
 AZA.ST,Avanza Bank Holding AB (publ),Financial Services,OMX Stockholm
 AZN.ST,AstraZeneca PLC,Healthcare,OMX Stockholm
 AZO,AutoZone,Consumer Discretionary,S&P 500
@@ -113,6 +114,7 @@ BALL,Ball Corporation,Materials,S&P 500
 BAX,Baxter International,Health Care,S&P 500
 BBY,Best Buy,Consumer Discretionary,S&P 500
 BDX,Becton Dickinson,Health Care,S&P 500
+BE,Bloom Energy,Industrials,S&P 500
 BEAMMW-B.ST,BeammWave AB (publ),Technology,OMX Stockholm
 BEGR.ST,BE Group AB (publ),Basic Materials,OMX Stockholm
 BEIA-B.ST,Beijer Alma AB (publ),Industrials,OMX Stockholm
@@ -136,7 +138,6 @@ BIOA-B.ST,BioArctic AB (publ),Healthcare,OMX Stockholm
 BIOG-B.ST,BioGaia AB (publ),Healthcare,OMX Stockholm
 BKNG,Booking Holdings,Consumer Discretionary,Nasdaq-100+S&P 500
 BKR,Baker Hughes,Energy,Nasdaq-100+S&P 500
-BLDR,Builders FirstSource,Industrials,S&P 500
 BLK,BlackRock,Financials,S&P 500
 BMAX.ST,Byggmax Group AB (publ),Consumer Cyclical,OMX Stockholm
 BMC.ST,Brock Milton Capital AB,Financial Services,OMX Stockholm
@@ -481,12 +482,12 @@ IDUN-B.ST,Idun Industrier AB (publ),Financial Services,OMX Stockholm
 IDXX,Idexx Laboratories,Health Care,Nasdaq-100+S&P 500
 IEX,IDEX Corporation,Industrials,S&P 500
 IFF,International Flavors & Fragrances,Materials,S&P 500
+ILMN,"Illumina, Inc.",Health Care,S&P 500
 IMMU.ST,Mendus AB (publ),Healthcare,OMX Stockholm
 INCY,Incyte,Health Care,S&P 500
 INDT.ST,Indutrade AB (publ),Industrials,OMX Stockholm
 INDU-A.ST,AB IndustrivÃ¤rden (publ),Financial Services,OMX Stockholm
 INDU-C.ST,AB IndustrivÃ¤rden (publ),Financial Services,OMX Stockholm
-INFREA.ST,Infrea AB,Industrials,OMX Stockholm
 INISS-B.ST,Inission AB (publ),Technology,OMX Stockholm
 INSTAL.ST,Instalco AB (publ),Industrials,OMX Stockholm
 INTC,Intel,Information Technology,Nasdaq-100+S&P 500
@@ -706,6 +707,7 @@ ORX.ST,Orexo AB (publ),Healthcare,OMX Stockholm
 OTIS,Otis Worldwide,Industrials,S&P 500
 OVZON.ST,Ovzon AB (publ),Communication Services,OMX Stockholm
 OXY,Occidental Petroleum,Energy,S&P 500
+P,Everpure,Information Technology,S&P 500
 PACT.ST,Proact IT Group AB (publ),Technology,OMX Stockholm
 PANW,Palo Alto Networks,Information Technology,Nasdaq-100+S&P 500
 PAX.ST,Paxman AB (publ),Healthcare,OMX Stockholm
@@ -888,7 +890,6 @@ SYY,Sysco,Consumer Staples,S&P 500
 T,AT&T,Communication Services,S&P 500
 TAGM-B.ST,TagMaster AB (publ),Technology,OMX Stockholm
 TANGEN-B.ST,TÃ¥ngen Industrikapital AB (publ),Industrials,OMX Stockholm
-TAP,Molson Coors Beverage Company,Consumer Staples,S&P 500
 TDG,TransDigm Group,Industrials,S&P 500
 TDY,Teledyne Technologies,Information Technology,S&P 500
 TECH,Bio-Techne,Health Care,S&P 500
@@ -928,7 +929,6 @@ TSCO,Tractor Supply,Consumer Discretionary,S&P 500
 TSLA,"Tesla, Inc.",Consumer Discretionary,Nasdaq-100+S&P 500
 TSN,Tyson Foods,Consumer Staples,S&P 500
 TT,Trane Technologies,Industrials,S&P 500
-TTD,Trade Desk (The),Communication Services,S&P 500
 TTWO,Take-Two Interactive,Communication Services,Nasdaq-100+S&P 500
 TXN,Texas Instruments,Information Technology,Nasdaq-100+S&P 500
 TXT,Textron,Industrials,S&P 500
