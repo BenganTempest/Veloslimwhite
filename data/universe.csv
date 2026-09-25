@@ -212,6 +212,7 @@ CL,Colgate-Palmolive,Consumer Staples,S&P 500
 CLA-B.ST,Cloetta AB (publ),Consumer Defensive,OMX Stockholm
 CLAS-B.ST,Clas Ohlson AB (publ),Consumer Cyclical,OMX Stockholm
 CLAV.ST,Clavister Holding AB (publ.),Technology,OMX Stockholm
+CLBIO.ST,Corline Biomedical AB,Healthcare,OMX Stockholm
 CLX,Clorox,Consumer Staples,S&P 500
 CMBTOO.ST,Cmb.Tech NV,Unknown,OMX Stockholm
 CMCSA,Comcast,Communication Services,Nasdaq-100+S&P 500
@@ -429,7 +430,6 @@ GRMN,Garmin,Consumer Discretionary,S&P 500
 GRNG.ST,GrÃ¤nges AB (publ),Basic Materials,OMX Stockholm
 GS,Goldman Sachs,Financials,S&P 500
 GSKR-SDB.ST,Goldsky Resources Corp.,Basic Materials,OMX Stockholm
-GULD.ST,Guldbrev Holding AB (publ),Consumer Cyclical,OMX Stockholm
 GWW,W. W. Grainger,Industrials,S&P 500
 HACK.ST,Hacksaw AB (publ),Communication Services,OMX Stockholm
 HAKI-A.ST,HAKI Safety AB (publ),Industrials,OMX Stockholm
@@ -564,6 +564,7 @@ LIN,Linde plc,Materials,Nasdaq-100+S&P 500
 LINC.ST,Linc AB,Financial Services,OMX Stockholm
 LITE,Lumentum,Information Technology,Nasdaq-100+S&P 500
 LLY,Lilly (Eli),Health Care,S&P 500
+LMGAB.ST,Linjemontage i GrÃ¤storp Aktiebolag (publ),Unknown,OMX Stockholm
 LMT,Lockheed Martin,Industrials,S&P 500
 LNT,Alliant Energy,Utilities,S&P 500
 LOGI-B.ST,Logistea AB (publ),Real Estate,OMX Stockholm
@@ -688,6 +689,7 @@ NYAB.ST,Nyab AB (publ),Industrials,OMX Stockholm
 NYOR.ST,Nyorda AB,Communication Services,OMX Stockholm
 O,Realty Income,Real Estate,S&P 500
 OBAB.ST,Online Brands Nordic AB (publ),Consumer Cyclical,OMX Stockholm
+OBSE.ST,Observit AB,Technology,OMX Stockholm
 OCTV-SDB.ST,Octave Intelligence plc,Technology,OMX Stockholm
 ODFL,Old Dominion,Industrials,Nasdaq-100+S&P 500
 OEM-B.ST,OEM International AB (publ),Industrials,OMX Stockholm
@@ -850,7 +852,6 @@ SOBI.ST,Swedish Orphan Biovitrum AB (publ),Healthcare,OMX Stockholm
 SOF-B.ST,Softronic AB (publ),Technology,OMX Stockholm
 SOLNA.ST,Solnaberg Property AB (publ),Real Estate,OMX Stockholm
 SOLV,Solventum,Health Care,S&P 500
-SOMAO.ST,Solstad Maritime ASA,Unknown,OMX Stockholm
 SPCX,SpaceX,Telecommunications,Nasdaq-100
 SPG,Simon Property Group,Real Estate,S&P 500
 SPGI,S&P Global,Financials,S&P 500
@@ -958,7 +959,6 @@ VIMIAN.ST,Vimian Group AB (publ),Healthcare,OMX Stockholm
 VISC.ST,Gruvaktiebolaget Viscaria,Basic Materials,OMX Stockholm
 VIT-B.ST,Vitec Software Group AB (publ),Technology,OMX Stockholm
 VITR.ST,Vitrolife AB (publ),Healthcare,OMX Stockholm
-VIVA.ST,Viva Wine Group AB,Consumer Defensive,OMX Stockholm
 VLO,Valero Energy,Energy,S&P 500
 VLTO,Veralto,Industrials,S&P 500
 VMC,Vulcan Materials Company,Materials,S&P 500
