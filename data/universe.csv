@@ -172,8 +172,8 @@ BYGGP.ST,ByggPartner Gruppen AB (publ),Industrials,OMX Stockholm
 C,Citigroup,Financials,S&P 500
 CAG.ST,CAG Group AB (publ),Technology,OMX Stockholm
 CAH,Cardinal Health,Health Care,S&P 500
+CALVIK.ST,Calviks AB (publ),Industrials,OMX Stockholm
 CAMX.ST,Camurus AB (publ),Healthcare,OMX Stockholm
-CANTA.ST,Cantargia AB (publ),Healthcare,OMX Stockholm
 CARA.ST,Carasent AB (publ),Healthcare,OMX Stockholm
 CARE.ST,Careium AB (Publ),Industrials,OMX Stockholm
 CARR,Carrier Global,Industrials,S&P 500
@@ -212,7 +212,6 @@ CL,Colgate-Palmolive,Consumer Staples,S&P 500
 CLA-B.ST,Cloetta AB (publ),Consumer Defensive,OMX Stockholm
 CLAS-B.ST,Clas Ohlson AB (publ),Consumer Cyclical,OMX Stockholm
 CLAV.ST,Clavister Holding AB (publ.),Technology,OMX Stockholm
-CLBIO.ST,Corline Biomedical AB,Healthcare,OMX Stockholm
 CLX,Clorox,Consumer Staples,S&P 500
 CMBTOO.ST,Cmb.Tech NV,Unknown,OMX Stockholm
 CMCSA,Comcast,Communication Services,Nasdaq-100+S&P 500
@@ -282,6 +281,7 @@ DNBO.ST,DNB Bank ASA,Unknown,OMX Stockholm
 DOC,Healthpeak Properties,Real Estate,S&P 500
 DOM.ST,Dometic Group AB (publ),Consumer Cyclical,OMX Stockholm
 DONE.ST,Done.ai Group AB,Technology,OMX Stockholm
+DORMY.ST,Dormy Corporation AB (publ),Unknown,OMX Stockholm
 DOV,Dover Corporation,Industrials,S&P 500
 DOW,Dow Inc.,Materials,S&P 500
 DOXA.ST,Doxa AB (publ),Real Estate,OMX Stockholm
@@ -564,7 +564,7 @@ LIN,Linde plc,Materials,Nasdaq-100+S&P 500
 LINC.ST,Linc AB,Financial Services,OMX Stockholm
 LITE,Lumentum,Information Technology,Nasdaq-100+S&P 500
 LLY,Lilly (Eli),Health Care,S&P 500
-LMGAB.ST,Linjemontage i GrÃ¤storp Aktiebolag (publ),Unknown,OMX Stockholm
+LMGAB.ST,Linjemontage i GrÃ¤storp Aktiebolag (publ),Industrials,OMX Stockholm
 LMT,Lockheed Martin,Industrials,S&P 500
 LNT,Alliant Energy,Utilities,S&P 500
 LOGI-B.ST,Logistea AB (publ),Real Estate,OMX Stockholm
@@ -641,7 +641,6 @@ MYCR.ST,Mycronic AB (publ),Industrials,OMX Stockholm
 NANEXA.ST,Nanexa AB (publ),Healthcare,OMX Stockholm
 NANOFS.ST,Nanoform Finland Oyj,Healthcare,OMX Stockholm
 NAVIGO-STAM.ST,Navigo Invest AB (publ),Financial Services,OMX Stockholm
-NAXS.ST,NAXS AB (publ),Financial Services,OMX Stockholm
 NBIS,Nebius Group,Technology,Nasdaq-100
 NCAB.ST,NCAB Group AB (publ),Technology,OMX Stockholm
 NCC-A.ST,NCC AB (publ),Industrials,OMX Stockholm
@@ -873,6 +872,7 @@ STZ,Constellation Brands,Consumer Staples,S&P 500
 SUS.ST,Surgical Science Sweden AB (publ),Healthcare,OMX Stockholm
 SVEAF-B.ST,Sveafastigheter AB (publ),Real Estate,OMX Stockholm
 SVED-B.ST,Svedbergs Group AB (publ),Industrials,OMX Stockholm
+SVEVIK.ST,Svevik Industri AB,Unknown,OMX Stockholm
 SVIK.ST,Studsvik AB (publ),Industrials,OMX Stockholm
 SVOL-A.ST,Svolder AB (publ),Financial Services,OMX Stockholm
 SVOL-B.ST,Svolder AB (publ),Financial Services,OMX Stockholm
