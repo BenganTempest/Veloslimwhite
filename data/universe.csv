@@ -101,7 +101,7 @@ AWK,American Water Works,Utilities,S&P 500
 AXFO.ST,Axfood AB (publ),Consumer Defensive,OMX Stockholm
 AXON,Axon Enterprise,Industrials,Nasdaq-100+S&P 500
 AXP,American Express,Financials,S&P 500
-AXVIK.ST,Axvik Group Ab,Industrials,OMX Stockholm
+AXVIK.ST,Axvik Group AB,Industrials,OMX Stockholm
 AZA.ST,Avanza Bank Holding AB (publ),Financial Services,OMX Stockholm
 AZN.ST,AstraZeneca PLC,Healthcare,OMX Stockholm
 AZO,AutoZone,Consumer Discretionary,S&P 500
@@ -281,7 +281,7 @@ DNBO.ST,DNB Bank ASA,Unknown,OMX Stockholm
 DOC,Healthpeak Properties,Real Estate,S&P 500
 DOM.ST,Dometic Group AB (publ),Consumer Cyclical,OMX Stockholm
 DONE.ST,Done.ai Group AB,Technology,OMX Stockholm
-DORMY.ST,Dormy Corporation AB (publ),Unknown,OMX Stockholm
+DORMY.ST,Dormy Corporation AB (publ),Consumer Cyclical,OMX Stockholm
 DOV,Dover Corporation,Industrials,S&P 500
 DOW,Dow Inc.,Materials,S&P 500
 DOXA.ST,Doxa AB (publ),Real Estate,OMX Stockholm
@@ -641,6 +641,7 @@ MYCR.ST,Mycronic AB (publ),Industrials,OMX Stockholm
 NANEXA.ST,Nanexa AB (publ),Healthcare,OMX Stockholm
 NANOFS.ST,Nanoform Finland Oyj,Healthcare,OMX Stockholm
 NAVIGO-STAM.ST,Navigo Invest AB (publ),Financial Services,OMX Stockholm
+NAXS.ST,NAXS AB (publ),Financial Services,OMX Stockholm
 NBIS,Nebius Group,Technology,Nasdaq-100
 NCAB.ST,NCAB Group AB (publ),Technology,OMX Stockholm
 NCC-A.ST,NCC AB (publ),Industrials,OMX Stockholm
@@ -802,7 +803,6 @@ SBUX,Starbucks,Consumer Discretionary,Nasdaq-100+S&P 500
 SCA-A.ST,Svenska Cellulosa Aktiebolaget SCA (publ),Basic Materials,OMX Stockholm
 SCA-B.ST,Svenska Cellulosa Aktiebolaget SCA (publ),Basic Materials,OMX Stockholm
 SCHW,Charles Schwab Corporation,Financials,S&P 500
-SCST-BTA.ST,Scandi Standard AB (publ),Unknown,OMX Stockholm
 SCST.ST,Scandi Standard AB (publ),Consumer Defensive,OMX Stockholm
 SDIP-B.ST,Sdiptech AB (publ),Industrials,OMX Stockholm
 SEAF.ST,Seafire AB (publ),Financial Services,OMX Stockholm
@@ -872,7 +872,7 @@ STZ,Constellation Brands,Consumer Staples,S&P 500
 SUS.ST,Surgical Science Sweden AB (publ),Healthcare,OMX Stockholm
 SVEAF-B.ST,Sveafastigheter AB (publ),Real Estate,OMX Stockholm
 SVED-B.ST,Svedbergs Group AB (publ),Industrials,OMX Stockholm
-SVEVIK.ST,Svevik Industri AB,Unknown,OMX Stockholm
+SVEVIK.ST,Svevik Industri AB,Industrials,OMX Stockholm
 SVIK.ST,Studsvik AB (publ),Industrials,OMX Stockholm
 SVOL-A.ST,Svolder AB (publ),Financial Services,OMX Stockholm
 SVOL-B.ST,Svolder AB (publ),Financial Services,OMX Stockholm
