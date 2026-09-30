@@ -73,6 +73,7 @@ APOTEA.ST,Apotea AB (publ),Healthcare,OMX Stockholm
 APP,AppLovin,Communication Services,Nasdaq-100+S&P 500
 APTV,Aptiv,Consumer Discretionary,S&P 500
 AQ.ST,AQ Group AB (publ),Industrials,OMX Stockholm
+ARCT.ST,Arctic Minerals AB (publ),Basic Materials,OMX Stockholm
 ARE,Alexandria Real Estate Equities,Real Estate,S&P 500
 ARENIT-SDB.ST,Arenit Industrie SE,Industrials,OMX Stockholm
 ARES,Ares Management,Financials,S&P 500
@@ -172,7 +173,6 @@ BYGGP.ST,ByggPartner Gruppen AB (publ),Industrials,OMX Stockholm
 C,Citigroup,Financials,S&P 500
 CAG.ST,CAG Group AB (publ),Technology,OMX Stockholm
 CAH,Cardinal Health,Health Care,S&P 500
-CALVIK.ST,Calviks AB (publ),Industrials,OMX Stockholm
 CAMX.ST,Camurus AB (publ),Healthcare,OMX Stockholm
 CARA.ST,Carasent AB (publ),Healthcare,OMX Stockholm
 CARE.ST,Careium AB (Publ),Industrials,OMX Stockholm
@@ -212,6 +212,7 @@ CL,Colgate-Palmolive,Consumer Staples,S&P 500
 CLA-B.ST,Cloetta AB (publ),Consumer Defensive,OMX Stockholm
 CLAS-B.ST,Clas Ohlson AB (publ),Consumer Cyclical,OMX Stockholm
 CLAV.ST,Clavister Holding AB (publ.),Technology,OMX Stockholm
+CLBIO.ST,Corline Biomedical AB,Healthcare,OMX Stockholm
 CLX,Clorox,Consumer Staples,S&P 500
 CMBTOO.ST,Cmb.Tech NV,Unknown,OMX Stockholm
 CMCSA,Comcast,Communication Services,Nasdaq-100+S&P 500
@@ -641,7 +642,6 @@ MYCR.ST,Mycronic AB (publ),Industrials,OMX Stockholm
 NANEXA.ST,Nanexa AB (publ),Healthcare,OMX Stockholm
 NANOFS.ST,Nanoform Finland Oyj,Healthcare,OMX Stockholm
 NAVIGO-STAM.ST,Navigo Invest AB (publ),Financial Services,OMX Stockholm
-NAXS.ST,NAXS AB (publ),Financial Services,OMX Stockholm
 NBIS,Nebius Group,Technology,Nasdaq-100
 NCAB.ST,NCAB Group AB (publ),Technology,OMX Stockholm
 NCC-A.ST,NCC AB (publ),Industrials,OMX Stockholm
