@@ -73,6 +73,7 @@ APOTEA.ST,Apotea AB (publ),Healthcare,OMX Stockholm
 APP,AppLovin,Communication Services,Nasdaq-100+S&P 500
 APTV,Aptiv,Consumer Discretionary,S&P 500
 AQ.ST,AQ Group AB (publ),Industrials,OMX Stockholm
+ARCT.ST,Arctic Minerals AB (publ),Basic Materials,OMX Stockholm
 ARE,Alexandria Real Estate Equities,Real Estate,S&P 500
 ARENIT-SDB.ST,Arenit Industrie SE,Industrials,OMX Stockholm
 ARES,Ares Management,Financials,S&P 500
@@ -172,8 +173,8 @@ BYGGP.ST,ByggPartner Gruppen AB (publ),Industrials,OMX Stockholm
 C,Citigroup,Financials,S&P 500
 CAG.ST,CAG Group AB (publ),Technology,OMX Stockholm
 CAH,Cardinal Health,Health Care,S&P 500
+CALVIK.ST,Calviks AB (publ),Industrials,OMX Stockholm
 CAMX.ST,Camurus AB (publ),Healthcare,OMX Stockholm
-CANTA.ST,Cantargia AB (publ),Healthcare,OMX Stockholm
 CARA.ST,Carasent AB (publ),Healthcare,OMX Stockholm
 CARE.ST,Careium AB (Publ),Industrials,OMX Stockholm
 CARR,Carrier Global,Industrials,S&P 500
@@ -540,7 +541,6 @@ KINV-B.ST,Kinnevik AB,Financial Services,OMX Stockholm
 KJELL.ST,Kjell Group AB (publ),Technology,OMX Stockholm
 KKR,KKR & Co.,Financials,S&P 500
 KLAC,KLA Corporation,Information Technology,Nasdaq-100+S&P 500
-KLARA-B.ST,KlaraBo Sverige AB (publ),Real Estate,OMX Stockholm
 KMARO.ST,Kongsberg Maritime ASA,Unknown,OMX Stockholm
 KMB,Kimberly-Clark,Consumer Staples,S&P 500
 KMI,Kinder Morgan,Energy,S&P 500
