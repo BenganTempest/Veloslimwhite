@@ -73,7 +73,6 @@ APOTEA.ST,Apotea AB (publ),Healthcare,OMX Stockholm
 APP,AppLovin,Communication Services,Nasdaq-100+S&P 500
 APTV,Aptiv,Consumer Discretionary,S&P 500
 AQ.ST,AQ Group AB (publ),Industrials,OMX Stockholm
-ARCT.ST,Arctic Minerals AB (publ),Basic Materials,OMX Stockholm
 ARE,Alexandria Real Estate Equities,Real Estate,S&P 500
 ARENIT-SDB.ST,Arenit Industrie SE,Industrials,OMX Stockholm
 ARES,Ares Management,Financials,S&P 500
@@ -175,6 +174,7 @@ CAG.ST,CAG Group AB (publ),Technology,OMX Stockholm
 CAH,Cardinal Health,Health Care,S&P 500
 CALVIK.ST,Calviks AB (publ),Industrials,OMX Stockholm
 CAMX.ST,Camurus AB (publ),Healthcare,OMX Stockholm
+CANTA.ST,Cantargia AB (publ),Healthcare,OMX Stockholm
 CARA.ST,Carasent AB (publ),Healthcare,OMX Stockholm
 CARE.ST,Careium AB (Publ),Industrials,OMX Stockholm
 CARR,Carrier Global,Industrials,S&P 500
@@ -854,6 +854,7 @@ SOLV,Solventum,Health Care,S&P 500
 SPCX,SpaceX,Telecommunications,Nasdaq-100
 SPG,Simon Property Group,Real Estate,S&P 500
 SPGI,S&P Global,Financials,S&P 500
+SPRINT.ST,Sprint Bioscience AB (publ),Healthcare,OMX Stockholm
 SRE,Sempra,Utilities,S&P 500
 SSAB-A.ST,SSAB AB (publ),Basic Materials,OMX Stockholm
 SSAB-B.ST,SSAB AB (publ),Basic Materials,OMX Stockholm
@@ -916,7 +917,6 @@ TMUS,T-Mobile US,Communication Services,Nasdaq-100+S&P 500
 TPL,Texas Pacific Land Corporation,Energy,S&P 500
 TPR,"Tapestry, Inc.",Consumer Discretionary,S&P 500
 TRAC-B.ST,AB Traction,Financial Services,OMX Stockholm
-TRAIN-B.ST,Train Alliance AB (publ),Industrials,OMX Stockholm
 TREL-B.ST,Trelleborg AB (publ),Industrials,OMX Stockholm
 TRGP,Targa Resources,Energy,S&P 500
 TRI,Thomson Reuters,Technology,Nasdaq-100
