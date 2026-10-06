@@ -101,7 +101,7 @@ AWK,American Water Works,Utilities,S&P 500
 AXFO.ST,Axfood AB (publ),Consumer Defensive,OMX Stockholm
 AXON,Axon Enterprise,Industrials,Nasdaq-100+S&P 500
 AXP,American Express,Financials,S&P 500
-AXVIK.ST,Axvik Group AB,Industrials,OMX Stockholm
+AXVIK.ST,Axvik Group AB (publ),Industrials,OMX Stockholm
 AZA.ST,Avanza Bank Holding AB (publ),Financial Services,OMX Stockholm
 AZN.ST,AstraZeneca PLC,Healthcare,OMX Stockholm
 AZO,AutoZone,Consumer Discretionary,S&P 500
@@ -642,6 +642,7 @@ MYCR.ST,Mycronic AB (publ),Industrials,OMX Stockholm
 NANEXA.ST,Nanexa AB (publ),Healthcare,OMX Stockholm
 NANOFS.ST,Nanoform Finland Oyj,Healthcare,OMX Stockholm
 NAVIGO-STAM.ST,Navigo Invest AB (publ),Financial Services,OMX Stockholm
+NAXS.ST,NAXS AB (publ),Financial Services,OMX Stockholm
 NBIS,Nebius Group,Technology,Nasdaq-100
 NCAB.ST,NCAB Group AB (publ),Technology,OMX Stockholm
 NCC-A.ST,NCC AB (publ),Industrials,OMX Stockholm
@@ -689,7 +690,6 @@ NYAB.ST,Nyab AB (publ),Industrials,OMX Stockholm
 NYOR.ST,Nyorda AB,Communication Services,OMX Stockholm
 O,Realty Income,Real Estate,S&P 500
 OBAB.ST,Online Brands Nordic AB (publ),Consumer Cyclical,OMX Stockholm
-OBSE.ST,Observit AB,Technology,OMX Stockholm
 OCTV-SDB.ST,Octave Intelligence plc,Technology,OMX Stockholm
 ODFL,Old Dominion,Industrials,Nasdaq-100+S&P 500
 OEM-B.ST,OEM International AB (publ),Industrials,OMX Stockholm
