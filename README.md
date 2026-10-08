@@ -91,8 +91,12 @@ history.
 
 ## Optional: free Telegram alerts
 
-The pipeline can ping you on Telegram the first time a ticker's Trend Score crosses
-`config.TELEGRAM_SCORE_THRESHOLD` (default 75). This is entirely free — no billing
+The pipeline can ping you on Telegram when a ticker's Trend Score crosses
+`config.TELEGRAM_SCORE_THRESHOLD` (default 85) -- i.e. it was below it in the previous
+run and is above it today. Tickers with no previous score don't count, a ticker that
+has alerted must fall below `TELEGRAM_RESET_THRESHOLD` (default 75) before it can alert
+again (memory kept in `data/alert_state.json`), and each message lists at most
+`TELEGRAM_MAX_TICKERS_IN_MESSAGE` (default 5) tickers plus a link to the dashboard. This is entirely free — no billing
 account, no credit card, ever — but it does need two values only you can create,
 stored as GitHub Actions secrets (never in the repo):
 

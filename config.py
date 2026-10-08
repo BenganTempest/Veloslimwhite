@@ -105,10 +105,23 @@ PAUSE_BEFORE_EARNINGS_CHECK_SECONDS = 15
 # those secrets aren't set, alerting is silently skipped -- the pipeline
 # doesn't require this to work. See the README for setup steps.
 TELEGRAM_ALERTS_ENABLED = True
-TELEGRAM_SCORE_THRESHOLD = 75  # alert when a ticker crosses this for the first time
+# Alert when a ticker crosses this. Scores are RELATIVE (momentum is a
+# percentile rank, the pattern model is class-balanced), so on a normal day
+# dozens of tickers sit above 75 -- 85 keeps alerts to the genuine top names.
+TELEGRAM_SCORE_THRESHOLD = 85
+# Hysteresis: once a ticker has alerted, it must fall BELOW this level before
+# it can alert again. Stops a ticker hovering around the threshold from
+# pinging you every other day.
+TELEGRAM_RESET_THRESHOLD = 75
+# Keep the message short even on a busy day: list at most this many tickers,
+# then "+N till" and the dashboard link.
+TELEGRAM_MAX_TICKERS_IN_MESSAGE = 5
+# Remembers which tickers have already alerted (and not yet reset). Committed
+# by the workflow so the memory survives between daily runs.
+TELEGRAM_ALERT_STATE_FILE = DATA_DIR / "alert_state.json"
 # Optional: your GitHub Pages URL, appended to alert messages so you can tap
 # straight through. Leave blank to omit it.
-DASHBOARD_URL = ""
+DASHBOARD_URL = "https://bengantempest.github.io/Veloslimwhite/"
 
 # --- Repo-staleness alert -----------------------------------------------------
 # GitHub auto-disables a PUBLIC repo's scheduled Actions workflows after 60

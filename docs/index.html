@@ -763,8 +763,8 @@
       " högst rankade aktierna varje dag, inte alla &mdash; en Yahoo-fråga per aktie för hela universumet " +
       "skulle riskera samma typ av hastighetsbegränsning som prisnedladdningen redan en gång stötte på. " +
       "Rapportdatum är Yahoos egen uppskattning, inte alltid exakt.</p>" +
-      "<p>Ett gratis Telegram-larm kan skickas när en akties poäng korsar " + esc(d.telegram_score_threshold || 75) +
-      " för första gången (ställs in i <code>config.py</code>) &mdash; en egen, kostnadsfri Telegram-bot, " +
+      "<p>Ett gratis Telegram-larm kan skickas när en akties poäng korsar " + esc(d.telegram_score_threshold || 85) +
+      " (ställs in i <code>config.py</code>). Aktier utan poäng från föregående körning räknas inte, och en aktie som redan larmat måste först falla tillbaka innan den kan larma igen &mdash; en egen, kostnadsfri Telegram-bot, " +
       "ingen betald tjänst. Om det inte är konfigurerat skickas inga larm och resten av skanningen påverkas inte.</p>";
   }
 
