@@ -132,6 +132,35 @@ weeks after that — well before GitHub's 60-day cutoff actually arrives. Tune
 silently skipped if `TELEGRAM_ALERTS_ENABLED = False` or the two Telegram secrets
 above aren't set, same as the threshold alert.
 
+## Data quality, follow-up, watchlist and weekly summary
+
+- **Price download** runs in batches (`PRICE_DOWNLOAD_BATCH_SIZE`) with up to
+  `PRICE_DOWNLOAD_MAX_RETRIES` retries of missing tickers. Each run is logged to
+  `data/run_log.csv`; if more than `DATA_QUALITY_WARN_MISSING_PCT` of the universe is
+  missing, the dashboard shows a banner and the Actions run shows a warning.
+- **Liquidity filter**: tickers below `MIN_AVG_TURNOVER` (average daily close x volume
+  over 20 days, own currency) aren't scored.
+- **Relative momentum**: ranked within each market (US / Sweden) and, at
+  `MOMENTUM_SECTOR_WEIGHT`, within the ticker's sector. The "Mot index" column is the
+  20-day change minus the market index's 20-day change (`BENCHMARKS`, stored in
+  `data/benchmarks.csv`).
+- **Calibrated chance**: the dashboard's "Chans" column is the pattern model's
+  prior-corrected probability of a +20 % move in 10 days; the methodology panel shows
+  how well those estimates matched the held-out period. The pattern part of the
+  Trend Score is now a percentile rank within the day's scan.
+- **Follow-up**: every alert is logged in `data/alert_log.csv`; the dashboard's
+  "Uppföljning" panel shows how alerts and each day's top `FOLLOWUP_TOP_N` did after
+  `FOLLOWUP_HORIZONS` trading days versus their index.
+- **Detail view**: click any ticker for a price chart, score history and headlines
+  (embedded for the top `DETAIL_TOP_N` plus the watchlist).
+- **Watchlist**: put tickers in `WATCHLIST` in `config.py` to always scan them and get
+  a Telegram line when their score moves `WATCHLIST_ALERT_CHANGE`+ points. Stars set on
+  the dashboard are stored in your browser only.
+- **Weekly summary**: `.github/workflows/weekly.yml` sends a Sunday Telegram message
+  (climbers, how recent alerts did, hit rates, run health). Test it with
+  Actions -> "Weekly summary" -> Run workflow, or locally with
+  `python scripts/weekly_summary.py --dry-run`.
+
 ## Customizing
 
 Everything tunable lives in `config.py` with comments: which indices to scan,

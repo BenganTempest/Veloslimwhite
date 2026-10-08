@@ -54,32 +54,49 @@ def _download_batch(tickers: list[str]) -> dict[str, pd.DataFrame]:
     return out
 
 
+def _download_in_batches(tickers: list[str]) -> dict[str, pd.DataFrame]:
+    out: dict[str, pd.DataFrame] = {}
+    size = max(1, int(config.PRICE_DOWNLOAD_BATCH_SIZE))
+    batches = [tickers[i:i + size] for i in range(0, len(tickers), size)]
+    for n, batch in enumerate(batches):
+        try:
+            out.update(_download_batch(batch))
+        except Exception as exc:  # noqa: BLE001
+            log.warning("Price batch %d/%d failed outright (%s) -- will be retried", n + 1, len(batches), exc)
+        if n < len(batches) - 1 and config.PRICE_DOWNLOAD_BATCH_PAUSE_SECONDS:
+            time.sleep(config.PRICE_DOWNLOAD_BATCH_PAUSE_SECONDS)
+    return out
+
+
 def fetch_prices(tickers: list[str]) -> dict[str, pd.DataFrame]:
     """
-    Bulk-download daily OHLCV for every ticker. yfinance batches this
-    internally far more efficiently than one request per ticker.
-    Returns {ticker: DataFrame} for tickers that returned usable data.
+    Download daily OHLCV for every ticker, in batches of
+    config.PRICE_DOWNLOAD_BATCH_SIZE. Returns {ticker: DataFrame} for
+    tickers that returned usable data.
 
     A ticker can come back missing either because it's genuinely delisted/
     invalid, or because Yahoo rate-limited the batch (YFRateLimitError) --
-    common at this scale and usually transient. One retry, after a pause,
-    of just the tickers still missing recovers most of the rate-limited
+    common at this scale and usually transient. Up to
+    config.PRICE_DOWNLOAD_MAX_RETRIES retries of just the still-missing
+    tickers, each after a longer pause, recover most of the rate-limited
     ones without re-downloading everything that already succeeded.
     """
     log.info("Downloading price history for %d tickers...", len(tickers))
-    out = _download_batch(tickers)
+    out = _download_in_batches(tickers)
 
-    missing = [t for t in tickers if t not in out]
-    if missing and config.PRICE_DOWNLOAD_MAX_RETRIES > 0:
+    for attempt in range(1, config.PRICE_DOWNLOAD_MAX_RETRIES + 1):
+        missing = [t for t in tickers if t not in out]
+        if not missing:
+            break
+        pause = config.PRICE_DOWNLOAD_RETRY_PAUSE_SECONDS * attempt
         log.warning(
-            "%d/%d tickers missing after the first pass (delistings and/or rate "
-            "limiting) -- waiting %ds and retrying that subset once",
-            len(missing), len(tickers), config.PRICE_DOWNLOAD_RETRY_PAUSE_SECONDS,
+            "%d/%d tickers missing (delistings and/or rate limiting) -- retry %d/%d in %ds",
+            len(missing), len(tickers), attempt, config.PRICE_DOWNLOAD_MAX_RETRIES, pause,
         )
-        time.sleep(config.PRICE_DOWNLOAD_RETRY_PAUSE_SECONDS)
-        retry_out = _download_batch(missing)
+        time.sleep(pause)
+        retry_out = _download_in_batches(missing)
         out.update(retry_out)
-        log.info("Retry recovered %d/%d previously-missing tickers", len(retry_out), len(missing))
+        log.info("Retry %d recovered %d/%d previously-missing tickers", attempt, len(retry_out), len(missing))
 
     log.info("Got usable price history for %d/%d tickers", len(out), len(tickers))
     return out

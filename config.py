@@ -44,8 +44,32 @@ PAUSE_AFTER_SECTOR_ENRICHMENT_SECONDS = 20
 # is usually transient. One retry of just the tickers that failed the first
 # pass, after a pause, recovers most of them without re-downloading
 # everything that already succeeded.
-PRICE_DOWNLOAD_MAX_RETRIES = 1
+# Downloading ~1000 tickers in one request is what trips Yahoo's limiter
+# most often, so the first pass is split into smaller batches with a short
+# pause between them. Missing tickers are then retried a few times with a
+# growing pause (60s, 120s, 180s...).
+PRICE_DOWNLOAD_BATCH_SIZE = 150
+PRICE_DOWNLOAD_BATCH_PAUSE_SECONDS = 5
+PRICE_DOWNLOAD_MAX_RETRIES = 3
 PRICE_DOWNLOAD_RETRY_PAUSE_SECONDS = 60
+# If more than this share of the universe is still missing after retries,
+# the dashboard shows a warning banner and the weekly summary flags the run.
+DATA_QUALITY_WARN_MISSING_PCT = 5.0
+RUN_LOG_CSV = DATA_DIR / "run_log.csv"  # one row per run: how many tickers were fetched/missing
+
+# --- Benchmarks (for market-relative momentum and the follow-up panel) ------
+# Keyed by the same market labels the dashboard uses.
+BENCHMARKS = {"US": "^GSPC", "Sweden": "^OMX"}  # S&P 500, OMX Stockholm 30
+BENCHMARK_NAMES = {"US": "S&P 500", "Sweden": "OMXS30"}
+BENCHMARK_HISTORY_CSV = DATA_DIR / "benchmarks.csv"
+
+# --- Liquidity filter -------------------------------------------------------
+# Very thinly traded stocks swing a lot on tiny volume and float to the top
+# on momentum alone. Tickers whose average daily turnover (close x volume,
+# in their own currency) over the last LIQUIDITY_WINDOW days is below these
+# floors are left out of scoring. Tickers on WATCHLIST are always kept.
+LIQUIDITY_WINDOW = 20
+MIN_AVG_TURNOVER = {"USD": 1_000_000, "SEK": 2_000_000}
 
 # --- Price / feature settings --------------------------------------------
 PRICE_LOOKBACK = "2y"        # yfinance period string used for both training + features
@@ -72,6 +96,14 @@ NEWS_MAX_HEADLINES_PER_TICKER = 15
 # If the news source is unreachable or rate-limited, the pipeline should not
 # hard-fail -- it just zeroes out the sentiment weight for that run.
 NEWS_TIMEOUT_SECONDS = 8
+
+# --- Momentum: relative to market and sector -------------------------------
+# Momentum is percentile-ranked within each market (US vs Sweden), so a broad
+# rally in one market doesn't crowd the other out, and blended with a rank
+# within the ticker's own sector (in the same market). Sector groups smaller
+# than MOMENTUM_MIN_SECTOR_SIZE fall back to the market rank.
+MOMENTUM_SECTOR_WEIGHT = 0.5
+MOMENTUM_MIN_SECTOR_SIZE = 8
 
 # --- Composite score weights (must sum to 1.0) -----------------------------
 WEIGHT_PATTERN = 0.55
@@ -122,6 +154,38 @@ TELEGRAM_ALERT_STATE_FILE = DATA_DIR / "alert_state.json"
 # Optional: your GitHub Pages URL, appended to alert messages so you can tap
 # straight through. Leave blank to omit it.
 DASHBOARD_URL = "https://bengantempest.github.io/Veloslimwhite/"
+
+# --- Watchlist -----------------------------------------------------------------
+# Tickers you own or follow (Yahoo symbols, e.g. "VOLV-B.ST", "AAPL"). They are
+# always scanned (even if they fail the liquidity filter), always get a detail
+# view on the dashboard, and get their own section in the Telegram message
+# when their score moves at least WATCHLIST_ALERT_CHANGE points in a day or
+# they cross TELEGRAM_SCORE_THRESHOLD. (Stars you set on the dashboard itself
+# are saved in your browser only and don't reach Telegram.)
+WATCHLIST: list[str] = []
+WATCHLIST_ALERT_CHANGE = 10.0
+
+# --- Follow-up ("did it work?") ------------------------------------------------
+# Every alert is logged and later checked: how did the stock do N trading days
+# later compared with its market's index? Same check for each day's top
+# FOLLOWUP_TOP_N tickers, which gives data much sooner than alerts alone.
+ALERT_LOG_CSV = DATA_DIR / "alert_log.csv"
+FOLLOWUP_HORIZONS = [5, 10, 20]   # trading days (= scanner runs)
+FOLLOWUP_TOP_N = 10
+
+# --- Detail view -------------------------------------------------------------
+# Price chart, score history and headlines are embedded for the top
+# DETAIL_TOP_N tickers (plus the watchlist) -- not all ~1000, to keep
+# data.json (committed daily) reasonably small.
+DETAIL_TOP_N = 150
+DETAIL_PRICE_DAYS = 120
+DETAIL_SCORE_DAYS = 60
+DETAIL_HEADLINES = 5
+
+# --- Weekly summary -------------------------------------------------------------
+# Sent by .github/workflows/weekly.yml (Sunday morning) via the same bot.
+WEEKLY_SUMMARY_ENABLED = True
+WEEKLY_TOP_CLIMBERS = 5
 
 # --- Repo-staleness alert -----------------------------------------------------
 # GitHub auto-disables a PUBLIC repo's scheduled Actions workflows after 60

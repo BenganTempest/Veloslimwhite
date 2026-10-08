@@ -58,6 +58,13 @@ def compute_features(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def avg_turnover(df: pd.DataFrame, window: int | None = None) -> float:
+    """Average daily turnover (close x volume, in the ticker's own currency) over the last `window` days."""
+    window = window or config.LIQUIDITY_WINDOW
+    tail = (df["Close"] * df["Volume"]).dropna().tail(window)
+    return float(tail.mean()) if len(tail) else 0.0
+
+
 def forward_return(close: pd.Series, window: int) -> pd.Series:
     """Forward N-day return, used only for labeling training data."""
     return close.shift(-window) / close - 1.0

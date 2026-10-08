@@ -71,31 +71,82 @@ def score_sentiment(news: pd.DataFrame, tickers: list[str]) -> pd.DataFrame:
     return result
 
 
-def score_momentum(today_features: pd.DataFrame) -> pd.Series:
-    """
-    Percentile-rank today's blended momentum (5d/20d/60d, volume-weighted
-    toward the shorter windows) across the whole scanned universe, so the
-    score reflects *relative* strength within today's scan rather than an
-    arbitrary absolute cutoff.
-    """
-    blend = (
+def market_for(ticker: str) -> str:
+    return "Sweden" if str(ticker).endswith(".ST") else "US"
+
+
+def _blend_momentum(today_features: pd.DataFrame) -> pd.Series:
+    return (
         0.5 * today_features.get("mom_5d", 0)
         + 0.3 * today_features.get("mom_20d", 0)
         + 0.2 * today_features.get("mom_60d", 0)
-    )
-    pct_rank = blend.rank(pct=True) * 100
-    return pct_rank.rename("momentum_score")
+    ).astype(float)
 
 
-def composite_score(pattern: pd.Series, momentum: pd.Series, sentiment: pd.Series) -> pd.DataFrame:
+def score_momentum(today_features: pd.DataFrame, sectors: pd.Series | None = None) -> pd.Series:
+    """
+    Percentile-rank today's blended momentum (5d/20d/60d, weighted toward the
+    shorter windows) RELATIVE TO PEERS:
+
+      * within the ticker's own market (US vs Sweden), so a broad rally in
+        one market doesn't push the other market's stocks out of the top;
+      * blended (config.MOMENTUM_SECTOR_WEIGHT) with a rank within its own
+        sector in that market, so a stock that's merely riding a hot sector
+        scores lower than one that's beating its sector. Sector groups
+        smaller than config.MOMENTUM_MIN_SECTOR_SIZE (or "Unknown") fall
+        back to the market rank.
+    """
+    blend = _blend_momentum(today_features)
+    market = pd.Series([market_for(t) for t in blend.index], index=blend.index)
+    market_rank = blend.groupby(market).rank(pct=True) * 100
+
+    if sectors is None:
+        return market_rank.rename("momentum_score")
+
+    sector = sectors.reindex(blend.index).fillna("Unknown").astype(str)
+    group = market + "|" + sector
+    sizes = group.map(group.value_counts())
+    sector_rank = blend.groupby(group).rank(pct=True) * 100
+    usable = (sizes >= config.MOMENTUM_MIN_SECTOR_SIZE) & (sector != "Unknown")
+    sector_rank = sector_rank.where(usable, market_rank)
+
+    w = config.MOMENTUM_SECTOR_WEIGHT
+    return ((1 - w) * market_rank + w * sector_rank).rename("momentum_score")
+
+
+def excess_vs_benchmark(today_features: pd.DataFrame, benchmark_mom_20d: dict[str, float]) -> pd.Series:
+    """20-day price change minus the same change in the ticker's market index (percentage points)."""
+    out = {}
+    for t, r in today_features.iterrows():
+        bench = benchmark_mom_20d.get(market_for(t))
+        m = r.get("mom_20d")
+        out[t] = (float(m) - bench) if (bench is not None and m is not None and pd.notna(m)) else np.nan
+    return pd.Series(out, dtype=float, name="excess_20d")
+
+
+def composite_score(
+    pattern: pd.Series, momentum: pd.Series, sentiment: pd.Series, weights: dict | None = None
+) -> pd.DataFrame:
+    """
+    weights: {"pattern", "momentum", "sentiment"} -- defaults to config.
+    When the pattern weight is 0 (model couldn't be trained this run), a
+    missing pattern score no longer drops the ticker: previously every row
+    was dropped here, which left the whole scan empty on such a day.
+    """
+    w = weights or {
+        "pattern": config.WEIGHT_PATTERN,
+        "momentum": config.WEIGHT_MOMENTUM,
+        "sentiment": config.WEIGHT_SENTIMENT,
+    }
     df = pd.DataFrame({"pattern_score": pattern, "momentum_score": momentum, "sentiment_score": sentiment})
-    df = df.dropna(subset=["pattern_score", "momentum_score"])
+    required = ["momentum_score"] + (["pattern_score"] if w["pattern"] > 0 else [])
+    df = df.dropna(subset=required)
     df["sentiment_score"] = df["sentiment_score"].fillna(50.0)
 
     df["trend_score"] = (
-        config.WEIGHT_PATTERN * df["pattern_score"]
-        + config.WEIGHT_MOMENTUM * df["momentum_score"]
-        + config.WEIGHT_SENTIMENT * df["sentiment_score"]
+        w["pattern"] * df["pattern_score"].fillna(0.0)
+        + w["momentum"] * df["momentum_score"]
+        + w["sentiment"] * df["sentiment_score"]
     ).clip(0, 100).round(1)
 
     return df

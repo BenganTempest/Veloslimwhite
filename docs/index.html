@@ -225,6 +225,63 @@
   .backtest-block h3 { font-size: 13.5px; margin: 0 0 8px; }
   .not-ready { font-size: 13px; color: var(--text-muted); font-style: italic; }
 
+  /* data-quality banner */
+  .alert-banner {
+    background: var(--surface-1); border: 1px solid var(--warning); border-left: 4px solid var(--warning);
+    border-radius: 10px; padding: 12px 16px; font-size: 13px; color: var(--text-secondary);
+    line-height: 1.5; margin-bottom: 20px;
+  }
+  .alert-banner strong { color: var(--text-primary); }
+
+  /* watchlist star */
+  .star-btn {
+    background: none; border: none; padding: 2px; cursor: pointer; color: var(--text-muted);
+    font-size: 16px; line-height: 1; flex: none;
+  }
+  .star-btn:hover { color: var(--warning); }
+  .star-btn.on { color: var(--warning); }
+  .star-btn.locked { cursor: default; }
+  td.star-cell { width: 28px; padding-right: 0; }
+  tbody tr.clickable { cursor: pointer; }
+  .bar-row.clickable { cursor: pointer; }
+
+  /* follow-up */
+  .fu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 720px) { .fu-grid { grid-template-columns: 1fr; } }
+  .fu-tile { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .fu-tile .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 650; }
+  .fu-line { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; padding: 2px 0;
+    font-variant-numeric: tabular-nums; }
+  .fu-line .k { color: var(--text-secondary); }
+  .fu-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 6px; }
+  .small-table td, .small-table th { padding: 6px 8px; font-size: 12.5px; }
+  .small-table thead th { cursor: default; }
+
+  /* detail dialog */
+  dialog.detail {
+    width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0;
+    border: 1px solid var(--border); border-radius: 14px; background: var(--surface-1); color: var(--text-primary);
+  }
+  dialog.detail::backdrop { background: rgba(0,0,0,0.45); }
+  .detail-inner { padding: 18px 20px 20px; }
+  .detail-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+  .detail-head h3 { margin: 0; font-size: 18px; }
+  .detail-head .name { color: var(--text-secondary); font-size: 13px; margin-top: 2px; }
+  .detail-head .spacer { flex: 1; }
+  .detail-close {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px;
+    color: var(--text-primary); cursor: pointer; font-size: 13px;
+  }
+  .detail-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+  @media (max-width: 600px) { .detail-stats { grid-template-columns: repeat(2, 1fr); } }
+  .detail-stats .stat-tile { padding: 10px 12px; border-radius: 10px; }
+  .detail-stats .value { font-size: 18px; }
+  .detail h4 { font-size: 13px; margin: 14px 0 6px; color: var(--text-secondary); font-weight: 650; }
+  .chart-svg { width: 100%; height: auto; display: block; }
+  .chart-svg text { fill: var(--text-muted); font-size: 11px; font-family: inherit; }
+  .headline-list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; color: var(--text-secondary); }
+  .headline-list .when { color: var(--text-muted); font-size: 11.5px; }
+
   footer { font-size: 12px; color: var(--text-muted); text-align: center; padding-top: 24px; }
   footer a { color: var(--text-secondary); }
 </style>
@@ -258,7 +315,17 @@
       title="Dölj den här rutan">Dölj ✕</button>
   </div>
 
+  <div class="alert-banner" id="dqBanner" hidden></div>
+
   <div class="kpi-row" id="kpiRow"></div>
+
+  <section id="watchSection" hidden>
+    <h2>Bevakade aktier</h2>
+    <p class="desc">Aktier du stjärnmärkt (sparas bara i den här webbläsaren) plus de som står i
+      <code>WATCHLIST</code> i <code>config.py</code> &mdash; bara de senare får Telegram-meddelanden.
+      Klicka på en rad för detaljer.</p>
+    <div class="card" style="overflow-x:auto;" id="watchPanel"></div>
+  </section>
 
   <section>
     <h2>Dagens topplista</h2>
@@ -300,6 +367,9 @@
         Stockholmsnoterade (.ST) aktier.</dd>
       <dt>5d % / 20d %</dt>
       <dd>Kursförändring de senaste 5 respektive 20 handelsdagarna.</dd>
+      <dt>Mot index</dt>
+      <dd>Aktiens kursförändring de senaste 20 handelsdagarna minus samma förändring i dess marknads index
+        (S&amp;P 500 eller OMXS30), i procentenheter. Positivt = har gått bättre än marknaden.</dd>
       <dt>Rel. vol</dt>
       <dd>Dagens handelsvolym delat med dess senaste genomsnitt. 1,0&times; är normalt; klart över 2&times;
         betyder ovanligt hög handel och utlöser taggen "volymspik".</dd>
@@ -313,6 +383,14 @@
       <dt>Poäng</dt>
       <dd>Den sammanvägda trendpoängen 0&ndash;100 (mönsterlikhet + momentum + sentiment). Se
         <a href="#methodology">Metodik</a> nedan för exakta vikter och vad den betyder och inte betyder.</dd>
+      <dt>Chans</dt>
+      <dd>Mönstermodellens egen uppskattning av chansen att aktien stiger minst 20&nbsp;% inom 10 handelsdagar,
+        justerad till hur ovanliga sådana uppgångar faktiskt är. Normalt några procent som mest &mdash; en
+        hög poäng betyder alltså inte hög chans. Hur väl uppskattningen stämt syns under Metodik.</dd>
+      <dt>Stjärna och detaljvy</dt>
+      <dd>Klicka på stjärnan för att bevaka en aktie (sparas i din webbläsare). Klicka på en rad för
+        kursgraf, poänghistorik och senaste rubriker. Fullständiga detaljer finns för topp
+        <span class="js-detail-n">150</span> och bevakningslistan i <code>config.py</code>.</dd>
       <dt>Taggar</dt>
       <dd>Snabba flaggor, inte en del av själva poängen: <strong>volymspik</strong> (rel. vol &ge; 2&times;),
         <strong>nära 52-veckorshögsta</strong> (inom 3% av sin högsta kurs senaste året),
@@ -326,7 +404,7 @@
       <dd>Klicka på en eller flera taggar under filtren ovan för att bara visa aktier som har
         <em>minst en</em> av de markerade taggarna &mdash; inte nödvändigtvis alla samtidigt. Fler markerade
         taggar breddar alltså listan snarare än att snäva in den. Klicka på en markerad tagg igen för att
-        ta bort den. Taggen <strong>ny</strong> är inte en riktig tagg utan visar aktier utan någon
+        ta bort den. <strong>bevakade</strong> visar dina stjärnmärkta aktier. Taggen <strong>ny</strong> är inte en riktig tagg utan visar aktier utan någon
         tidigare poäng att jämföra med, samma betydelse som "ny" under "Dagens största rörelser" nedan.</dd>
       <dt>Dagens största rörelser</dt>
       <dd>Skiljer sig från topplistan &mdash; den visar högsta poäng just nu, det här visar störst
@@ -350,16 +428,19 @@
         <table id="mainTable">
           <thead>
             <tr>
+              <th title="Bevaka (stjärnmärk)"></th>
               <th data-key="ticker" title="Klicka för att sortera">Ticker</th>
               <th data-key="market" title="USA eller Sverige">Marknad</th>
               <th data-key="sector" title="Yahoo-rapporterad sektor/bransch">Sektor</th>
               <th class="num" data-key="price" title="Senaste stängningskurs, i aktiens egen valuta">Pris</th>
               <th class="num" data-key="mom_5d" title="Kursförändring senaste 5 handelsdagarna">5d %</th>
               <th class="num" data-key="mom_20d" title="Kursförändring senaste 20 handelsdagarna">20d %</th>
+              <th class="num" data-key="excess_20d" title="20-dagars kursförändring minus samma förändring i marknadens index (S&amp;P 500 / OMXS30), i procentenheter">Mot index</th>
               <th class="num" data-key="rel_volume" title="Dagens volym / senaste snittvolym. Över 2× = ovanligt hög handel">Rel. vol</th>
               <th class="num" data-key="sentiment_score" title="0–100 nyhetssentiment (ordlisteanalys, inte AI). 50 = neutralt">Sentiment</th>
               <th title="30-dagars minigraf över stängningskurser">Trend</th>
               <th class="num" data-key="trend_score" title="Sammanvägd trendpoäng 0–100 (mönsterlikhet + momentum + sentiment)">Poäng</th>
+              <th class="num" data-key="breakout_prob" title="Modellens kalibrerade chans för en uppgång på minst 20 % inom 10 handelsdagar">Chans</th>
               <th title="Snabba flaggor, inte en del av poängen">Taggar</th>
             </tr>
           </thead>
@@ -368,6 +449,14 @@
       </div>
       <div class="pagination-row" id="paginationControls"></div>
     </div>
+  </section>
+
+  <section id="followup">
+    <h2>Uppföljning: slog de index?</h2>
+    <p class="desc">Hur det gick för aktierna efter att de larmat på Telegram eller låg på dagens topplista,
+      jämfört med sin marknads index (S&amp;P 500 för USA, OMXS30 för Sverige) under exakt samma period.
+      "Mot index" = aktiens utveckling minus indexets, i procentenheter. Fyller på sig själv dag för dag.</p>
+    <div class="card" id="followupPanel"></div>
   </section>
 
   <section id="honesty">
@@ -393,6 +482,10 @@
   </footer>
 
 </div>
+
+<dialog class="detail" id="detailDialog" aria-labelledby="detailTitle">
+  <div class="detail-inner" id="detailBody"></div>
+</dialog>
 
 <script>
 (function () {
@@ -475,11 +568,46 @@
   // "new" (no prior-day score to diff against). Keeping the list here
   // fixed (rather than derived from whatever tags happen to appear in
   // today's data) means the filter chips don't jump around day to day.
-  var TAG_FILTER_KEYS = ["__new__", "volume spike", "near 52w high", "sentiment surge", "overbought (RSI)", "earnings soon"];
-  function tagFilterLabel(key) { return key === "__new__" ? "ny" : svTag(key); }
+  var TAG_FILTER_KEYS = ["__watch__", "__new__", "volume spike", "near 52w high", "sentiment surge", "overbought (RSI)", "earnings soon"];
+  function tagFilterLabel(key) {
+    if (key === "__watch__") return "★ bevakade";
+    return key === "__new__" ? "ny" : svTag(key);
+  }
   function tickerHasTag(r, key) {
+    if (key === "__watch__") return isWatched(r.ticker);
     if (key === "__new__") return r.score_change === null || r.score_change === undefined;
     return (r.tags || []).indexOf(key) !== -1;
+  }
+
+  // --- Watchlist: stars saved per browser + tickers from config.py WATCHLIST
+  // (the latter can't be un-starred here, since they live in the repo).
+  var WATCH_KEY = "watchlist";
+  var localWatch = [];
+  try { localWatch = JSON.parse(localStorage.getItem(WATCH_KEY) || "[]") || []; } catch (e) { localWatch = []; }
+  function configWatch() { return (state.data && state.data.watchlist) || []; }
+  function isConfigWatched(t) { return configWatch().indexOf(t) !== -1; }
+  function isWatched(t) { return localWatch.indexOf(t) !== -1 || isConfigWatched(t); }
+  function toggleWatch(t) {
+    if (isConfigWatched(t)) return;
+    var i = localWatch.indexOf(t);
+    if (i === -1) localWatch.push(t); else localWatch.splice(i, 1);
+    try { localStorage.setItem(WATCH_KEY, JSON.stringify(localWatch)); } catch (e) {}
+  }
+  function starHtml(t) {
+    var on = isWatched(t), locked = isConfigWatched(t);
+    var title = locked ? "Bevakas via config.py" : (on ? "Sluta bevaka" : "Bevaka");
+    return '<button type="button" class="star-btn' + (on ? " on" : "") + (locked ? " locked" : "") +
+      '" data-star="' + esc(t) + '" title="' + title + '" aria-label="' + title + " " + esc(t) +
+      '" aria-pressed="' + on + '">' + (on ? "★" : "☆") + "</button>";
+  }
+  function fmtPP(v) {
+    if (v === null || v === undefined || isNaN(v)) return "—";
+    var cls = v > 0 ? "up" : (v < 0 ? "down" : "");
+    return '<span class="' + cls + '">' + (v > 0 ? "+" : "") + v.toFixed(1) + "</span>";
+  }
+  function fmtChance(v) {
+    if (v === null || v === undefined || isNaN(v)) return "—";
+    return (v < 1 ? v.toFixed(1) : v.toFixed(0)) + "%";
   }
 
   // Small inline icons (no external icon font/library -- keeps the page
@@ -528,21 +656,48 @@
 
   function renderKpis(d) {
     var rows = d.rows;
-    var avg = rows.reduce(function (a, r) { return a + (r.trend_score || 0); }, 0) / (rows.length || 1);
     var top = rows.length ? rows[0] : null;
     var auc = d.model && d.model.validation_auc;
+    var dq = d.data_quality || {};
+    var fu = (d.followup && d.followup.top && d.followup.top["10"]) || null;
+    var subParts = [];
+    if (dq.illiquid_excluded) subParts.push(dq.illiquid_excluded + " uteslutna (låg omsättning)");
+    if (dq.missing) subParts.push(dq.missing + " saknades");
     var kpis = [
-      { label: "Skannade aktier", value: String(d.universe_size) },
-      { label: "Genomsnittlig trendpoäng", value: avg.toFixed(1) },
-      { label: "Bäst idag", value: top ? top.ticker : "—", delta: top ? top.trend_score.toFixed(1) : "" },
+      { label: "Skannade aktier", value: String(d.universe_size), delta: subParts.join(" · ") },
+      { label: "Bäst idag", value: top ? top.ticker : "—", delta: top ? top.trend_score.toFixed(1) + " poäng" : "" },
       { label: "Modellens AUC (out-of-sample)", value: (auc === null || auc === undefined) ? "n/a" : auc.toFixed(2),
         delta: "0,50 = ingen träffsäkerhet, 1,0 = perfekt" },
+      { label: "Topp " + ((d.followup && d.followup.top_n) || 10) + " som slog index (10 dagar)",
+        value: fu && fu.n ? fu.hit_rate.toFixed(0) + "%" : "—",
+        delta: fu && fu.n ? "snitt " + (fu.avg_excess > 0 ? "+" : "") + fu.avg_excess.toFixed(1) + " %-enh. mot index, n=" + fu.n
+                          : "inte tillräckligt med data än" },
     ];
     document.getElementById("kpiRow").innerHTML = kpis.map(function (k) {
       return '<div class="stat-tile"><div class="label">' + esc(k.label) + '</div>' +
         '<div class="value">' + esc(k.value) + "</div>" +
-        (k.delta ? '<div class="delta">' + esc(k.delta) + "</div>" : "") + "</div>";
+        (k.delta ? '<div class="delta" style="color:var(--text-muted)">' + esc(k.delta) + "</div>" : "") + "</div>";
     }).join("");
+  }
+
+  function renderDataQuality(d) {
+    var el = document.getElementById("dqBanner");
+    var dq = d.data_quality || {};
+    var msgs = [];
+    if (dq.missing_pct !== undefined && dq.missing_pct > (dq.warn_missing_pct || 5)) {
+      msgs.push("<strong>" + dq.missing + " av " + dq.universe_size + " aktier (" + dq.missing_pct.toFixed(1) +
+        "&nbsp;%) kunde inte hämtas</strong> från Yahoo i senaste körningen, troligen på grund av " +
+        "hastighetsbegränsning. De saknas i listan idag och räknas som \"nya\" i morgon.");
+    }
+    if (dq.model_trained === false) {
+      msgs.push("<strong>Mönstermodellen kunde inte tränas</strong> i senaste körningen &mdash; poängen bygger " +
+        "bara på momentum och sentiment idag.");
+    }
+    if (dq.benchmarks_ok && dq.benchmarks_ok.length < 2) {
+      msgs.push("Index kunde inte hämtas för alla marknader &mdash; kolumnen \"Mot index\" kan vara tom.");
+    }
+    el.hidden = !msgs.length;
+    el.innerHTML = msgs.join("<br>");
   }
 
   function renderLeaderboard(d) {
@@ -550,7 +705,7 @@
     var max = top.length ? top[0].trend_score : 100;
     var html = top.map(function (r) {
       var pct = Math.max(2, (r.trend_score / (max || 1)) * 100);
-      return '<div class="bar-row">' +
+      return '<div class="bar-row clickable" data-ticker="' + esc(r.ticker) + '">' +
         '<div class="bar-label">' + esc(r.ticker) + " · " + esc(r.name) + "</div>" +
         '<div class="bar-track"><div class="bar-fill" style="width:' + pct + "%;background:" +
           scoreColor(r.trend_score) + ';"></div></div>' +
@@ -567,7 +722,7 @@
     return list.map(function (r) {
       var pct = Math.max(2, (Math.abs(r.score_change) / maxAbs) * 100);
       var sign = r.score_change > 0 ? "+" : "";
-      return '<div class="bar-row">' +
+      return '<div class="bar-row clickable" data-ticker="' + esc(r.ticker) + '">' +
         '<div class="bar-label">' + esc(r.ticker) + " · " + esc(r.name) + "</div>" +
         '<div class="bar-track"><div class="bar-fill" style="width:' + pct + "%;background:" +
           (isGain ? "var(--good)" : "var(--critical)") + ';"></div></div>' +
@@ -679,7 +834,8 @@
       var tagPills = (r.tags || []).map(function (t) { return '<span class="tag">' + esc(svTag(t)) + "</span>"; });
       if (tickerHasTag(r, "__new__")) tagPills.unshift('<span class="tag">ny</span>');
       var tags = tagPills.join("");
-      return "<tr>" +
+      return '<tr class="clickable" data-ticker="' + esc(r.ticker) + '">' +
+        '<td class="star-cell">' + starHtml(r.ticker) + "</td>" +
         '<td class="ticker-cell"><div class="ticker-row"><span>' + esc(r.ticker) + "</span>" +
           externalLinksHtml(r) + '</div><div class="name-cell">' + esc(r.name) + "</div></td>" +
         "<td>" + esc(svMarket(r.market)) + "</td>" +
@@ -687,15 +843,17 @@
         '<td class="num">' + fmtPrice(r) + "</td>" +
         '<td class="num">' + fmtPct(r.mom_5d) + "</td>" +
         '<td class="num">' + fmtPct(r.mom_20d) + "</td>" +
+        '<td class="num">' + fmtPP(r.excess_20d) + "</td>" +
         '<td class="num">' + fmtNum(r.rel_volume, 2) + "×</td>" +
         '<td class="num">' + fmtNum(r.sentiment_score, 0) + (r.headline_count ? "" : " (ingen bevakning)") + "</td>" +
         "<td>" + sparklineSvg(r.sparkline) + "</td>" +
         '<td class="num"><span class="score-pill" style="background:' + scoreColor(r.trend_score) + '">' +
           fmtNum(r.trend_score, 1) + "</span></td>" +
+        '<td class="num">' + fmtChance(r.breakout_prob) + "</td>" +
         "<td>" + tags + "</td>" +
         "</tr>";
     }).join("");
-    body.innerHTML = html || '<tr><td colspan="11" class="not-ready">Inga rader matchar dessa filter.</td></tr>';
+    body.innerHTML = html || '<tr><td colspan="14" class="not-ready">Inga rader matchar dessa filter.</td></tr>';
   }
 
   function renderBacktests(d) {
@@ -732,6 +890,187 @@
     }).join("");
   }
 
+  function rowByTicker(t) {
+    var rows = state.data ? state.data.rows : [];
+    for (var i = 0; i < rows.length; i++) if (rows[i].ticker === t) return rows[i];
+    return null;
+  }
+
+  function renderWatch(d) {
+    var sec = document.getElementById("watchSection");
+    var tickers = configWatch().concat(localWatch.filter(function (t) { return !isConfigWatched(t); }));
+    if (!tickers.length) { sec.hidden = true; return; }
+    sec.hidden = false;
+    var rows = tickers.map(function (t) {
+      var r = rowByTicker(t);
+      if (!r) {
+        return '<tr><td class="star-cell">' + starHtml(t) + '</td><td class="ticker-cell">' + esc(t) +
+          '</td><td colspan="6" class="not-ready">Saknas i dagens skanning (inte hämtad eller för låg omsättning).</td></tr>';
+      }
+      var ch = r.score_change;
+      return '<tr class="clickable" data-ticker="' + esc(r.ticker) + '">' +
+        '<td class="star-cell">' + starHtml(r.ticker) + "</td>" +
+        '<td class="ticker-cell">' + esc(r.ticker) + '<div class="name-cell">' + esc(r.name) + "</div></td>" +
+        '<td class="num">' + fmtPrice(r) + "</td>" +
+        '<td class="num">' + fmtPct(r.mom_20d) + "</td>" +
+        '<td class="num">' + fmtPP(r.excess_20d) + "</td>" +
+        '<td class="num"><span class="score-pill" style="background:' + scoreColor(r.trend_score) + '">' +
+          fmtNum(r.trend_score, 1) + "</span></td>" +
+        '<td class="num">' + (ch === null || ch === undefined ? "ny" : fmtPP(ch)) + "</td>" +
+        "<td>" + sparklineSvg(r.sparkline) + "</td></tr>";
+    }).join("");
+    document.getElementById("watchPanel").innerHTML =
+      '<table class="small-table"><thead><tr><th></th><th>Ticker</th><th class="num">Pris</th><th class="num">20d %</th>' +
+      '<th class="num">Mot index</th><th class="num">Poäng</th><th class="num">Ändring</th><th>Trend</th></tr></thead>' +
+      "<tbody>" + rows + "</tbody></table>";
+  }
+
+  function fuTile(label, summary, horizons) {
+    var lines = horizons.map(function (h) {
+      var x = summary && summary[String(h)];
+      var txt = (!x || !x.n) ? '<span style="color:var(--text-muted)">väntar på data</span>'
+        : x.hit_rate.toFixed(0) + "% slog index · " + fmtPP(x.avg_excess) + " %-enh.";
+      return '<div class="fu-line"><span class="k">Efter ' + h + " dagar</span><span>" + txt + "</span></div>";
+    }).join("");
+    var nMax = 0;
+    horizons.forEach(function (h) { var x = summary && summary[String(h)]; if (x && x.n > nMax) nMax = x.n; });
+    return '<div class="fu-tile"><div class="label">' + esc(label) + "</div>" + lines +
+      '<div class="fu-sub">' + (nMax ? "Baserat på upp till " + nMax + " observationer." : "Fylls på efter hand.") + "</div></div>";
+  }
+
+  function renderFollowup(d) {
+    var el = document.getElementById("followupPanel");
+    var fu = d.followup || {};
+    var horizons = fu.horizons || [5, 10, 20];
+    if (!fu.horizons) {
+      el.innerHTML = '<p class="not-ready">Ingen uppföljningsdata än &mdash; syns efter nästa körning.</p>';
+      return;
+    }
+    var tiles = '<div class="fu-grid">' +
+      fuTile("Telegram-larm (" + (fu.n_alerts || 0) + " st hittills)", fu.alerts, horizons) +
+      fuTile("Dagens topp " + (fu.top_n || 10) + ", varje dag", fu.top, horizons) +
+      '<div class="fu-tile"><div class="label">Så läser du det</div><div class="fu-sub" style="margin-top:0;font-size:12px;line-height:1.5">' +
+        "Över 50&nbsp;% som slår index och ett positivt snitt, uthålligt över många observationer, tyder på att " +
+        "poängen säger något. Runt 50&nbsp;% = ingen fördel jämfört med att köpa index. Få observationer " +
+        "betyder att siffrorna kan svänga mycket.</div></div>" +
+      "</div>";
+    var recent = fu.recent_alerts || [];
+    var table = !recent.length ? '<p class="not-ready">Inga Telegram-larm än.</p>' :
+      '<div style="overflow-x:auto"><table class="small-table"><thead><tr><th>Larmdatum</th><th>Aktie</th>' +
+      '<th class="num">Poäng</th><th class="num">Sedan larmet</th><th class="num">Index</th><th class="num">Mot index</th>' +
+      horizons.map(function (h) { return '<th class="num">' + h + " d</th>"; }).join("") +
+      "</tr></thead><tbody>" +
+      recent.map(function (r) {
+        return '<tr class="clickable" data-ticker="' + esc(r.ticker) + '"><td>' + esc(r.date) + "</td>" +
+          '<td class="ticker-cell">' + esc(r.ticker) + '<div class="name-cell">' + esc(r.name) + "</div></td>" +
+          '<td class="num">' + fmtNum(r.score, 1) + "</td>" +
+          '<td class="num">' + (r.ret_now === null ? '<span style="color:var(--text-muted)">för nytt</span>' : fmtPct(r.ret_now)) + "</td>" +
+          '<td class="num">' + fmtPct(r.bench_now) + "</td>" +
+          '<td class="num">' + fmtPP(r.excess_now) + "</td>" +
+          horizons.map(function (h) { return '<td class="num">' + fmtPP(r["excess_" + h]) + "</td>"; }).join("") +
+          "</tr>";
+      }).join("") + "</tbody></table></div>" +
+      '<p class="fu-sub">"Sedan larmet" mäts till senaste körningen. Kolumnerna ' + horizons.join(" / ") +
+      " d visar utvecklingen mot index efter så många handelsdagar, när de passerat.</p>";
+    el.innerHTML = tiles + table;
+  }
+
+  // --- detail view -------------------------------------------------------------
+  function lineChartSvg(values, opts) {
+    opts = opts || {};
+    var pts = [];
+    values.forEach(function (v, i) { if (v !== null && v !== undefined && !isNaN(v)) pts.push([i, v]); });
+    if (pts.length < 2) return '<p class="not-ready">' + (opts.empty || "För lite data för en graf.") + "</p>";
+    // Draw at roughly the on-screen width so axis text stays readable on phones.
+    var W = Math.max(300, Math.min(700, window.innerWidth - 72)), H = opts.height || 180, padL = 44, padR = 10, padT = 10, padB = 22;
+    var ys = pts.map(function (p) { return p[1]; });
+    var min = opts.min !== undefined ? opts.min : Math.min.apply(null, ys);
+    var max = opts.max !== undefined ? opts.max : Math.max.apply(null, ys);
+    if (max === min) { max += 1; min -= 1; }
+    var n = values.length - 1 || 1;
+    function x(i) { return padL + (i / n) * (W - padL - padR); }
+    function y(v) { return padT + (1 - (v - min) / (max - min)) * (H - padT - padB); }
+    var path = pts.map(function (p, k) { return (k ? "L" : "M") + x(p[0]).toFixed(1) + "," + y(p[1]).toFixed(1); }).join(" ");
+    var color = opts.color || (ys[ys.length - 1] >= ys[0] ? "var(--good)" : "var(--critical)");
+    var grid = [min, (min + max) / 2, max].map(function (v) {
+      return '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) +
+        '" stroke="var(--gridline)" stroke-width="1"/>' +
+        '<text x="' + (padL - 6) + '" y="' + (y(v) + 4).toFixed(1) + '" text-anchor="end">' +
+        (opts.fmt ? opts.fmt(v) : v.toFixed(1)) + "</text>";
+    }).join("");
+    var ref = "";
+    if (opts.refLine !== undefined && opts.refLine >= min && opts.refLine <= max) {
+      ref = '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y(opts.refLine).toFixed(1) + '" y2="' +
+        y(opts.refLine).toFixed(1) + '" stroke="var(--warning)" stroke-width="1.5" stroke-dasharray="5 4"/>' +
+        '<text x="' + (padL + 6) + '" y="' + (y(opts.refLine) - 5).toFixed(1) + '">' +
+        esc(opts.refLabel || "") + "</text>";
+    }
+    var labels = '<text x="' + padL + '" y="' + (H - 6) + '">' + esc(opts.fromLabel || "") + "</text>" +
+      '<text x="' + (W - padR) + '" y="' + (H - 6) + '" text-anchor="end">' + esc(opts.toLabel || "") + "</text>";
+    var last = pts[pts.length - 1];
+    return '<svg class="chart-svg" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc(opts.aria || "graf") + '">' +
+      grid + ref + '<path d="' + path + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linejoin="round"/>' +
+      '<circle cx="' + x(last[0]).toFixed(1) + '" cy="' + y(last[1]).toFixed(1) + '" r="3.5" fill="' + color + '"/>' +
+      labels + "</svg>";
+  }
+
+  function openDetail(ticker) {
+    var d = state.data, r = rowByTicker(ticker);
+    if (!r) return;
+    var det = (d.details && d.details.tickers && d.details.tickers[ticker]) || null;
+    var dates = (d.details && d.details.score_dates) || [];
+    var cur = r.currency === "SEK" ? " kr" : "";
+    var stats = [
+      ["Poäng", fmtNum(r.trend_score, 1), r.score_change === null || r.score_change === undefined ? "ny" :
+        (r.score_change > 0 ? "+" : "") + r.score_change.toFixed(1) + " sedan förra"],
+      ["Chans +20 % / 10 d", fmtChance(r.breakout_prob), "modellens uppskattning"],
+      ["20d %", r.mom_20d === null ? "—" : (r.mom_20d > 0 ? "+" : "") + r.mom_20d.toFixed(1) + "%",
+        r.excess_20d === null || r.excess_20d === undefined ? "" : (r.excess_20d > 0 ? "+" : "") + r.excess_20d.toFixed(1) + " mot index"],
+      ["Mönster / mom. / sent.", fmtNum(r.pattern_score, 0) + " / " + fmtNum(r.momentum_score, 0) + " / " +
+        fmtNum(r.sentiment_score, 0), r.headline_count ? "delpoängen bakom poängen" : "sentiment: ingen bevakning"],
+    ];
+    var html = '<div class="detail-head"><div><h3 id="detailTitle">' + esc(r.ticker) + "</h3>" +
+      '<div class="name">' + esc(r.name) + " · " + esc(svMarket(r.market)) + " · " + esc(svSector(r.sector)) +
+      " · " + fmtPrice(r) + "</div></div>" + externalLinksHtml(r) + '<div class="spacer"></div>' +
+      starHtml(r.ticker) + '<button type="button" class="detail-close" data-close>Stäng</button></div>' +
+      '<div class="detail-stats">' + stats.map(function (s) {
+        return '<div class="stat-tile"><div class="label">' + esc(s[0]) + '</div><div class="value">' + esc(s[1]) +
+          '</div><div class="delta" style="color:var(--text-muted)">' + esc(s[2]) + "</div></div>";
+      }).join("") + "</div>";
+    var tags = (r.tags || []).map(function (t) { return '<span class="tag">' + esc(svTag(t)) + "</span>"; }).join("");
+    if (tags) html += "<div>" + tags + "</div>";
+    if (det) {
+      html += "<h4>Kurs, senaste " + det.closes.length + " handelsdagarna</h4>" +
+        lineChartSvg(det.closes, { fromLabel: det.close_from, toLabel: det.close_to, aria: "Kursgraf",
+          fmt: function (v) { return (v >= 100 ? v.toFixed(0) : v.toFixed(2)) + cur; } });
+      html += "<h4>Trendpoäng över tid</h4>" +
+        lineChartSvg(det.scores, { min: 0, max: 100, color: "var(--series-1)", height: 150,
+          refLine: d.telegram_score_threshold, refLabel: "larmgräns " + d.telegram_score_threshold,
+          fromLabel: dates[0] || "", toLabel: dates[dates.length - 1] || "", aria: "Poänghistorik",
+          fmt: function (v) { return v.toFixed(0); }, empty: "Poänghistorik byggs upp dag för dag." });
+      html += "<h4>Senaste rubriker</h4>" + (det.headlines.length
+        ? '<ul class="headline-list">' + det.headlines.map(function (h) {
+            return "<li>" + esc(h.title) + (h.published ? ' <span class="when">' + esc(h.published) + "</span>" : "") + "</li>";
+          }).join("") + "</ul>"
+        : '<p class="not-ready">Inga färska rubriker hittades.</p>');
+    } else {
+      html += "<h4>Kurs, senaste 30 dagarna</h4>" +
+        lineChartSvg(r.sparkline, { aria: "Kursgraf", fmt: function (v) { return v.toFixed(2) + cur; } }) +
+        '<p class="not-ready">Kursgraf för längre tid, poänghistorik och rubriker finns bara för topp ' +
+        esc(d.detail_top_n || 150) + " och aktierna i <code>WATCHLIST</code> i config.py.</p>";
+    }
+    document.getElementById("detailBody").innerHTML = html;
+    var dlg = document.getElementById("detailDialog");
+    if (typeof dlg.showModal === "function") { if (!dlg.open) dlg.showModal(); } else dlg.setAttribute("open", "");
+  }
+
+  function fmtMoney(v, cur) {
+    if (!v) return "—";
+    var m = v / 1e6;
+    return (cur === "USD" ? "$" : "") + (m >= 1 ? m.toFixed(m % 1 ? 1 : 0) + " milj." : (v / 1e3).toFixed(0) + " tn") +
+      (cur === "SEK" ? " kr" : "");
+  }
+
   function renderMethodology(d) {
     var w = d.weights || {};
     var bd = d.breakout_definition || {};
@@ -751,7 +1090,24 @@
           ", tränad på " + esc(m.n_train_rows) + " rader (" + esc(m.n_positive_train) + " positiva)."
         : "Kunde inte tränas denna körning (för lite historik) &mdash; poängen faller tillbaka på enbart momentum + sentiment.") +
       "</p>" +
-      "<p><strong>Momentum</strong> är en percentilrankning (inom dagens skanning) av blandat 5-/20-/60-dagars prismomentum.</p>" +
+      "<p><strong>Momentum</strong> är en percentilrankning av blandat 5-/20-/60-dagars prismomentum, " +
+      "rankad <em>inom samma marknad</em> (USA respektive Sverige) och till " +
+      ((d.momentum_sector_weight || 0.5) * 100).toFixed(0) + "&nbsp;% inom samma sektor &mdash; så att en bred " +
+      "uppgång i ena marknaden eller en het sektor inte ensam lyfter alla dess aktier till toppen.</p>" +
+      "<p><strong>Chans</strong> är mönstermodellens sannolikhet, justerad för att uppgångar på " +
+      (bd.return * 100).toFixed(0) + "&nbsp;% faktiskt är ovanliga" +
+      (m.base_rate !== null && m.base_rate !== undefined ? " (" + (m.base_rate * 100).toFixed(1) + "&nbsp;% av alla dagar i träningsdatan)" : "") +
+      ". Mönsterdelen av trendpoängen är däremot en rankning inom dagens skanning, precis som momentum. " +
+      (m.val_mean_pred !== null && m.val_mean_pred !== undefined
+        ? "Kontroll på valideringsperioden: modellen förutsade i snitt " + (m.val_mean_pred * 100).toFixed(1) +
+          "&nbsp;% och utfallet blev " + (m.val_actual_rate * 100).toFixed(1) + "&nbsp;%; för den högsta decilen förutsade den " +
+          (m.val_top_decile_mean_pred * 100).toFixed(1) + "&nbsp;% och utfallet blev " +
+          (m.validation_precision_at_top_decile === null ? "n/a" : (m.validation_precision_at_top_decile * 100).toFixed(1) + "&nbsp;%") + "."
+        : "") + "</p>" +
+      "<p><strong>Omsättningsfilter:</strong> aktier med en genomsnittlig daglig omsättning under " +
+      fmtMoney((d.min_avg_turnover || {}).SEK, "SEK") + " (svenska) eller " + fmtMoney((d.min_avg_turnover || {}).USD, "USD") +
+      " (amerikanska) de senaste 20 dagarna skannas inte &mdash; de svänger mycket på liten handel och hamnar annars " +
+      "lätt i toppen. Aktier i bevakningslistan i config.py skannas alltid.</p>" +
       "<p><strong>Sentiment</strong> är ett genomsnittligt VADER-lexikonpoäng över varje akties senaste " +
       "Google Nyheter-rubriker &mdash; ett enkelt, generellt sentimentverktyg som inte är finansanpassat, så se " +
       "det som en grov stämningssignal snarare än en exakt läsning.</p>" +
@@ -764,18 +1120,23 @@
       "skulle riskera samma typ av hastighetsbegränsning som prisnedladdningen redan en gång stötte på. " +
       "Rapportdatum är Yahoos egen uppskattning, inte alltid exakt.</p>" +
       "<p>Ett gratis Telegram-larm kan skickas när en akties poäng korsar " + esc(d.telegram_score_threshold || 85) +
-      " (ställs in i <code>config.py</code>). Aktier utan poäng från föregående körning räknas inte, och en aktie som redan larmat måste först falla tillbaka innan den kan larma igen &mdash; en egen, kostnadsfri Telegram-bot, " +
+      " (ställs in i <code>config.py</code>). Aktier utan poäng från föregående körning räknas inte, och en aktie som redan larmat måste först falla under " +
+      esc(d.telegram_reset_threshold || 75) + " innan den kan larma igen. Bevakade aktier i config.py får också ett meddelande vid stora poängrörelser, och varje söndag kommer en veckosammanfattning &mdash; en egen, kostnadsfri Telegram-bot, " +
       "ingen betald tjänst. Om det inte är konfigurerat skickas inga larm och resten av skanningen påverkas inte.</p>";
   }
 
   function render() {
     var d = state.data;
+    renderDataQuality(d);
     renderKpis(d);
+    renderWatch(d);
     renderLeaderboard(d);
     renderMovers(d);
     renderTable(d);
+    renderFollowup(d);
     renderBacktests(d);
     renderMethodology(d);
+    document.querySelectorAll(".js-detail-n").forEach(function (el) { el.textContent = d.detail_top_n || 150; });
     var updated = new Date(d.generated_at);
     document.getElementById("lastUpdated").textContent = "Senast uppdaterad " + updated.toLocaleString("sv-SE") +
       " · " + d.universe_size + " aktier skannade";
@@ -851,6 +1212,27 @@
       if (idx === -1) state.selectedTags.push(key); else state.selectedTags.splice(idx, 1);
       renderTagFilters();
       resetSaveAndRender();
+    });
+    // One delegated handler for every clickable ticker on the page: a star
+    // toggles the watchlist, anything else with data-ticker opens the detail view.
+    document.addEventListener("click", function (e) {
+      var star = e.target.closest("[data-star]");
+      if (star) {
+        e.stopPropagation();
+        toggleWatch(star.getAttribute("data-star"));
+        renderWatch(state.data);
+        renderTable(state.data);
+        var dlgStar = document.querySelector("#detailBody [data-star]");
+        if (dlgStar) dlgStar.outerHTML = starHtml(dlgStar.getAttribute("data-star"));
+        return;
+      }
+      if (e.target.closest("a")) return;
+      if (e.target.closest("[data-close]")) { document.getElementById("detailDialog").close(); return; }
+      var row = e.target.closest("[data-ticker]");
+      if (row && state.data && !e.target.closest("#detailDialog")) openDetail(row.getAttribute("data-ticker"));
+    });
+    document.getElementById("detailDialog").addEventListener("click", function (e) {
+      if (e.target === this) this.close();  // click on the backdrop
     });
     document.getElementById("scanHelpBtn").addEventListener("click", function () {
       var panel = document.getElementById("scanHelpPanel");

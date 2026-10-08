@@ -111,15 +111,41 @@ def run():
     print(f"   OK -- trained on {model.n_train_rows} rows ({model.n_positive_train} positive), "
           f"val AUC={model.validation_auc:.3f}" if not np.isnan(model.validation_auc) else "   OK (val AUC n/a, small sample)")
 
-    pattern_scores = pattern_model.score_today(model, today_features_df)
+    pattern_df = pattern_model.score_today(model, today_features_df)
+    pattern_scores = pattern_df["pattern_score"]
     assert not pattern_scores.empty
     assert pattern_scores.between(0, 100).all()
-    print(f"   OK -- scored {len(pattern_scores)} tickers, range [{pattern_scores.min():.1f}, {pattern_scores.max():.1f}]")
+    assert pattern_df["breakout_prob"].between(0, 100).all()
+    assert 0 < model.base_rate < 1
+    # prior correction must lower probabilities when positives are rarer than 50%
+    # and must not change the ranking
+    raw = model.clf.predict_proba(model.scaler.transform(today_features_df[FEATURE_COLUMNS].values.astype(float)))[:, 1]
+    if model.base_rate < 0.5:
+        assert (pattern_df["breakout_prob"].values <= raw * 100 + 1e-9).all()
+    assert pd.Series(raw).rank().tolist() == pattern_df["breakout_prob"].rank().tolist()
+    print(f"   OK -- scored {len(pattern_scores)} tickers, calibrated chance range "
+          f"[{pattern_df['breakout_prob'].min():.2f}%, {pattern_df['breakout_prob'].max():.2f}%], base rate {model.base_rate:.3f}")
 
-    print("4. score_momentum...")
-    momentum_scores = scoring.score_momentum(today_features_df)
+    print("4. score_momentum (relative to market and sector)...")
+    sectors = universe.set_index("ticker")["sector"]
+    momentum_scores = scoring.score_momentum(today_features_df, sectors)
     assert momentum_scores.between(0, 100).all()
-    print("   OK")
+    # market-relative: the best Swedish ticker must rank at the top of its own market
+    # even if every US ticker had higher raw momentum
+    shifted = today_features_df.copy()
+    for c in ("mom_5d", "mom_20d", "mom_60d"):
+        shifted.loc[~shifted.index.str.endswith(".ST"), c] += 5.0  # huge US-only rally
+    m2 = scoring.score_momentum(shifted)
+    se = m2[m2.index.str.endswith(".ST")]
+    assert se.max() == 100.0, "top Swedish ticker should rank 100 within its own market"
+    print("   OK -- ranks within market; a US-only rally doesn't push Swedish names down")
+
+    print("4b. composite_score with no pattern model (bug fix: used to drop every row)...")
+    empty_pattern = pd.Series(dtype=float)
+    fallback = scoring.composite_score(empty_pattern, momentum_scores, pd.Series(dtype=float),
+                                       {"pattern": 0.0, "momentum": 0.555, "sentiment": 0.445})
+    assert len(fallback) == len(momentum_scores), "no-model fallback must still score every ticker"
+    print(f"   OK -- {len(fallback)} tickers still scored without the pattern model")
 
     print("5. sentiment (stubbed -- vaderSentiment isn't installable in this sandbox, see README)...")
     fake_news = pd.DataFrame(columns=["ticker", "title", "published", "link"])  # empty -> neutral path
@@ -129,6 +155,7 @@ def run():
 
     print("6. composite_score + tags...")
     scored = scoring.composite_score(pattern_scores, momentum_scores, sentiment_df["sentiment_score"])
+    scored = scored.join(pattern_df[["breakout_prob"]], how="left")
     scored = scored.join(today_features_df[FEATURE_COLUMNS], how="left")
     scored = scored.join(sentiment_df[["sentiment_compound", "headline_count"]], how="left")
     scored["tags"] = scored.apply(lambda r: scoring.build_tags(r), axis=1)
@@ -216,18 +243,29 @@ def run():
     print("12. Telegram threshold-crossing logic (pure function, no network)...")
     universe_idx = universe.set_index("ticker")
     threshold = config.TELEGRAM_SCORE_THRESHOLD
+    reset = config.TELEGRAM_RESET_THRESHOLD
     fake_scored = scored.copy()
-    hi_ticker, lo_ticker = fake_scored.index[0], fake_scored.index[-1]
-    fake_scored.at[hi_ticker, "trend_score"] = threshold + 5  # crosses: was below, now above
-    fake_scored.at[lo_ticker, "trend_score"] = threshold + 3  # does NOT cross: already above yesterday
-    prev_scores = {hi_ticker: threshold - 10, lo_ticker: threshold + 1}
-    crossers = notify.find_threshold_crossers(fake_scored, prev_scores, universe_idx)
+    fake_scored["trend_score"] = reset - 10  # everyone else well below
+    t_cross, t_above, t_new, t_seen, t_rearm = list(fake_scored.index[:5])
+    fake_scored.loc[[t_cross, t_above, t_new, t_seen], "trend_score"] = threshold + 5
+    prev_scores = {t_cross: threshold - 10, t_above: threshold + 1, t_seen: threshold - 10, t_rearm: threshold + 2}
+    # t_new has no prev score; t_seen already alerted and never reset; t_rearm alerted then fell below reset
+    crossers, alerted = notify.find_threshold_crossers(
+        fake_scored, prev_scores, universe_idx, alerted={t_seen, t_rearm}
+    )
     crossed_tickers = {c["ticker"] for c in crossers}
-    assert hi_ticker in crossed_tickers, "a ticker newly above threshold should be flagged as a crosser"
-    assert lo_ticker not in crossed_tickers, "a ticker already above threshold yesterday should NOT re-alert"
+    assert crossed_tickers == {t_cross}, f"only the genuine below->above cross should alert, got {crossed_tickers}"
+    assert {t_cross, t_above, t_new, t_seen} <= alerted, "everything above threshold should be remembered"
+    assert t_rearm not in alerted, "a ticker that fell below the reset level should be re-armed"
+    # next run: t_cross stays above -> no repeat alert
+    again, _ = notify.find_threshold_crossers(fake_scored, {t_cross: threshold + 5}, universe_idx, alerted)
+    assert not again, "an already-alerted ticker still above threshold must not re-alert"
     msg = notify.format_alert_message(crossers)
-    assert hi_ticker in msg and str(threshold) in msg
-    print(f"   OK -- {len(crossers)} crosser(s) detected correctly, message formats without error")
+    assert t_cross in msg and str(threshold) in msg
+    many = [{"ticker": f"T{i}", "name": f"N{i}", "score": 90.0, "prev": 80.0} for i in range(8)]
+    long_msg = notify.format_alert_message(many)
+    assert "T4" in long_msg and "T5" not in long_msg and "+ 3 till" in long_msg, "message should cap the list"
+    print(f"   OK -- only real crosses alert, no-prev/hysteresis/cap rules all hold")
 
     print("13. Telegram send is a no-op (not an error) when secrets aren't configured...")
     import os

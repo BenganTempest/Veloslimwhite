@@ -2,8 +2,11 @@
 The "does this look like stocks that broke out before" model.
 
 Important framing, repeated in the README and on the dashboard itself:
-this produces a PATTERN-SIMILARITY score, not a probability that a stock
-will go up. It is trained on a mechanical historical label (did the stock
+the pattern_score fed into the Trend Score is a RELATIVE rank (how much
+more breakout-like a stock looks than the rest of today's scan), not a
+probability. A separate, prior-corrected breakout_prob is also reported --
+the model's own estimate of the real-world chance -- together with a check
+on the held-out period of how well those estimates matched reality. It is trained on a mechanical historical label (did the stock
 gain >= BREAKOUT_RETURN over the next BREAKOUT_WINDOW trading days) using
 only price/volume features available at the time. Past breakouts having
 looked a certain way is not evidence that stocks which look similar today
@@ -42,6 +45,17 @@ class TrainedModel:
     n_train_rows: int
     n_positive_train: int
     n_validation_rows: int
+    # Share of training rows that actually broke out. The classifier is
+    # trained with class_weight="balanced" (otherwise it would barely learn
+    # from the rare positives), which makes its raw output behave as if
+    # breakouts happened 50% of the time. calibrated_proba() undoes that.
+    base_rate: float = float("nan")
+    # Calibration check on the held-out validation period: average predicted
+    # (calibrated) chance vs the share that actually broke out, overall and
+    # in the top decile of predictions.
+    val_mean_pred: float = float("nan")
+    val_actual_rate: float = float("nan")
+    val_top_decile_mean_pred: float = float("nan")
 
 
 def build_training_panel(prices: dict[str, pd.DataFrame]) -> pd.DataFrame:
@@ -94,9 +108,11 @@ def train(panel: pd.DataFrame) -> TrainedModel | None:
 
     clf = LogisticRegression(max_iter=1000, class_weight="balanced")
     clf.fit(X_train_s, y_train)
+    base_rate = float(np.mean(y_train)) if len(y_train) else float("nan")
 
     auc = float("nan")
     precision_top = float("nan")
+    val_mean_pred = val_actual = val_top_pred = float("nan")
     if not val_rows.empty and val_rows["label"].nunique() > 1:
         X_val_s = scaler.transform(val_rows[FEATURE_COLUMNS].values)
         y_val = val_rows["label"].values
@@ -106,6 +122,10 @@ def train(panel: pd.DataFrame) -> TrainedModel | None:
         top_mask = proba >= top_decile_cut
         if top_mask.sum() > 0:
             precision_top = float(precision_score(y_val, top_mask))
+        cal = _prior_correct(proba, base_rate)
+        val_mean_pred = float(np.mean(cal))
+        val_actual = float(np.mean(y_val))
+        val_top_pred = float(np.mean(cal[top_mask])) if top_mask.sum() else float("nan")
 
     return TrainedModel(
         scaler=scaler,
@@ -115,17 +135,45 @@ def train(panel: pd.DataFrame) -> TrainedModel | None:
         n_train_rows=len(train_rows),
         n_positive_train=int(train_rows["label"].sum()),
         n_validation_rows=len(val_rows),
+        base_rate=base_rate,
+        val_mean_pred=val_mean_pred,
+        val_actual_rate=val_actual,
+        val_top_decile_mean_pred=val_top_pred,
     )
 
 
-def score_today(model: TrainedModel, today_features: pd.DataFrame) -> pd.Series:
+def _prior_correct(balanced_proba: np.ndarray, base_rate: float) -> np.ndarray:
+    """
+    Convert a class_weight="balanced" logistic-regression output back to a
+    real-world probability. Balanced weighting is equivalent to training as
+    if the positive rate were 50%; the standard prior correction multiplies
+    the odds by base_rate / (1 - base_rate).
+    """
+    if not (0 < base_rate < 1):
+        return balanced_proba
+    p = np.clip(balanced_proba, 1e-6, 1 - 1e-6)
+    odds = p / (1 - p) * (base_rate / (1 - base_rate))
+    return odds / (1 + odds)
+
+
+def score_today(model: TrainedModel, today_features: pd.DataFrame) -> pd.DataFrame:
     """
     today_features: index=ticker, columns=FEATURE_COLUMNS (already computed,
-    NaN rows should be dropped by the caller). Returns a 0-100 pattern score.
+    NaN rows should be dropped by the caller). Returns a DataFrame with:
+
+      pattern_score  0-100 percentile rank of the model output within today's
+                     scan -- relative, like the momentum score, so the
+                     composite Trend Score blends like with like
+      breakout_prob  the model's calibrated estimate (in %) that the stock
+                     gains >= BREAKOUT_RETURN within BREAKOUT_WINDOW days
     """
     clean = today_features.dropna(subset=FEATURE_COLUMNS)
     if clean.empty:
-        return pd.Series(dtype=float)
-    X = model.scaler.transform(clean[FEATURE_COLUMNS].values)
-    proba = model.clf.predict_proba(X)[:, 1]
-    return pd.Series(proba * 100, index=clean.index, name="pattern_score")
+        return pd.DataFrame(columns=["pattern_score", "breakout_prob"], dtype=float)
+    X = model.scaler.transform(clean[FEATURE_COLUMNS].values.astype(float))
+    raw = model.clf.predict_proba(X)[:, 1]
+    cal = _prior_correct(raw, model.base_rate)
+    out = pd.DataFrame(index=clean.index)
+    out["pattern_score"] = pd.Series(raw, index=clean.index).rank(pct=True) * 100
+    out["breakout_prob"] = cal * 100
+    return out
