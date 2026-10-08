@@ -173,6 +173,41 @@ ALERT_LOG_CSV = DATA_DIR / "alert_log.csv"
 FOLLOWUP_HORIZONS = [5, 10, 20]   # trading days (= scanner runs)
 FOLLOWUP_TOP_N = 10
 
+# --- Model versioning ----------------------------------------------------------
+# Every snapshot, alert and run is tagged with the scoring-model version that
+# produced it, so the follow-up and paper-portfolio results can be judged per
+# version instead of silently mixing old and new methods. Bump MODEL_VERSION
+# (and describe the change) whenever you change how scores are calculated.
+# If you forget, the pipeline notices -- it fingerprints every
+# scoring-relevant setting below -- registers an automatic sub-version and
+# flags it in the Actions log. History is in data/model_versions.json.
+MODEL_VERSION = "2.0"
+MODEL_VERSION_NOTE = (
+    "Momentum rankas inom marknad och sektor, mönsterdelen är en rankning, "
+    "omsättningsfilter, kalibrerad chans."
+)
+# Snapshots written before versioning existed get this label.
+LEGACY_MODEL_VERSION = "1.0"
+MODEL_VERSIONS_FILE = DATA_DIR / "model_versions.json"
+
+# --- Paper portfolio ---------------------------------------------------------------
+# A simulated, cost-aware portfolio that follows the scanner mechanically:
+# every PAPER_REBALANCE_EVERY runs (5 = about weekly) it holds the top
+# PAPER_TOP_N tickers by Trend Score, equal-weighted. Compared with the same
+# mix of market indexes (S&P 500 / OMXS30, weighted by the portfolio's own
+# US/Sweden split). No real money, no broker, no paid data -- it is computed
+# from data/history.csv and data/benchmarks.csv only.
+PAPER_TOP_N = 10
+PAPER_REBALANCE_EVERY = 5
+# Trading cost per side, in basis points (0.01 %), covering brokerage plus
+# half the bid/ask spread. Deliberately on the conservative side for small
+# caps; adjust to your own broker.
+PAPER_COST_BPS = {"US": 15, "Sweden": 30}
+# The validation bar the strategy has to clear before it's considered more
+# than an experiment (shown as a status on the dashboard).
+PAPER_VALIDATION_DAYS = 126   # ~6 months of runs
+PAPER_MIN_HIT_RATE = 55.0     # % of rebalance periods beating the index
+
 # --- Detail view -------------------------------------------------------------
 # Price chart, score history and headlines are embedded for the top
 # DETAIL_TOP_N tickers (plus the watchlist) -- not all ~1000, to keep

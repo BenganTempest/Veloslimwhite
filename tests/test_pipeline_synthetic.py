@@ -31,6 +31,9 @@ from build_dashboard import build_data_json, write_data_json  # noqa: E402
 from earnings import check_upcoming_earnings, tickers_with_earnings_soon  # noqa: E402
 import notify  # noqa: E402
 import staleness_check  # noqa: E402
+import paper_portfolio  # noqa: E402
+import versioning  # noqa: E402
+import followup  # noqa: E402
 
 rng = np.random.default_rng(42)
 
@@ -291,6 +294,42 @@ def run():
     level = staleness_check.check_and_alert(forty_days_ago_epoch)
     assert level is None, "send should fail soft (no secrets) -- nothing should be recorded as sent"
     print("   OK -- fails soft exactly like the threshold-alert path above")
+
+    print("16. Paper portfolio arithmetic on a hand-checkable case...")
+    old_n, old_every, old_cost = config.PAPER_TOP_N, config.PAPER_REBALANCE_EVERY, config.PAPER_COST_BPS
+    config.PAPER_TOP_N, config.PAPER_REBALANCE_EVERY, config.PAPER_COST_BPS = 1, 5, {"US": 15, "Sweden": 30}
+    days = [f"2026-01-{d:02d}" for d in range(5, 16)]  # 11 runs
+    rows = []
+    for i, d in enumerate(days):
+        a_price = 100.0 if i == 0 else 110.0       # A: +10% on day 1, then flat
+        rows.append({"date": d, "ticker": "A", "close": a_price, "trend_score": 90 if i < 5 else 10})
+        rows.append({"date": d, "ticker": "B", "close": 50.0, "trend_score": 50})  # B flat, top from day 5
+    hist = pd.DataFrame(rows)
+    bench = pd.DataFrame([{"date": d, "market": "US", "close": 1000.0} for d in days])
+    res = paper_portfolio.simulate(hist, bench)
+    # buy A (cost 0.15%), A +10%, switch A->B on day 5 (sell+buy = 2 x 0.15% of value), B flat
+    expected = (1 - 0.0015) * 1.10 * (1 - 0.003)
+    assert abs(res["total_return"] - round((expected - 1) * 100, 2)) < 0.011, (res["total_return"], expected)
+    assert res["bench_return"] == 0.0 and res["rebalances"] == 2
+    assert res["holdings"][0]["ticker"] == "B"
+    assert abs(res["total_costs"] - 0.45) < 0.011
+    config.PAPER_TOP_N, config.PAPER_REBALANCE_EVERY, config.PAPER_COST_BPS = old_n, old_every, old_cost
+    print(f"   OK -- {res['total_return']}% matches the hand calculation {(expected - 1) * 100:.2f}%, costs {res['total_costs']}%")
+
+    print("17. Model versioning: fingerprint + automatic sub-version...")
+    reg: list = []
+    v1, reg = versioning.resolve_version("2026-01-01", reg, persist=False)
+    v1b, reg = versioning.resolve_version("2026-01-02", reg, persist=False)
+    assert v1 == v1b == config.MODEL_VERSION and len(reg) == 1, "same settings must keep the same version"
+    old_w = config.WEIGHT_SENTIMENT
+    config.WEIGHT_SENTIMENT = old_w + 0.01
+    v2, reg = versioning.resolve_version("2026-01-03", reg, persist=False)
+    config.WEIGHT_SENTIMENT = old_w
+    assert v2 != v1 and v2.startswith(config.MODEL_VERSION + "+"), "changed settings must get a new version"
+    legacy = followup.with_version(pd.DataFrame({"date": ["2026-01-01"], "ticker": ["X"]}))
+    assert legacy["model_version"].iloc[0] == config.LEGACY_MODEL_VERSION
+    print(f"   OK -- {v1} kept for identical settings, {v2} registered after a change, old rows tagged "
+          f"{config.LEGACY_MODEL_VERSION}")
 
     print("\nALL SYNTHETIC PIPELINE CHECKS PASSED")
 

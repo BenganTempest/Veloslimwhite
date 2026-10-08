@@ -282,6 +282,32 @@
   .headline-list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; color: var(--text-secondary); }
   .headline-list .when { color: var(--text-muted); font-size: 11.5px; }
 
+  /* paper portfolio */
+  .pp-status { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; font-size: 13px; }
+  .pp-badge { font-size: 12px; font-weight: 650; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .pp-badge.validating { background: var(--surface-2); color: var(--text-secondary); }
+  .pp-badge.passed { background: var(--good); color: #fff; border-color: var(--good); }
+  .pp-badge.failed { background: var(--critical); color: #fff; border-color: var(--critical); }
+  .pp-progress { flex: 1; min-width: 140px; height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden;
+    border: 1px solid var(--border); }
+  .pp-progress div { height: 100%; background: var(--series-1); }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg button { background: var(--surface-2); border: none; padding: 6px 12px; font-size: 12.5px; color: var(--text-secondary);
+    cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--border); }
+  .seg button.active { background: var(--seq-550); color: #fff; }
+  .pp-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  @media (max-width: 720px) { .pp-tiles { grid-template-columns: repeat(2, 1fr); } }
+  .pp-tiles .stat-tile { padding: 10px 12px; border-radius: 10px; background: var(--surface-2); }
+  .pp-tiles .value { font-size: 19px; }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); margin: 2px 0 6px; flex-wrap: wrap; }
+  .legend span::before { content: ""; display: inline-block; width: 16px; height: 0; margin-right: 6px; vertical-align: middle;
+    border-top: 2px solid var(--series-1); }
+  .legend span.idx::before { border-top: 2px dashed var(--text-muted); }
+  .legend span.ver::before { border-top: 1.5px dotted var(--warning); }
+  .version-select { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px;
+    font-size: 13px; color: var(--text-primary); }
+
   footer { font-size: 12px; color: var(--text-muted); text-align: center; padding-top: 24px; }
   footer a { color: var(--text-secondary); }
 </style>
@@ -459,6 +485,15 @@
     <div class="card" id="followupPanel"></div>
   </section>
 
+  <section id="paper">
+    <h2>Pappersportfölj: lönar det sig efter kostnader?</h2>
+    <p class="desc">En simulerad portfölj som följer skannern mekaniskt &mdash; inga riktiga pengar. Den äger dagens
+      högst rankade aktier med lika vikt, byter ut dem med jämna mellanrum och betalar courtage och spread vid varje
+      affär. Jämförs med att i stället äga index i samma fördelning mellan USA och Sverige, utan kostnader.
+      Slår den inte index här är signalerna inte värda att handla på, hur bra de än ser ut.</p>
+    <div class="card" id="paperPanel"></div>
+  </section>
+
   <section id="honesty">
     <h2>Ärlighetspanelen</h2>
     <p class="desc">
@@ -492,7 +527,8 @@
   "use strict";
 
   var PAGE_SIZE = 100;
-  var state = { rows: [], sortKey: "trend_score", sortDir: -1, data: null, visibleCount: PAGE_SIZE, selectedTags: [] };
+  var state = { rows: [], sortKey: "trend_score", sortDir: -1, data: null, visibleCount: PAGE_SIZE, selectedTags: [],
+    fuVersion: null, paperScope: "current" };
 
   var seqSteps = [
     { max: 20, css: "var(--seq-250)" },
@@ -659,7 +695,8 @@
     var top = rows.length ? rows[0] : null;
     var auc = d.model && d.model.validation_auc;
     var dq = d.data_quality || {};
-    var fu = (d.followup && d.followup.top && d.followup.top["10"]) || null;
+    var fuv = d.followup && d.followup.by_version && d.followup.by_version[d.model_version];
+    var fu = (fuv && fuv.top && fuv.top["10"]) || null;
     var subParts = [];
     if (dq.illiquid_excluded) subParts.push(dq.illiquid_excluded + " uteslutna (låg omsättning)");
     if (dq.missing) subParts.push(dq.missing + " saknades");
@@ -670,8 +707,8 @@
         delta: "0,50 = ingen träffsäkerhet, 1,0 = perfekt" },
       { label: "Topp " + ((d.followup && d.followup.top_n) || 10) + " som slog index (10 dagar)",
         value: fu && fu.n ? fu.hit_rate.toFixed(0) + "%" : "—",
-        delta: fu && fu.n ? "snitt " + (fu.avg_excess > 0 ? "+" : "") + fu.avg_excess.toFixed(1) + " %-enh. mot index, n=" + fu.n
-                          : "inte tillräckligt med data än" },
+        delta: (fu && fu.n ? "snitt " + (fu.avg_excess > 0 ? "+" : "") + fu.avg_excess.toFixed(1) + " %-enh. mot index, n=" + fu.n
+                          : "inte tillräckligt med data än") + " · modell " + (d.model_version || "?") },
     ];
     document.getElementById("kpiRow").innerHTML = kpis.map(function (k) {
       return '<div class="stat-tile"><div class="label">' + esc(k.label) + '</div>' +
@@ -946,23 +983,39 @@
       el.innerHTML = '<p class="not-ready">Ingen uppföljningsdata än &mdash; syns efter nästa körning.</p>';
       return;
     }
-    var tiles = '<div class="fu-grid">' +
-      fuTile("Telegram-larm (" + (fu.n_alerts || 0) + " st hittills)", fu.alerts, horizons) +
-      fuTile("Dagens topp " + (fu.top_n || 10) + ", varje dag", fu.top, horizons) +
+    var versions = Object.keys(fu.by_version || {});
+    if (state.fuVersion === null) state.fuVersion = versions.indexOf(d.model_version) !== -1 ? d.model_version : "__all__";
+    var sel = state.fuVersion === "__all__" || !fu.by_version || !fu.by_version[state.fuVersion]
+      ? { n_alerts: fu.n_alerts, alerts: fu.alerts, top: fu.top } : fu.by_version[state.fuVersion];
+    var picker = '<div class="filters" style="margin-bottom:12px"><label style="font-size:13px;color:var(--text-secondary)">' +
+      'Modellversion <select class="version-select" id="fuVersion">' +
+      '<option value="__all__"' + (state.fuVersion === "__all__" ? " selected" : "") + ">Alla versioner</option>" +
+      versions.map(function (v) {
+        return '<option value="' + esc(v) + '"' + (v === state.fuVersion ? " selected" : "") + ">" + esc(v) +
+          (v === d.model_version ? " (nuvarande)" : "") + "</option>";
+      }).join("") + "</select></label>" +
+      '<span class="count">Resultat från olika modellversioner blandas inte, om du inte väljer "Alla".</span></div>';
+    var tiles = picker + '<div class="fu-grid">' +
+      fuTile("Telegram-larm (" + (sel.n_alerts || 0) + " st)", sel.alerts, horizons) +
+      fuTile("Dagens topp " + (fu.top_n || 10) + ", varje dag", sel.top, horizons) +
       '<div class="fu-tile"><div class="label">Så läser du det</div><div class="fu-sub" style="margin-top:0;font-size:12px;line-height:1.5">' +
         "Över 50&nbsp;% som slår index och ett positivt snitt, uthålligt över många observationer, tyder på att " +
         "poängen säger något. Runt 50&nbsp;% = ingen fördel jämfört med att köpa index. Få observationer " +
         "betyder att siffrorna kan svänga mycket.</div></div>" +
       "</div>";
-    var recent = fu.recent_alerts || [];
-    var table = !recent.length ? '<p class="not-ready">Inga Telegram-larm än.</p>' :
-      '<div style="overflow-x:auto"><table class="small-table"><thead><tr><th>Larmdatum</th><th>Aktie</th>' +
+    var recent = (fu.recent_alerts || []).filter(function (r) {
+      return state.fuVersion === "__all__" || r.model_version === state.fuVersion;
+    });
+    var table = !recent.length ? '<p class="not-ready">' + (state.fuVersion === "__all__" ? "Inga Telegram-larm än." :
+      "Inga Telegram-larm med modellversion " + esc(state.fuVersion) + ".") + "</p>" :
+      '<div style="overflow-x:auto"><table class="small-table"><thead><tr><th>Larmdatum</th><th>Aktie</th><th>Version</th>' +
       '<th class="num">Poäng</th><th class="num">Sedan larmet</th><th class="num">Index</th><th class="num">Mot index</th>' +
       horizons.map(function (h) { return '<th class="num">' + h + " d</th>"; }).join("") +
       "</tr></thead><tbody>" +
       recent.map(function (r) {
         return '<tr class="clickable" data-ticker="' + esc(r.ticker) + '"><td>' + esc(r.date) + "</td>" +
           '<td class="ticker-cell">' + esc(r.ticker) + '<div class="name-cell">' + esc(r.name) + "</div></td>" +
+          "<td>" + esc(r.model_version || "") + "</td>" +
           '<td class="num">' + fmtNum(r.score, 1) + "</td>" +
           '<td class="num">' + (r.ret_now === null ? '<span style="color:var(--text-muted)">för nytt</span>' : fmtPct(r.ret_now)) + "</td>" +
           '<td class="num">' + fmtPct(r.bench_now) + "</td>" +
@@ -1064,6 +1117,113 @@
     if (typeof dlg.showModal === "function") { if (!dlg.open) dlg.showModal(); } else dlg.setAttribute("open", "");
   }
 
+  function ppTile(label, value, sub) {
+    return '<div class="stat-tile"><div class="label">' + esc(label) + '</div><div class="value">' + value +
+      '</div><div class="delta" style="color:var(--text-muted)">' + sub + "</div></div>";
+  }
+  function signedPct(v) { return v === null || v === undefined ? "—" : fmtPct(v); }
+
+  function equityChartSvg(curve, changes) {
+    if (!curve || curve.length < 2) return '<p class="not-ready">Grafen visas när det finns minst två körningar.</p>';
+    var W = Math.max(300, Math.min(1100, window.innerWidth - 100)), H = 220, padL = 48, padR = 12, padT = 12, padB = 24;
+    var base = curve[0];
+    var pv = curve.map(function (c) { return (c.port / base.port - 1) * 100; });
+    var bv = curve.map(function (c) { return (c.bench / base.bench - 1) * 100; });
+    var all = pv.concat(bv).concat([0]);
+    var min = Math.min.apply(null, all), max = Math.max.apply(null, all);
+    var pad = (max - min) * 0.08 || 1; min -= pad; max += pad;
+    var n = curve.length - 1;
+    function x(i) { return padL + (i / n) * (W - padL - padR); }
+    function y(v) { return padT + (1 - (v - min) / (max - min)) * (H - padT - padB); }
+    function path(vals) { return vals.map(function (v, i) { return (i ? "L" : "M") + x(i).toFixed(1) + "," + y(v).toFixed(1); }).join(" "); }
+    var ticks = [min + pad, 0, max - pad].filter(function (v, i, a) { return a.indexOf(v) === i; });
+    var grid = ticks.map(function (v) {
+      return '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) +
+        '" stroke="' + (v === 0 ? "var(--baseline)" : "var(--gridline)") + '" stroke-width="1"/>' +
+        '<text x="' + (padL - 6) + '" y="' + (y(v) + 4).toFixed(1) + '" text-anchor="end">' + (v > 0 ? "+" : "") + v.toFixed(1) + "%</text>";
+    }).join("");
+    var idx = {}; curve.forEach(function (c, i) { idx[c.date] = i; });
+    var marks = (changes || []).filter(function (c) { return idx[c.date] > 0; }).map(function (c) {
+      var xi = x(idx[c.date]).toFixed(1);
+      return '<line x1="' + xi + '" x2="' + xi + '" y1="' + padT + '" y2="' + (H - padB) + '" stroke="var(--warning)" stroke-width="1.5" stroke-dasharray="2 3"/>' +
+        '<text x="' + (Number(xi) + 4) + '" y="' + (padT + 10) + '">v' + esc(c.version) + "</text>";
+    }).join("");
+    var lastI = curve.length - 1;
+    return '<svg class="chart-svg" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Pappersportfölj mot index">' + grid + marks +
+      '<path d="' + path(bv) + '" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-dasharray="6 4"/>' +
+      '<path d="' + path(pv) + '" fill="none" stroke="var(--series-1)" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<circle cx="' + x(lastI).toFixed(1) + '" cy="' + y(pv[lastI]).toFixed(1) + '" r="3.5" fill="var(--series-1)"/>' +
+      '<text x="' + padL + '" y="' + (H - 6) + '">' + esc(curve[0].date) + "</text>" +
+      '<text x="' + (W - padR) + '" y="' + (H - 6) + '" text-anchor="end">' + esc(curve[lastI].date) + "</text></svg>";
+  }
+
+  function renderPaper(d) {
+    var el = document.getElementById("paperPanel");
+    var pp = d.paper || {};
+    if (!pp.full) {
+      el.innerHTML = '<p class="not-ready">Pappersportföljen startar när det finns minst två körningar i historiken.</p>';
+      return;
+    }
+    var useCurrent = state.paperScope === "current" && pp.current;
+    var r = useCurrent ? pp.current : pp.full;
+    var curve = (r && r.curve) || [];
+    var st = pp.status || {};
+    var stLabel = { validating: "Under validering", passed: "Godkänd", failed: "Underkänd" }[st.state] || "Under validering";
+    var prog = Math.min(100, ((st.runs || 0) / (st.required_runs || 126)) * 100);
+    var stText = st.state === "validating"
+      ? (st.runs || 0) + " av " + (st.required_runs || 126) + " körningar med modell " + esc(pp.current_version) +
+        ". Inga slutsatser åt något håll förrän dess."
+      : st.state === "passed"
+        ? "Slog index efter kostnader och vann minst " + st.min_hit_rate + " % av perioderna med modell " + esc(pp.current_version) + "."
+        : "Klarade inte kraven (slå index efter kostnader och vinna minst " + st.min_hit_rate + " % av perioderna) med modell " +
+          esc(pp.current_version) + ".";
+    var html = '<div class="pp-status"><span class="pp-badge ' + esc(st.state || "validating") + '">' + stLabel + "</span>" +
+      (st.state === "validating" ? '<div class="pp-progress" title="' + prog.toFixed(0) + ' %"><div style="width:' + prog.toFixed(1) + '%"></div></div>' : "") +
+      '<span style="color:var(--text-secondary)">' + stText + "</span></div>";
+    html += '<div class="filters"><div class="seg" id="paperScope">' +
+      '<button type="button" data-scope="current" class="' + (useCurrent ? "active" : "") + '">Sedan modell ' + esc(pp.current_version) + "</button>" +
+      '<button type="button" data-scope="full" class="' + (useCurrent ? "" : "active") + '">Hela historiken</button></div>' +
+      '<span class="count">' + (r ? esc(r.start) + " – " + esc(r.end) + " · " + r.runs + " körningar · " + r.rebalances + " ombalanseringar" : "") + "</span></div>";
+    if (!r) {
+      html += '<p class="not-ready">Modell ' + esc(pp.current_version) + " har inte körts tillräckligt många dagar än. Välj \"Hela historiken\" för att se hela perioden.</p>";
+      el.innerHTML = html;
+      return;
+    }
+    html += '<div class="pp-tiles">' +
+      ppTile("Portföljen, efter kostnader", signedPct(r.total_return), "index samma period: " + signedPct(r.bench_return)) +
+      ppTile("Mot index", fmtPP(r.excess) + " %-enh.", r.excess > 0 ? "bättre än index" : (r.excess < 0 ? "sämre än index" : "")) +
+      ppTile("Perioder som slog index", r.hit_rate === null ? "—" : r.hit_rate.toFixed(0) + "%",
+        r.periods + (r.periods === 1 ? " period" : " perioder") + " om " + pp.rebalance_every + " körningar") +
+      ppTile("Största nedgång", signedPct(r.max_drawdown), "index: " + signedPct(r.bench_max_drawdown)) +
+      // Annualised risk-adjusted return is meaningless on a few weeks of data -- hide it until ~3 months.
+      (r.runs >= 60
+        ? ppTile("Sharpe-kvot", r.sharpe === null ? "—" : r.sharpe.toFixed(2), "index: " + (r.bench_sharpe === null ? "—" : r.bench_sharpe.toFixed(2)) + " · årstakt, ränta 0")
+        : ppTile("Sharpe-kvot", "—", "visas efter 60 körningar (" + r.runs + " hittills); kortare perioder ger missvisande siffror")) +
+      ppTile("Kostnader totalt", r.total_costs === null ? "—" : r.total_costs.toFixed(2) + "%",
+        "omsättning " + (r.avg_turnover === null ? "—" : r.avg_turnover.toFixed(0) + " %") + " per byte") +
+      "</div>";
+    html += '<div class="legend"><span>Pappersportfölj</span><span class="idx">Index (samma USA/Sverige-mix)</span>' +
+      (!useCurrent && (pp.version_changes || []).length > 1 ? '<span class="ver">Ny modellversion</span>' : "") + "</div>" +
+      equityChartSvg(curve, useCurrent ? [] : pp.version_changes);
+    var hold = r.holdings || [];
+    html += "<h4 style=\"font-size:13px;margin:16px 0 6px;color:var(--text-secondary)\">Innehav just nu (" + hold.length + " st)</h4>" +
+      (hold.length ? '<div style="overflow-x:auto"><table class="small-table"><thead><tr><th>Aktie</th><th>Marknad</th>' +
+        '<th class="num">Vikt</th><th class="num">Sedan köp</th></tr></thead><tbody>' +
+        hold.map(function (h) {
+          var row = rowByTicker(h.ticker);
+          return '<tr class="clickable" data-ticker="' + esc(h.ticker) + '"><td class="ticker-cell">' + esc(h.ticker) +
+            (row ? '<div class="name-cell">' + esc(row.name) + "</div>" : "") + "</td><td>" + esc(svMarket(h.market)) + "</td>" +
+            '<td class="num">' + h.weight.toFixed(1) + '%</td><td class="num">' + fmtPct(h.since_entry) + "</td></tr>";
+        }).join("") + "</tbody></table></div>" : '<p class="not-ready">Inga innehav.</p>');
+    var cb = pp.cost_bps || {};
+    html += '<p class="fu-sub" style="line-height:1.55">Regler: topp ' + pp.top_n + " efter trendpoäng, lika vikt, byts var " +
+      pp.rebalance_every + ":e körning. Kostnad per affär: " + (cb.US || 0) / 100 + " % för amerikanska och " + (cb.Sweden || 0) / 100 +
+      " % för svenska aktier (courtage + halva spreaden). Förenklingar: handel till stängningskurs, ingen valutaeffekt mellan " +
+      "USD och SEK, ingen skatt, och utdelningar räknas för aktierna men inte för index &mdash; det gynnar portföljen något. " +
+      "Allt beräknas från skannerns egen sparade historik, utan betald data.</p>";
+    el.innerHTML = html;
+  }
+
   function fmtMoney(v, cur) {
     if (!v) return "—";
     var m = v / 1e6;
@@ -1122,7 +1282,15 @@
       "<p>Ett gratis Telegram-larm kan skickas när en akties poäng korsar " + esc(d.telegram_score_threshold || 85) +
       " (ställs in i <code>config.py</code>). Aktier utan poäng från föregående körning räknas inte, och en aktie som redan larmat måste först falla under " +
       esc(d.telegram_reset_threshold || 75) + " innan den kan larma igen. Bevakade aktier i config.py får också ett meddelande vid stora poängrörelser, och varje söndag kommer en veckosammanfattning &mdash; en egen, kostnadsfri Telegram-bot, " +
-      "ingen betald tjänst. Om det inte är konfigurerat skickas inga larm och resten av skanningen påverkas inte.</p>";
+      "ingen betald tjänst. Om det inte är konfigurerat skickas inga larm och resten av skanningen påverkas inte.</p>" +
+      ((d.model_versions || []).length
+        ? "<p><strong>Modellversioner</strong> &mdash; varje poäng, larm och körning märks med versionen som räknade fram den, " +
+          "så att uppföljning och pappersportfölj kan bedömas per metod:</p><ul>" +
+          d.model_versions.map(function (v) {
+            return "<li><strong>" + esc(v.version) + "</strong>" + (v.first_date ? " (från " + esc(v.first_date) + ")" : "") +
+              (v.version === d.model_version ? " &mdash; nuvarande" : "") + ": " + esc(v.note || "") + "</li>";
+          }).join("") + "</ul>"
+        : "");
   }
 
   function render() {
@@ -1134,12 +1302,13 @@
     renderMovers(d);
     renderTable(d);
     renderFollowup(d);
+    renderPaper(d);
     renderBacktests(d);
     renderMethodology(d);
     document.querySelectorAll(".js-detail-n").forEach(function (el) { el.textContent = d.detail_top_n || 150; });
     var updated = new Date(d.generated_at);
     document.getElementById("lastUpdated").textContent = "Senast uppdaterad " + updated.toLocaleString("sv-SE") +
-      " · " + d.universe_size + " aktier skannade";
+      " · " + d.universe_size + " aktier skannade · modellversion " + (d.model_version || "?");
   }
 
   // Remembers your filter/tag/search choices between visits so reloading
@@ -1230,6 +1399,13 @@
       if (e.target.closest("[data-close]")) { document.getElementById("detailDialog").close(); return; }
       var row = e.target.closest("[data-ticker]");
       if (row && state.data && !e.target.closest("#detailDialog")) openDetail(row.getAttribute("data-ticker"));
+    });
+    document.addEventListener("change", function (e) {
+      if (e.target && e.target.id === "fuVersion") { state.fuVersion = e.target.value; renderFollowup(state.data); }
+    });
+    document.getElementById("paperPanel").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-scope]");
+      if (b) { state.paperScope = b.getAttribute("data-scope"); renderPaper(state.data); }
     });
     document.getElementById("detailDialog").addEventListener("click", function (e) {
       if (e.target === this) this.close();  // click on the backdrop

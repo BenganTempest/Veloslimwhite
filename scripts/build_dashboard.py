@@ -110,6 +110,9 @@ def build_data_json(
     followup: dict | None = None,
     data_quality: dict | None = None,
     weights: dict | None = None,
+    paper: dict | None = None,
+    model_version: str | None = None,
+    model_versions: list[dict] | None = None,
 ) -> dict:
     universe_idx = universe.set_index("ticker")
     score_change = score_change or {}
@@ -194,6 +197,11 @@ def build_data_json(
         "detail_top_n": config.DETAIL_TOP_N,
         "data_quality": data_quality or {},
         "followup": followup or {},
+        "paper": paper or {},
+        "model_version": model_version or config.MODEL_VERSION,
+        "model_versions": [
+            {k: v.get(k) for k in ("version", "first_date", "note")} for v in (model_versions or [])
+        ],
         "details": details or {},
         "breakout_definition": {
             "return": config.BREAKOUT_RETURN,

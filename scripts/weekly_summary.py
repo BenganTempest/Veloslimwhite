@@ -27,6 +27,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import config  # noqa: E402
 import followup  # noqa: E402
 import notify  # noqa: E402
+import paper_portfolio  # noqa: E402
+import versioning  # noqa: E402
 
 log = logging.getLogger("weekly_summary")
 
@@ -93,9 +95,14 @@ def build_message(now: datetime | None = None) -> str | None:
 
     # --- running hit rates
     payload = followup.build_followup_payload(history, alert_log, benchmarks)
+    register = versioning.load_register()
+    current = register[-1] if register else None
+    version = current["version"] if current else None
+    scope = payload["by_version"].get(version) if version else None
+    scope = scope or {"alerts": payload["alerts"], "top": payload["top"]}
     h = str(10 if 10 in config.FOLLOWUP_HORIZONS else config.FOLLOWUP_HORIZONS[0])
-    a, t = payload["alerts"].get(h, {}), payload["top"].get(h, {})
-    lines += ["", f"Träffsäkerhet efter {h} handelsdagar:"]
+    a, t = scope["alerts"].get(h, {}), scope["top"].get(h, {})
+    lines += ["", f"Träffsäkerhet efter {h} handelsdagar" + (f" (modell {version}):" if version else ":")]
     if a.get("n"):
         lines.append(f"• Larm: {a['hit_rate']:.0f} % slog index, i snitt {_fmt_pp(a['avg_excess'])} mot index (n={a['n']})")
     else:
@@ -105,6 +112,23 @@ def build_message(now: datetime | None = None) -> str | None:
                      f"i snitt {_fmt_pp(t['avg_excess'])} mot index (n={t['n']})")
     else:
         lines.append(f"• Dagens topp {payload['top_n']}: inte tillräckligt med data än")
+
+    # --- paper portfolio since the current model version started
+    try:
+        pp = paper_portfolio.build_paper_payload(history, benchmarks, version or config.MODEL_VERSION,
+                                                 current["first_date"] if current else None)
+        r, st = pp.get("current"), pp.get("status", {})
+        lines += ["", "Pappersportfölj" + (f" (modell {version})" if version else "") + ":"]
+        if r:
+            lines.append(f"• {_fmt_pct(r['total_return'])} efter kostnader, index {_fmt_pct(r['bench_return'])} "
+                         f"({_fmt_pp(r['excess'])})")
+            lines.append(f"• Största nedgång {_fmt_pct(r['max_drawdown'])}, kostnader hittills {_fmt_pct(r['total_costs'], False)}")
+        else:
+            lines.append("• för få körningar än")
+        state = {"validating": "under validering", "passed": "GODKÄND", "failed": "UNDERKÄND"}.get(st.get("state"), "under validering")
+        lines.append(f"• Status: {state} ({st.get('runs', 0)} av {st.get('required_runs', config.PAPER_VALIDATION_DAYS)} körningar)")
+    except Exception as exc:  # noqa: BLE001
+        log.warning("Paper portfolio section failed: %s", exc)
 
     # --- run health
     if config.RUN_LOG_CSV.exists():

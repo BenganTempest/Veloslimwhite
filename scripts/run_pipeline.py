@@ -31,6 +31,8 @@ from build_dashboard import build_data_json, write_data_json, ensure_html_shell,
 from earnings import check_upcoming_earnings, tickers_with_earnings_soon  # noqa: E402
 import notify  # noqa: E402
 import followup  # noqa: E402
+import versioning  # noqa: E402
+import paper_portfolio  # noqa: E402
 from features import avg_turnover  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
@@ -67,6 +69,10 @@ def append_run_log(row: dict) -> None:
 
 
 def main() -> None:
+    today_str = pd.Timestamp.utcnow().strftime("%Y-%m-%d")
+    model_version, version_register = versioning.resolve_version(today_str)
+    log.info("Scoring model version %s", model_version)
+
     universe = build_universe()
     # watchlist tickers are always scanned, even if they aren't in any index list
     extra = [t for t in config.WATCHLIST if t not in set(universe["ticker"])]
@@ -191,17 +197,16 @@ def main() -> None:
     # with today's snapshot -- powers the "movers" leaderboard, the
     # Telegram alert and the follow-up panel.
     config.DATA_DIR.mkdir(parents=True, exist_ok=True)
-    today_str = pd.Timestamp.utcnow().strftime("%Y-%m-%d")
     prev_scores: dict[str, float] = {}
     if config.SNAPSHOT_HISTORY_CSV.exists():
-        existing_history = pd.read_csv(config.SNAPSHOT_HISTORY_CSV)
+        existing_history = followup.with_version(pd.read_csv(config.SNAPSHOT_HISTORY_CSV))
         existing_history = existing_history[existing_history["date"] != today_str]
         if not existing_history.empty:
             last_prev_date = existing_history["date"].max()
             prev_rows = existing_history[existing_history["date"] == last_prev_date]
             prev_scores = dict(zip(prev_rows["ticker"], prev_rows["trend_score"]))
     else:
-        existing_history = pd.DataFrame(columns=["date", "ticker", "close", "trend_score"])
+        existing_history = pd.DataFrame(columns=["date", "ticker", "close", "trend_score", "model_version"])
 
     score_change: dict[str, float] = {}
     for ticker in scored.index:
@@ -223,14 +228,15 @@ def main() -> None:
             continue
         closes[ticker] = float(close)
         snapshot_rows.append(
-            {"date": today_str, "ticker": ticker, "close": float(close), "trend_score": float(r["trend_score"])}
+            {"date": today_str, "ticker": ticker, "close": float(close), "trend_score": float(r["trend_score"]),
+             "model_version": model_version}
         )
 
     # --- Telegram alert for new threshold crossers + big watchlist moves
     universe_idx = universe.drop_duplicates("ticker").set_index("ticker")
     try:
         crossers = notify.maybe_send_threshold_alert(scored, prev_scores, universe_idx)
-        followup.append_alert_log(today_str, crossers, closes)
+        followup.append_alert_log(today_str, crossers, closes, model_version)
     except Exception as exc:  # noqa: BLE001
         log.warning("Telegram alert step failed (non-fatal): %s", exc)
 
@@ -259,11 +265,19 @@ def main() -> None:
         "illiquid_excluded": len(illiquid),
         "scored": int(len(scored)),
         "model_trained": model is not None,
+        "model_version": model_version,
         "alerts": len(followup.load_alert_log().query("date == @today_str")),
     })
 
     backtests = run_backtests(history)
     followup_payload = followup.build_followup_payload(history, followup.load_alert_log(), benchmarks)
+    version_start = next((v["first_date"] for v in version_register if v["version"] == model_version), today_str)
+    try:
+        paper = paper_portfolio.build_paper_payload(history, benchmarks, model_version, version_start)
+    except Exception as exc:  # noqa: BLE001 -- a bookkeeping bug must never stop the daily scan
+        log.warning("Paper portfolio failed (non-fatal): %s", exc)
+        paper = {}
+    model_versions = versioning.with_legacy(version_register, sorted(set(history["model_version"].astype(str))))
 
     detail_tickers = list(scored.head(config.DETAIL_TOP_N).index)
     detail_tickers += [t for t in config.WATCHLIST if t in scored.index and t not in detail_tickers]
@@ -272,6 +286,7 @@ def main() -> None:
     payload = build_data_json(
         scored, universe, prices, model_meta, backtests, score_change,
         details=details, followup=followup_payload, data_quality=data_quality, weights=weights,
+        paper=paper, model_version=model_version, model_versions=model_versions,
     )
     ensure_html_shell()
     write_data_json(payload)

@@ -30,7 +30,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import config  # noqa: E402
 
-ALERT_LOG_COLUMNS = ["date", "ticker", "name", "score", "prev_score", "close"]
+ALERT_LOG_COLUMNS = ["date", "ticker", "name", "score", "prev_score", "close", "model_version"]
 
 
 def market_for(ticker: str) -> str:
@@ -39,19 +39,29 @@ def market_for(ticker: str) -> str:
 
 # --- loading / saving ----------------------------------------------------------
 
+def with_version(df: pd.DataFrame) -> pd.DataFrame:
+    """Rows written before versioning existed get config.LEGACY_MODEL_VERSION."""
+    df = df.copy()
+    if "model_version" not in df.columns:
+        df["model_version"] = config.LEGACY_MODEL_VERSION
+    df["model_version"] = df["model_version"].fillna(config.LEGACY_MODEL_VERSION).astype(str)
+    return df
+
+
 def load_history() -> pd.DataFrame:
     if config.SNAPSHOT_HISTORY_CSV.exists():
-        return pd.read_csv(config.SNAPSHOT_HISTORY_CSV)
-    return pd.DataFrame(columns=["date", "ticker", "close", "trend_score"])
+        return with_version(pd.read_csv(config.SNAPSHOT_HISTORY_CSV))
+    return pd.DataFrame(columns=["date", "ticker", "close", "trend_score", "model_version"])
 
 
 def load_alert_log() -> pd.DataFrame:
     if config.ALERT_LOG_CSV.exists():
-        return pd.read_csv(config.ALERT_LOG_CSV)
+        return with_version(pd.read_csv(config.ALERT_LOG_CSV))
     return pd.DataFrame(columns=ALERT_LOG_COLUMNS)
 
 
-def append_alert_log(date_str: str, crossers: list[dict], closes: dict[str, float]) -> None:
+def append_alert_log(date_str: str, crossers: list[dict], closes: dict[str, float],
+                     model_version: str | None = None) -> None:
     if not crossers:
         return
     existing = load_alert_log()
@@ -64,6 +74,7 @@ def append_alert_log(date_str: str, crossers: list[dict], closes: dict[str, floa
             "score": round(float(c["score"]), 1),
             "prev_score": round(float(c["prev"]), 1) if c.get("prev") is not None else None,
             "close": closes.get(c["ticker"]),
+            "model_version": model_version or config.MODEL_VERSION,
         }
         for c in crossers
     ], columns=ALERT_LOG_COLUMNS)
@@ -193,10 +204,11 @@ def event_returns(events: pd.DataFrame, history: pd.DataFrame, benchmarks: pd.Da
 def top_n_events(history: pd.DataFrame, n: int | None = None) -> pd.DataFrame:
     n = n or config.FOLLOWUP_TOP_N
     if history.empty:
-        return pd.DataFrame(columns=["date", "ticker", "score"])
-    h = history.dropna(subset=["trend_score"])
+        return pd.DataFrame(columns=["date", "ticker", "score", "model_version"])
+    h = with_version(history).dropna(subset=["trend_score"])
     top = h.sort_values("trend_score", ascending=False).groupby("date", sort=False).head(n)
-    return top.rename(columns={"trend_score": "score"})[["date", "ticker", "score"]].sort_values("date")
+    return (top.rename(columns={"trend_score": "score"})[["date", "ticker", "score", "model_version"]]
+            .sort_values("date"))
 
 
 def summarize(ev: pd.DataFrame, horizons: list[int] | None = None) -> dict:
@@ -230,9 +242,15 @@ def _pct(x) -> float | None:
 
 def build_followup_payload(history: pd.DataFrame, alert_log: pd.DataFrame, benchmarks: pd.DataFrame,
                            recent_n: int = 30) -> dict:
+    """
+    Results for all versions together plus, under "by_version", separately
+    per scoring-model version -- each event belongs to the version that
+    produced the score it was based on.
+    """
     horizons = config.FOLLOWUP_HORIZONS
-    alerts_ev = event_returns(alert_log[["date", "ticker", "name", "score"]] if not alert_log.empty
-                              else pd.DataFrame(columns=["date", "ticker", "name", "score"]),
+    history = with_version(history)
+    alert_log = with_version(alert_log) if not alert_log.empty else pd.DataFrame(columns=ALERT_LOG_COLUMNS)
+    alerts_ev = event_returns(alert_log[["date", "ticker", "name", "score", "model_version"]],
                               history, benchmarks, horizons)
     top_ev = event_returns(top_n_events(history), history, benchmarks, horizons)
 
@@ -244,6 +262,7 @@ def build_followup_payload(history: pd.DataFrame, alert_log: pd.DataFrame, bench
             "ticker": r["ticker"],
             "name": str(r.get("name", r["ticker"])),
             "market": market_for(r["ticker"]),
+            "model_version": str(r.get("model_version", config.LEGACY_MODEL_VERSION)),
             "score": None if pd.isna(r.get("score")) else round(float(r["score"]), 1),
             "runs_since": int(r["runs_since"]) if pd.notna(r["runs_since"]) else 0,
             "ret_now": _pct(r["ret_now"]),
@@ -254,6 +273,13 @@ def build_followup_payload(history: pd.DataFrame, alert_log: pd.DataFrame, bench
             row[f"excess_{h}"] = _pct(r[f"excess_{h}"])
         recent_rows.append(row)
 
+    versions = sorted(set(history["model_version"]) | set(alert_log["model_version"].astype(str)))
+    by_version = {}
+    for v in versions:
+        a_v = alerts_ev[alerts_ev["model_version"].astype(str) == v] if not alerts_ev.empty else alerts_ev
+        t_v = top_ev[top_ev["model_version"].astype(str) == v] if not top_ev.empty else top_ev
+        by_version[v] = {"n_alerts": int(len(a_v)), "alerts": summarize(a_v, horizons), "top": summarize(t_v, horizons)}
+
     return {
         "horizons": horizons,
         "top_n": config.FOLLOWUP_TOP_N,
@@ -261,5 +287,6 @@ def build_followup_payload(history: pd.DataFrame, alert_log: pd.DataFrame, bench
         "n_alerts": int(len(alert_log)),
         "alerts": summarize(alerts_ev, horizons),
         "top": summarize(top_ev, horizons),
+        "by_version": by_version,
         "recent_alerts": recent_rows,
     }

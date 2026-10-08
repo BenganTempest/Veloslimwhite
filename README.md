@@ -161,6 +161,27 @@ above aren't set, same as the threshold alert.
   Actions -> "Weekly summary" -> Run workflow, or locally with
   `python scripts/weekly_summary.py --dry-run`.
 
+## Model versions and the paper portfolio
+
+- **Model versions.** Every row in `data/history.csv`, `data/alert_log.csv` and
+  `data/run_log.csv` is tagged with the scoring-model version that produced it
+  (`MODEL_VERSION` in `config.py`; rows from before versioning are `1.0`). The
+  register with each version's start date, note and exact settings is
+  `data/model_versions.json`. When you change how scores are calculated, bump
+  `MODEL_VERSION` and write a short `MODEL_VERSION_NOTE`. If you forget, the pipeline
+  detects the changed settings, registers an automatic sub-version (e.g. `2.0+3fa1c9`)
+  and shows a warning in the Actions run. The dashboard's follow-up panel can be
+  filtered per version, so results from different methods are never mixed by accident.
+- **Paper portfolio.** A simulated portfolio holds the top `PAPER_TOP_N` tickers,
+  equal-weighted, re-picked every `PAPER_REBALANCE_EVERY` runs, paying
+  `PAPER_COST_BPS` per trade, compared with the same US/Sweden mix of index funds.
+  The dashboard shows return, return vs index, max drawdown, Sharpe ratio (after 60
+  runs), costs, turnover and current holdings -- since the current model version
+  started, or over the whole history. It stays "Under validering" until
+  `PAPER_VALIDATION_DAYS` runs have passed on the current version, then shows
+  passed/failed against `PAPER_MIN_HIT_RATE` and beating the index after costs.
+  It's computed only from files already in the repo: no broker, no paid data.
+
 ## Customizing
 
 Everything tunable lives in `config.py` with comments: which indices to scan,
