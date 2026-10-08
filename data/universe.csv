@@ -690,7 +690,6 @@ NYAB.ST,Nyab AB (publ),Industrials,OMX Stockholm
 NYOR.ST,Nyorda AB,Communication Services,OMX Stockholm
 O,Realty Income,Real Estate,S&P 500
 OBAB.ST,Online Brands Nordic AB (publ),Consumer Cyclical,OMX Stockholm
-OBSE.ST,Observit AB,Technology,OMX Stockholm
 OCTV-SDB.ST,Octave Intelligence plc,Technology,OMX Stockholm
 ODFL,Old Dominion,Industrials,Nasdaq-100+S&P 500
 OEM-B.ST,OEM International AB (publ),Industrials,OMX Stockholm
@@ -917,6 +916,7 @@ TMUS,T-Mobile US,Communication Services,Nasdaq-100+S&P 500
 TPL,Texas Pacific Land Corporation,Energy,S&P 500
 TPR,"Tapestry, Inc.",Consumer Discretionary,S&P 500
 TRAC-B.ST,AB Traction,Financial Services,OMX Stockholm
+TRAIN-B.ST,Train Alliance AB (publ),Industrials,OMX Stockholm
 TREL-B.ST,Trelleborg AB (publ),Industrials,OMX Stockholm
 TRGP,Targa Resources,Energy,S&P 500
 TRI,Thomson Reuters,Technology,Nasdaq-100
@@ -984,7 +984,7 @@ W5.ST,W5 Solutions AB (publ),Industrials,OMX Stockholm
 WAB,Wabtec,Industrials,S&P 500
 WALL-B.ST,Wallenstam AB (publ),Real Estate,OMX Stockholm
 WAT,Waters Corporation,Health Care,S&P 500
-WBD,Warner Bros. Discovery,Communication Services,Nasdaq-100+S&P 500
+WBD,Warner Bros. Discovery,Communication Services,S&P 500
 WBGR-B.ST,WÃ¤stbygg Gruppen AB (publ),Industrials,OMX Stockholm
 WDAY,"Workday, Inc.",Information Technology,Nasdaq-100+S&P 500
 WDC,Western Digital,Information Technology,Nasdaq-100+S&P 500
