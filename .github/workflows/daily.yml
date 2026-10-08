@@ -68,5 +68,6 @@ jobs:
           # exist on a normal healthy run, so this has to be conditional or
           # `git add` on a missing path would fail the whole step.
           if [ -f data/staleness_state.json ]; then git add data/staleness_state.json; fi
+          if [ -f data/alert_state.json ]; then git add data/alert_state.json; fi
           git diff --cached --quiet || git commit -m "Daily scan: $(date -u +'%Y-%m-%d')"
           git push
