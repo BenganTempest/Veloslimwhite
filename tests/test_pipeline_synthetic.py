@@ -313,6 +313,12 @@ def run():
     assert res["bench_return"] == 0.0 and res["rebalances"] == 2
     assert res["holdings"][0]["ticker"] == "B"
     assert abs(res["total_costs"] - 0.45) < 0.011
+    # monthly variant on the same data: one rebalance only (day 0) -> holds A throughout, one buy cost
+    res_m = paper_portfolio.simulate(hist, bench, rebalance_every=21)
+    exp_m = (1 - 0.0015) * 1.10
+    assert abs(res_m["total_return"] - round((exp_m - 1) * 100, 2)) < 0.011 and res_m["rebalances"] == 1
+    payload_pp = paper_portfolio.build_paper_payload(hist, bench, "2.0", days[0])
+    assert [x["key"] for x in payload_pp["strategies"]] == [x["key"] for x in config.PAPER_STRATEGIES]
     config.PAPER_TOP_N, config.PAPER_REBALANCE_EVERY, config.PAPER_COST_BPS = old_n, old_every, old_cost
     print(f"   OK -- {res['total_return']}% matches the hand calculation {(expected - 1) * 100:.2f}%, costs {res['total_costs']}%")
 

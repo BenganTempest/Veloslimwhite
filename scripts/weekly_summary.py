@@ -117,16 +117,18 @@ def build_message(now: datetime | None = None) -> str | None:
     try:
         pp = paper_portfolio.build_paper_payload(history, benchmarks, version or config.MODEL_VERSION,
                                                  current["first_date"] if current else None)
-        r, st = pp.get("current"), pp.get("status", {})
-        lines += ["", "Pappersportfölj" + (f" (modell {version})" if version else "") + ":"]
-        if r:
-            lines.append(f"• {_fmt_pct(r['total_return'])} efter kostnader, index {_fmt_pct(r['bench_return'])} "
-                         f"({_fmt_pp(r['excess'])})")
-            lines.append(f"• Största nedgång {_fmt_pct(r['max_drawdown'])}, kostnader hittills {_fmt_pct(r['total_costs'], False)}")
-        else:
-            lines.append("• för få körningar än")
-        state = {"validating": "under validering", "passed": "GODKÄND", "failed": "UNDERKÄND"}.get(st.get("state"), "under validering")
-        lines.append(f"• Status: {state} ({st.get('runs', 0)} av {st.get('required_runs', config.PAPER_VALIDATION_DAYS)} körningar)")
+        lines += ["", "Pappersportföljer" + (f" (modell {version})" if version else "") + ", efter kostnader:"]
+        state_sv = {"validating": "under validering", "passed": "GODKÄND", "failed": "UNDERKÄND"}
+        st = {}
+        for strat in pp.get("strategies", []):
+            r, st = strat.get("current"), strat.get("status", {})
+            if r:
+                lines.append(f"• {strat['label']}: {_fmt_pct(r['total_return'])}, index {_fmt_pct(r['bench_return'])} "
+                             f"({_fmt_pp(r['excess'])}), kostnader {_fmt_pct(r['total_costs'], False)}"
+                             f", {state_sv.get(st.get('state'), 'under validering')}")
+            else:
+                lines.append(f"• {strat['label']}: för få körningar än")
+        lines.append(f"• Validering: {st.get('runs', 0)} av {st.get('required_runs', config.PAPER_VALIDATION_DAYS)} körningar")
     except Exception as exc:  # noqa: BLE001
         log.warning("Paper portfolio section failed: %s", exc)
 

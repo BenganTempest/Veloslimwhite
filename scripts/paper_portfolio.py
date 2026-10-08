@@ -42,7 +42,8 @@ def _cost_rate(ticker: str) -> float:
     return config.PAPER_COST_BPS.get(market_for(ticker), 0) / 10_000
 
 
-def simulate(history: pd.DataFrame, benchmarks: pd.DataFrame, start_date: str | None = None) -> dict | None:
+def simulate(history: pd.DataFrame, benchmarks: pd.DataFrame, start_date: str | None = None,
+             rebalance_every: int | None = None) -> dict | None:
     """
     Runs the strategy over history.csv (optionally from start_date).
     Returns None if there are fewer than two run dates to work with.
@@ -63,7 +64,7 @@ def simulate(history: pd.DataFrame, benchmarks: pd.DataFrame, start_date: str | 
     bench = _bench_series(benchmarks)
     bench_lvl = {m: [_asof(bench.get(m), pd.Timestamp(d)) for d in dates] for m in ("US", "Sweden")}
 
-    n, every = config.PAPER_TOP_N, max(1, config.PAPER_REBALANCE_EVERY)
+    n, every = config.PAPER_TOP_N, max(1, int(rebalance_every or config.PAPER_REBALANCE_EVERY))
     value, bvalue = 1.0, 1.0
     w: dict[str, float] = {}
     bw: dict[str, float] = {}
@@ -214,24 +215,40 @@ def _pct(x) -> float | None:
 
 def build_paper_payload(history: pd.DataFrame, benchmarks: pd.DataFrame, current_version: str,
                         version_start: str | None) -> dict:
-    """Full history and, separately, only since the current model version started."""
-    full = simulate(history, benchmarks)
-    current = simulate(history, benchmarks, start_date=version_start) if version_start else full
+    """
+    Every strategy in config.PAPER_STRATEGIES, each over the full history and,
+    separately, only since the current model version started. The first
+    strategy is also exposed at the top level (full/current/status) so older
+    dashboard code keeps working.
+    """
+    strategies = []
     version_changes = []
-    if full:
-        prev = None
-        for c in full["curve"]:
-            if c["version"] != prev:
-                version_changes.append({"date": c["date"], "version": c["version"]})
-                prev = c["version"]
+    for spec in config.PAPER_STRATEGIES:
+        every = spec["rebalance_every"]
+        full = simulate(history, benchmarks, rebalance_every=every)
+        current = (simulate(history, benchmarks, start_date=version_start, rebalance_every=every)
+                   if version_start else full)
+        if full and not version_changes:
+            prev = None
+            for c in full["curve"]:
+                if c["version"] != prev:
+                    version_changes.append({"date": c["date"], "version": c["version"]})
+                    prev = c["version"]
+        strategies.append({
+            "key": spec["key"], "label": spec["label"], "rebalance_every": every,
+            "full": full, "current": current, "status": validation_status(current),
+        })
+    first = strategies[0] if strategies else {"full": None, "current": None, "status": validation_status(None),
+                                              "rebalance_every": config.PAPER_REBALANCE_EVERY}
     return {
         "top_n": config.PAPER_TOP_N,
-        "rebalance_every": config.PAPER_REBALANCE_EVERY,
+        "rebalance_every": first["rebalance_every"],
         "cost_bps": config.PAPER_COST_BPS,
         "current_version": current_version,
         "version_start": version_start,
-        "full": full,
-        "current": current,
+        "full": first["full"],
+        "current": first["current"],
+        "status": first["status"],
+        "strategies": strategies,
         "version_changes": version_changes,
-        "status": validation_status(current),
     }

@@ -181,6 +181,9 @@ above aren't set, same as the threshold alert.
   `PAPER_VALIDATION_DAYS` runs have passed on the current version, then shows
   passed/failed against `PAPER_MIN_HIT_RATE` and beating the index after costs.
   It's computed only from files already in the repo: no broker, no paid data.
+- **Two trading frequencies.** `PAPER_STRATEGIES` runs the same picks with weekly
+  (every 5 runs) and monthly (every 21 runs) rebalancing side by side over the same
+  period, so you can see whether any edge survives the lower costs of trading less.
 
 ## Customizing
 

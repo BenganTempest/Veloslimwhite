@@ -199,6 +199,13 @@ MODEL_VERSIONS_FILE = DATA_DIR / "model_versions.json"
 # from data/history.csv and data/benchmarks.csv only.
 PAPER_TOP_N = 10
 PAPER_REBALANCE_EVERY = 5
+# Parallel variants measured over the same period. Same picks, different
+# trading frequency: monthly trades far less, so it pays far less in costs
+# -- worth knowing whether the edge (if any) survives without weekly trading.
+PAPER_STRATEGIES = [
+    {"key": "weekly", "label": "Veckobyte", "rebalance_every": 5},
+    {"key": "monthly", "label": "Månadsbyte", "rebalance_every": 21},
+]
 # Trading cost per side, in basis points (0.01 %), covering brokerage plus
 # half the bid/ask spread. Deliberately on the conservative side for small
 # caps; adjust to your own broker.

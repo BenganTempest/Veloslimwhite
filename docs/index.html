@@ -528,7 +528,7 @@
 
   var PAGE_SIZE = 100;
   var state = { rows: [], sortKey: "trend_score", sortDir: -1, data: null, visibleCount: PAGE_SIZE, selectedTags: [],
-    fuVersion: null, paperScope: "current" };
+    fuVersion: null, paperScope: "current", paperStrategy: null };
 
   var seqSteps = [
     { max: 20, css: "var(--seq-250)" },
@@ -1160,14 +1160,18 @@
   function renderPaper(d) {
     var el = document.getElementById("paperPanel");
     var pp = d.paper || {};
-    if (!pp.full) {
+    var strats = pp.strategies || (pp.full ? [{ key: "weekly", label: "Veckobyte", rebalance_every: pp.rebalance_every,
+      full: pp.full, current: pp.current, status: pp.status }] : []);
+    if (!strats.length || !strats[0].full) {
       el.innerHTML = '<p class="not-ready">Pappersportföljen startar när det finns minst två körningar i historiken.</p>';
       return;
     }
-    var useCurrent = state.paperScope === "current" && pp.current;
-    var r = useCurrent ? pp.current : pp.full;
+    var S = strats.filter(function (x) { return x.key === state.paperStrategy; })[0] || strats[0];
+    state.paperStrategy = S.key;
+    var useCurrent = state.paperScope === "current" && S.current;
+    var r = useCurrent ? S.current : S.full;
     var curve = (r && r.curve) || [];
-    var st = pp.status || {};
+    var st = S.status || {};
     var stLabel = { validating: "Under validering", passed: "Godkänd", failed: "Underkänd" }[st.state] || "Under validering";
     var prog = Math.min(100, ((st.runs || 0) / (st.required_runs || 126)) * 100);
     var stText = st.state === "validating"
@@ -1180,7 +1184,28 @@
     var html = '<div class="pp-status"><span class="pp-badge ' + esc(st.state || "validating") + '">' + stLabel + "</span>" +
       (st.state === "validating" ? '<div class="pp-progress" title="' + prog.toFixed(0) + ' %"><div style="width:' + prog.toFixed(1) + '%"></div></div>' : "") +
       '<span style="color:var(--text-secondary)">' + stText + "</span></div>";
-    html += '<div class="filters"><div class="seg" id="paperScope">' +
+    // side-by-side comparison of the strategies, in the same scope as selected below
+    if (strats.length > 1) {
+      html += '<div style="overflow-x:auto;margin-bottom:14px"><table class="small-table"><thead><tr><th>Strategi</th>' +
+        '<th class="num">Efter kostnader</th><th class="num">Index</th><th class="num">Mot index</th>' +
+        '<th class="num">Kostnader</th><th class="num">Perioder som slog index</th><th>Status</th></tr></thead><tbody>' +
+        strats.map(function (x) {
+          var rr = state.paperScope === "current" ? x.current : x.full;
+          var lab = { validating: "under validering", passed: "godkänd", failed: "underkänd" }[(x.status || {}).state] || "under validering";
+          var cell = function (v) { return '<td class="num">' + v + "</td>"; };
+          return "<tr><td><strong>" + esc(x.label) + '</strong><div class="name-cell">byte var ' + x.rebalance_every + ":e körning</div></td>" +
+            (rr ? cell(signedPct(rr.total_return)) + cell(signedPct(rr.bench_return)) + cell(fmtPP(rr.excess)) +
+              cell(rr.total_costs === null ? "—" : rr.total_costs.toFixed(2) + "%") +
+              cell(rr.hit_rate === null ? "—" : rr.hit_rate.toFixed(0) + "% (" + rr.periods + ")")
+              : '<td colspan="5" class="not-ready">för få körningar än</td>') +
+            "<td>" + lab + "</td></tr>";
+        }).join("") + "</tbody></table></div>";
+    }
+    html += '<div class="filters">' +
+      (strats.length > 1 ? '<div class="seg" id="paperStrategy">' + strats.map(function (x) {
+        return '<button type="button" data-strategy="' + esc(x.key) + '" class="' + (x.key === S.key ? "active" : "") + '">' + esc(x.label) + "</button>";
+      }).join("") + "</div>" : "") +
+      '<div class="seg" id="paperScope">' +
       '<button type="button" data-scope="current" class="' + (useCurrent ? "active" : "") + '">Sedan modell ' + esc(pp.current_version) + "</button>" +
       '<button type="button" data-scope="full" class="' + (useCurrent ? "" : "active") + '">Hela historiken</button></div>' +
       '<span class="count">' + (r ? esc(r.start) + " – " + esc(r.end) + " · " + r.runs + " körningar · " + r.rebalances + " ombalanseringar" : "") + "</span></div>";
@@ -1193,7 +1218,7 @@
       ppTile("Portföljen, efter kostnader", signedPct(r.total_return), "index samma period: " + signedPct(r.bench_return)) +
       ppTile("Mot index", fmtPP(r.excess) + " %-enh.", r.excess > 0 ? "bättre än index" : (r.excess < 0 ? "sämre än index" : "")) +
       ppTile("Perioder som slog index", r.hit_rate === null ? "—" : r.hit_rate.toFixed(0) + "%",
-        r.periods + (r.periods === 1 ? " period" : " perioder") + " om " + pp.rebalance_every + " körningar") +
+        r.periods + (r.periods === 1 ? " period" : " perioder") + " om " + S.rebalance_every + " körningar") +
       ppTile("Största nedgång", signedPct(r.max_drawdown), "index: " + signedPct(r.bench_max_drawdown)) +
       // Annualised risk-adjusted return is meaningless on a few weeks of data -- hide it until ~3 months.
       (r.runs >= 60
@@ -1217,7 +1242,7 @@
         }).join("") + "</tbody></table></div>" : '<p class="not-ready">Inga innehav.</p>');
     var cb = pp.cost_bps || {};
     html += '<p class="fu-sub" style="line-height:1.55">Regler: topp ' + pp.top_n + " efter trendpoäng, lika vikt, byts var " +
-      pp.rebalance_every + ":e körning. Kostnad per affär: " + (cb.US || 0) / 100 + " % för amerikanska och " + (cb.Sweden || 0) / 100 +
+      S.rebalance_every + ":e körning (veckobyte = var 5:e, månadsbyte = var 21:a). Kostnad per affär: " + (cb.US || 0) / 100 + " % för amerikanska och " + (cb.Sweden || 0) / 100 +
       " % för svenska aktier (courtage + halva spreaden). Förenklingar: handel till stängningskurs, ingen valutaeffekt mellan " +
       "USD och SEK, ingen skatt, och utdelningar räknas för aktierna men inte för index &mdash; det gynnar portföljen något. " +
       "Allt beräknas från skannerns egen sparade historik, utan betald data.</p>";
@@ -1405,7 +1430,9 @@
     });
     document.getElementById("paperPanel").addEventListener("click", function (e) {
       var b = e.target.closest("[data-scope]");
-      if (b) { state.paperScope = b.getAttribute("data-scope"); renderPaper(state.data); }
+      if (b) { state.paperScope = b.getAttribute("data-scope"); renderPaper(state.data); return; }
+      var sb = e.target.closest("[data-strategy]");
+      if (sb) { state.paperStrategy = sb.getAttribute("data-strategy"); renderPaper(state.data); }
     });
     document.getElementById("detailDialog").addEventListener("click", function (e) {
       if (e.target === this) this.close();  // click on the backdrop
