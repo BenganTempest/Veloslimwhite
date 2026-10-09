@@ -254,7 +254,6 @@ CTAS,Cintas,Industrials,Nasdaq-100+S&P 500
 CTEK.ST,CTEK AB (publ),Industrials,OMX Stockholm
 CTSH,Cognizant,Information Technology,S&P 500
 CTT.ST,CTT Systems AB (publ),Industrials,OMX Stockholm
-CTVA,Corteva,Materials,S&P 500
 CVNA,Carvana,Consumer Discretionary,S&P 500
 CVS,CVS Health,Health Care,S&P 500
 CVX,Chevron Corporation,Energy,S&P 500
@@ -489,7 +488,6 @@ INCY,Incyte,Health Care,S&P 500
 INDT.ST,Indutrade AB (publ),Industrials,OMX Stockholm
 INDU-A.ST,AB IndustrivÃ¤rden (publ),Financial Services,OMX Stockholm
 INDU-C.ST,AB IndustrivÃ¤rden (publ),Financial Services,OMX Stockholm
-INFREA.ST,Infrea AB,Industrials,OMX Stockholm
 INISS-B.ST,Inission AB (publ),Technology,OMX Stockholm
 INSTAL.ST,Instalco AB (publ),Industrials,OMX Stockholm
 INTC,Intel,Information Technology,Nasdaq-100+S&P 500
@@ -690,6 +688,7 @@ NYAB.ST,Nyab AB (publ),Industrials,OMX Stockholm
 NYOR.ST,Nyorda AB,Communication Services,OMX Stockholm
 O,Realty Income,Real Estate,S&P 500
 OBAB.ST,Online Brands Nordic AB (publ),Consumer Cyclical,OMX Stockholm
+OBSE.ST,Observit AB,Technology,OMX Stockholm
 OCTV-SDB.ST,Octave Intelligence plc,Technology,OMX Stockholm
 ODFL,Old Dominion,Industrials,Nasdaq-100+S&P 500
 OEM-B.ST,OEM International AB (publ),Industrials,OMX Stockholm
@@ -747,7 +746,6 @@ PRISMA.ST,Prisma Properties AB (publ),Real Estate,OMX Stockholm
 PROF-B.ST,ProfilGruppen AB (publ),Industrials,OMX Stockholm
 PRU,Prudential Financial,Financials,S&P 500
 PSA,Public Storage,Real Estate,S&P 500
-PSKY,Paramount Skydance Corporation,Communication Services,S&P 500
 PSX,Phillips 66,Energy,S&P 500
 PTC,PTC Inc.,Information Technology,S&P 500
 PUBLI.ST,PPI Public Property Invest AB (publ),Real Estate,OMX Stockholm
@@ -835,6 +833,7 @@ SKF-B.ST,AB SKF (publ),Industrials,OMX Stockholm
 SKIS-B.ST,SkiStar AB (publ),Consumer Cyclical,OMX Stockholm
 SKMO.ST,SkÃ¥ne-mÃ¶llan AB (publ),Consumer Defensive,OMX Stockholm
 SKOLON.ST,Skolon AB (publ),Technology,OMX Stockholm
+SKYD,Skydance Corporation,Communication Services,S&P 500
 SLB,Schlumberger,Energy,S&P 500
 SLEEP.ST,Sleep Cycle AB (publ),Technology,OMX Stockholm
 SLP-B.ST,Swedish Logistic Property AB,Real Estate,OMX Stockholm
@@ -931,6 +930,7 @@ TSLA,"Tesla, Inc.",Consumer Discretionary,Nasdaq-100+S&P 500
 TSN,Tyson Foods,Consumer Staples,S&P 500
 TT,Trane Technologies,Industrials,S&P 500
 TTWO,Take-Two Interactive,Communication Services,Nasdaq-100+S&P 500
+TWLO,Twilio,Information Technology,S&P 500
 TXN,Texas Instruments,Information Technology,Nasdaq-100+S&P 500
 TXT,Textron,Industrials,S&P 500
 TYL,Tyler Technologies,Information Technology,S&P 500
@@ -979,12 +979,12 @@ VST,Vistra Corp.,Utilities,S&P 500
 VSURE.ST,Verisure plc,Industrials,OMX Stockholm
 VTR,Ventas,Real Estate,S&P 500
 VTRS,Viatris,Health Care,S&P 500
+VYLR,Vylor,Consumer Staples,S&P 500
 VZ,Verizon,Communication Services,S&P 500
 W5.ST,W5 Solutions AB (publ),Industrials,OMX Stockholm
 WAB,Wabtec,Industrials,S&P 500
 WALL-B.ST,Wallenstam AB (publ),Real Estate,OMX Stockholm
 WAT,Waters Corporation,Health Care,S&P 500
-WBD,Warner Bros. Discovery,Communication Services,S&P 500
 WBGR-B.ST,WÃ¤stbygg Gruppen AB (publ),Industrials,OMX Stockholm
 WDAY,"Workday, Inc.",Information Technology,Nasdaq-100+S&P 500
 WDC,Western Digital,Information Technology,Nasdaq-100+S&P 500

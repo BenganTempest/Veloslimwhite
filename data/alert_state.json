@@ -1,0 +1,30 @@
+{
+  "alerted": [
+    "ACN",
+    "ALAB",
+    "ALVO-SDB.ST",
+    "ANOD-B.ST",
+    "BE",
+    "BEAMMW-B.ST",
+    "CEG",
+    "CIEN",
+    "COHR",
+    "CYNCA.ST",
+    "EGTX.ST",
+    "ELTEL.ST",
+    "FNM.ST",
+    "GNRC",
+    "HPE",
+    "MRNA",
+    "MSTR",
+    "NANEXA.ST",
+    "ONCO.ST",
+    "P",
+    "PTC",
+    "SBB-D.ST",
+    "SMCI",
+    "SUS.ST",
+    "SWKS",
+    "YUBICO.ST"
+  ]
+}

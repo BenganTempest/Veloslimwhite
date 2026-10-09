@@ -1,0 +1,40 @@
+{
+  "versions": [
+    {
+      "version": "2.0",
+      "fingerprint": "1a9217306353",
+      "first_date": "2026-10-09",
+      "note": "Momentum rankas inom marknad och sektor, mönsterdelen är en rankning, omsättningsfilter, kalibrerad chans.",
+      "settings": {
+        "PRICE_LOOKBACK": "2y",
+        "MOMENTUM_WINDOWS": [
+          5,
+          20,
+          60
+        ],
+        "VOLATILITY_WINDOW": 20,
+        "RSI_WINDOW": 14,
+        "VOLUME_SPIKE_SHORT": 5,
+        "VOLUME_SPIKE_LONG": 20,
+        "BREAKOUT_RETURN": 0.2,
+        "BREAKOUT_WINDOW": 10,
+        "VALIDATION_HOLDOUT_DAYS": 126,
+        "WEIGHT_PATTERN": 0.55,
+        "WEIGHT_MOMENTUM": 0.25,
+        "WEIGHT_SENTIMENT": 0.2,
+        "MOMENTUM_SECTOR_WEIGHT": 0.5,
+        "MOMENTUM_MIN_SECTOR_SIZE": 8,
+        "LIQUIDITY_WINDOW": 20,
+        "MIN_AVG_TURNOVER": {
+          "USD": 1000000,
+          "SEK": 2000000
+        },
+        "FETCH_NEWS": true,
+        "NEWS_LOOKBACK_DAYS": 7,
+        "INCLUDE_SP500": true,
+        "INCLUDE_NASDAQ100": true,
+        "INCLUDE_OMX_STOCKHOLM_ALL": true
+      }
+    }
+  ]
+}
