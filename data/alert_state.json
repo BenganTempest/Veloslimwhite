@@ -11,12 +11,13 @@
     "CSGP",
     "CYNCA.ST",
     "EGTX.ST",
-    "ELTEL.ST",
+    "ELON.ST",
     "FNM.ST",
     "GNRC",
     "HPE",
     "ILMN",
     "IT",
+    "LITE",
     "MRNA",
     "MSTR",
     "NANEXA.ST",
@@ -26,7 +27,6 @@
     "SBB-D.ST",
     "SMCI",
     "SUS.ST",
-    "SWKS",
     "YUBICO.ST"
   ]
 }
