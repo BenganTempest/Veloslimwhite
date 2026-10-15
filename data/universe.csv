@@ -73,7 +73,6 @@ APOTEA.ST,Apotea AB (publ),Healthcare,OMX Stockholm
 APP,AppLovin,Communication Services,Nasdaq-100+S&P 500
 APTV,Aptiv,Consumer Discretionary,S&P 500
 AQ.ST,AQ Group AB (publ),Industrials,OMX Stockholm
-ARCT.ST,Arctic Minerals AB (publ),Basic Materials,OMX Stockholm
 ARE,Alexandria Real Estate Equities,Real Estate,S&P 500
 ARENIT-SDB.ST,Arenit Industrie SE,Industrials,OMX Stockholm
 ARES,Ares Management,Financials,S&P 500
@@ -590,7 +589,7 @@ MAS,Masco,Industrials,S&P 500
 MCAP.ST,MedCap AB (publ),Healthcare,OMX Stockholm
 MCD,McDonald's,Consumer Discretionary,S&P 500
 MCHP,Microchip Technology,Information Technology,Nasdaq-100+S&P 500
-MCK,McKesson Corporation,Health Care,S&P 500
+MCK,McKesson,Health Care,S&P 500
 MCO,Moody's Corporation,Financials,S&P 500
 MCOV-B.ST,Medicover AB (publ),Healthcare,OMX Stockholm
 MDLZ,Mondelez International,Consumer Staples,Nasdaq-100+S&P 500
@@ -986,6 +985,7 @@ W5.ST,W5 Solutions AB (publ),Industrials,OMX Stockholm
 WAB,Wabtec,Industrials,S&P 500
 WALL-B.ST,Wallenstam AB (publ),Real Estate,OMX Stockholm
 WAT,Waters Corporation,Health Care,S&P 500
+WBGR-B.ST,WÃ¤stbygg Gruppen AB (publ),Industrials,OMX Stockholm
 WDAY,"Workday, Inc.",Information Technology,Nasdaq-100+S&P 500
 WDC,Western Digital,Information Technology,Nasdaq-100+S&P 500
 WEC,WEC Energy Group,Utilities,S&P 500
