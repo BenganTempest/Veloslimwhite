@@ -4,11 +4,8 @@
     "ALVO-SDB.ST",
     "ANOD-B.ST",
     "BEAMMW-B.ST",
-    "CEG",
-    "COIN",
     "CSGP",
     "CTSH",
-    "CYNCA.ST",
     "EGTX.ST",
     "ELON.ST",
     "ELTEL.ST",
@@ -20,10 +17,11 @@
     "MSAB-B.ST",
     "MSTR",
     "NANEXA.ST",
+    "NOW",
     "P",
     "PTC",
+    "SHOP",
     "SUS.ST",
-    "TWLO",
     "YUBICO.ST"
   ]
 }
