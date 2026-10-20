@@ -110,7 +110,6 @@ BA,Boeing,Industrials,S&P 500
 BAC,Bank of America,Financials,S&P 500
 BACTI-B.ST,Bactiguard Holding AB (publ),Healthcare,OMX Stockholm
 BAHN-B.ST,Bahnhof AB (publ),Communication Services,OMX Stockholm
-BALCO.ST,Balco Group AB,Consumer Cyclical,OMX Stockholm
 BALD-B.ST,Fastighets AB Balder (publ),Real Estate,OMX Stockholm
 BALL,Ball Corporation,Materials,S&P 500
 BAX,Baxter International,Health Care,S&P 500
@@ -432,6 +431,7 @@ GRMN,Garmin,Consumer Discretionary,S&P 500
 GRNG.ST,GrÃ¤nges AB (publ),Basic Materials,OMX Stockholm
 GS,Goldman Sachs,Financials,S&P 500
 GSKR-SDB.ST,Goldsky Resources Corp.,Basic Materials,OMX Stockholm
+GULD.ST,Guldbrev Holding AB (publ),Consumer Cyclical,OMX Stockholm
 GWW,W. W. Grainger,Industrials,S&P 500
 HACK.ST,Hacksaw AB (publ),Communication Services,OMX Stockholm
 HAKI-A.ST,HAKI Safety AB (publ),Industrials,OMX Stockholm
@@ -606,6 +606,7 @@ META,Meta Platforms,Communication Services,Nasdaq-100+S&P 500
 MGM,MGM Resorts,Consumer Discretionary,S&P 500
 MIDS.ST,Midsummer AB (publ),Technology,OMX Stockholm
 MILDEF.ST,MilDef Group AB (publ),Industrials,OMX Stockholm
+MINEST.ST,Minesto AB (publ),Utilities,OMX Stockholm
 MIPS.ST,Mips AB (publ),Consumer Cyclical,OMX Stockholm
 MKC,McCormick & Company,Consumer Staples,S&P 500
 MLM,Martin Marietta Materials,Materials,S&P 500
@@ -901,7 +902,6 @@ TELIA.ST,Telia Company AB (publ),Communication Services,OMX Stockholm
 TEQ.ST,Teqnion AB (publ),Industrials,OMX Stockholm
 TER,Teradyne,Information Technology,Nasdaq-100+S&P 500
 TERNOR.ST,Terranor Group AB (publ),Industrials,OMX Stockholm
-TFBANK.ST,Avarda Bank AB (publ),Unknown,OMX Stockholm
 TFC,Truist Financial,Financials,S&P 500
 TGT,Target Corporation,Consumer Staples,S&P 500
 THULE.ST,Thule Group AB (publ),Consumer Cyclical,OMX Stockholm

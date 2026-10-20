@@ -2,3 +2,4 @@ date,ticker,name,score,prev_score,close,model_version
 2026-10-13,ELTEL.ST,Eltel AB (publ),85.7,73.9,,2.0
 2026-10-16,NOW,ServiceNow,86.2,84.9,141.97000122070312,2.0
 2026-10-16,SHOP,Shopify,85.2,83.2,169.52000427246094,2.0
+2026-10-20,VSURE.ST,Verisure plc,88.8,79.8,9.446000099182129,2.0
