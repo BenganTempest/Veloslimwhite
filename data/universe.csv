@@ -28,6 +28,7 @@ AEP,American Electric Power,Utilities,Nasdaq-100+S&P 500
 AES,AES Corporation,Utilities,S&P 500
 AFL,Aflac,Financials,S&P 500
 AFRY.ST,Afry AB,Industrials,OMX Stockholm
+AGES-B.ST,AGES Industri AB (publ),Industrials,OMX Stockholm
 AGROUP.ST,Arlandastad Group AB (publ),Real Estate,OMX Stockholm
 AIG,American International Group,Financials,S&P 500
 AIZ,Assurant,Financials,S&P 500
@@ -73,7 +74,6 @@ APOTEA.ST,Apotea AB (publ),Healthcare,OMX Stockholm
 APP,AppLovin,Communication Services,Nasdaq-100+S&P 500
 APTV,Aptiv,Consumer Discretionary,S&P 500
 AQ.ST,AQ Group AB (publ),Industrials,OMX Stockholm
-ARCT.ST,Arctic Minerals AB (publ),Basic Materials,OMX Stockholm
 ARE,Alexandria Real Estate Equities,Real Estate,S&P 500
 ARENIT-SDB.ST,Arenit Industrie SE,Industrials,OMX Stockholm
 ARES,Ares Management,Financials,S&P 500
@@ -485,6 +485,7 @@ IDXX,Idexx Laboratories,Health Care,Nasdaq-100+S&P 500
 IEX,IDEX Corporation,Industrials,S&P 500
 IFF,International Flavors & Fragrances,Materials,S&P 500
 ILMN,"Illumina, Inc.",Health Care,S&P 500
+IMPC.ST,Impact Coatings AB (publ),Industrials,OMX Stockholm
 INCY,Incyte,Health Care,S&P 500
 INDT.ST,Indutrade AB (publ),Industrials,OMX Stockholm
 INDU-A.ST,AB IndustrivÃ¤rden (publ),Financial Services,OMX Stockholm
@@ -505,6 +506,7 @@ IPCO.ST,International Petroleum Corporation,Energy,OMX Stockholm
 IQV,IQVIA,Health Care,S&P 500
 IR,Ingersoll Rand,Industrials,S&P 500
 IRM,Iron Mountain,Real Estate,S&P 500
+ISOFOL.ST,Isofol Medical AB (publ),Healthcare,OMX Stockholm
 ISRG,Intuitive Surgical,Health Care,Nasdaq-100+S&P 500
 IT,Gartner,Information Technology,S&P 500
 ITAB.ST,ITAB Group AB (publ),Industrials,OMX Stockholm
@@ -552,7 +554,6 @@ LAGR-B.ST,Lagercrantz Group AB (publ),Industrials,OMX Stockholm
 LATO-B.ST,Investment AB Latour (publ),Industrials,OMX Stockholm
 LDOS,Leidos,Industrials,S&P 500
 LEA.ST,Lea Bank AB (publ),Financial Services,OMX Stockholm
-LEMSE.ST,Leading Edge Materials Corp.,Basic Materials,OMX Stockholm
 LEN,Lennar,Consumer Discretionary,S&P 500
 LH,Labcorp,Health Care,S&P 500
 LHX,L3Harris,Industrials,S&P 500
@@ -770,7 +771,7 @@ RF,Regions Financial Corporation,Financials,S&P 500
 RJF,Raymond James Financial,Financials,S&P 500
 RKLB,Rocket Lab,Industrials,Nasdaq-100
 RL,Ralph Lauren Corporation,Consumer Discretionary,S&P 500
-RMD,ResMed|,Health Care,S&P 500
+RMD,ResMed,Health Care,S&P 500
 ROK,Rockwell Automation,Industrials,S&P 500
 ROKO-B.ST,RÃ¶ko AB (publ),Financial Services,OMX Stockholm
 ROL,"Rollins, Inc.",Industrials,S&P 500
@@ -952,7 +953,6 @@ VEEV,Veeva Systems,Health Care,S&P 500
 VEFAB.ST,VEF AB (publ),Financial Services,OMX Stockholm
 VER.ST,Verve Group Media SE,Technology,OMX Stockholm
 VERT-B.ST,Vertiseit AB (publ),Technology,OMX Stockholm
-VESTUM.ST,Cynca Nordic AB (publ),Industrials,OMX Stockholm
 VICI,Vici Properties,Real Estate,S&P 500
 VICO.ST,Vicore Pharma Holding AB (publ),Healthcare,OMX Stockholm
 VIMIAN.ST,Vimian Group AB (publ),Healthcare,OMX Stockholm
