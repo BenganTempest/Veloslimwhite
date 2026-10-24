@@ -73,7 +73,6 @@ APOTEA.ST,Apotea AB (publ),Healthcare,OMX Stockholm
 APP,AppLovin,Communication Services,Nasdaq-100+S&P 500
 APTV,Aptiv,Consumer Discretionary,S&P 500
 AQ.ST,AQ Group AB (publ),Industrials,OMX Stockholm
-ARCT.ST,Arctic Minerals AB (publ),Basic Materials,OMX Stockholm
 ARE,Alexandria Real Estate Equities,Real Estate,S&P 500
 ARENIT-SDB.ST,Arenit Industrie SE,Industrials,OMX Stockholm
 ARES,Ares Management,Financials,S&P 500
@@ -401,7 +400,6 @@ FTNT,Fortinet,Information Technology,Nasdaq-100+S&P 500
 FTV,Fortive,Industrials,S&P 500
 G2M.ST,Gentoo Media Inc.,Consumer Cyclical,OMX Stockholm
 G5EN.ST,G5 Entertainment AB (publ),Communication Services,OMX Stockholm
-GAPW-B.ST,Gapwaves AB (publ),Technology,OMX Stockholm
 GARO.ST,Garo Aktiebolag (publ),Industrials,OMX Stockholm
 GD,General Dynamics,Industrials,S&P 500
 GDDY,GoDaddy,Information Technology,S&P 500
@@ -506,6 +504,7 @@ IPCO.ST,International Petroleum Corporation,Energy,OMX Stockholm
 IQV,IQVIA,Health Care,S&P 500
 IR,Ingersoll Rand,Industrials,S&P 500
 IRM,Iron Mountain,Real Estate,S&P 500
+ISOFOL.ST,Isofol Medical AB (publ),Healthcare,OMX Stockholm
 ISRG,Intuitive Surgical,Health Care,Nasdaq-100+S&P 500
 IT,Gartner,Information Technology,S&P 500
 ITAB.ST,ITAB Group AB (publ),Industrials,OMX Stockholm
@@ -704,6 +703,7 @@ ORCL,Oracle Corporation,Information Technology,S&P 500
 ORES.ST,Investment AB Ãresund (publ),Financial Services,OMX Stockholm
 ORLY,O'Reilly Automotive,Consumer Discretionary,Nasdaq-100+S&P 500
 ORRON.ST,OrrÃ¶n Energy AB (publ),Utilities,OMX Stockholm
+ORT-B.ST,Ortoma AB (publ),Healthcare,OMX Stockholm
 OSSD.ST,OssDsign AB (publ),Healthcare,OMX Stockholm
 OTIS,Otis Worldwide,Industrials,S&P 500
 OVZON.ST,Ovzon AB (publ),Communication Services,OMX Stockholm
@@ -728,6 +728,7 @@ PGR,Progressive Corporation,Financials,S&P 500
 PH,Parker Hannifin,Industrials,S&P 500
 PHM,PulteGroup,Consumer Discretionary,S&P 500
 PIERCE.ST,Pierce Group AB (publ),Consumer Cyclical,OMX Stockholm
+PJ.ST,Prisjakt AB (publ),Unknown,OMX Stockholm
 PKG,Packaging Corporation of America,Materials,S&P 500
 PLAZ-B.ST,Platzer Fastigheter Holding AB (publ),Real Estate,OMX Stockholm
 PLD,Prologis,Real Estate,S&P 500
@@ -985,7 +986,6 @@ WAB,Wabtec,Industrials,S&P 500
 WALL-B.ST,Wallenstam AB (publ),Real Estate,OMX Stockholm
 WAT,Waters Corporation,Health Care,S&P 500
 WAYS.ST,Waystream Holding AB (publ),Technology,OMX Stockholm
-WBGR-B.ST,WÃ¤stbygg Gruppen AB (publ),Industrials,OMX Stockholm
 WDAY,"Workday, Inc.",Information Technology,Nasdaq-100+S&P 500
 WDC,Western Digital,Information Technology,Nasdaq-100+S&P 500
 WEC,WEC Energy Group,Utilities,S&P 500
