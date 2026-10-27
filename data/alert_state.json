@@ -4,13 +4,13 @@
     "AFRY.ST",
     "ANOD-B.ST",
     "BEAMMW-B.ST",
+    "BHG.ST",
     "BONEX.ST",
     "CSGP",
     "CTSH",
     "EGTX.ST",
     "ELON.ST",
     "ELTEL.ST",
-    "GOMX.ST",
     "HEM.ST",
     "HUMBLE.ST",
     "ILMN",
@@ -29,6 +29,7 @@
     "SPCX",
     "SUS.ST",
     "TRUE-B.ST",
+    "VITR.ST",
     "VSURE.ST",
     "YUBICO.ST"
   ]

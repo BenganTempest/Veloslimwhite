@@ -109,7 +109,6 @@ BA,Boeing,Industrials,S&P 500
 BAC,Bank of America,Financials,S&P 500
 BACTI-B.ST,Bactiguard Holding AB (publ),Healthcare,OMX Stockholm
 BAHN-B.ST,Bahnhof AB (publ),Communication Services,OMX Stockholm
-BALCO.ST,Balco Group AB,Consumer Cyclical,OMX Stockholm
 BALD-B.ST,Fastighets AB Balder (publ),Real Estate,OMX Stockholm
 BALL,Ball Corporation,Materials,S&P 500
 BAX,Baxter International,Health Care,S&P 500
@@ -288,6 +287,7 @@ DOW,Dow Inc.,Materials,S&P 500
 DOXA.ST,Doxa AB (publ),Real Estate,OMX Stockholm
 DPZ,Domino's,Consumer Discretionary,S&P 500
 DRI,Darden Restaurants,Consumer Discretionary,S&P 500
+DSNO.ST,Desenio Group AB (publ),Consumer Cyclical,OMX Stockholm
 DTE,DTE Energy,Utilities,S&P 500
 DUK,Duke Energy,Utilities,S&P 500
 DUNI.ST,Duni AB (publ),Consumer Cyclical,OMX Stockholm
@@ -447,6 +447,7 @@ HEM.ST,Hemnet Group AB (publ),Communication Services,OMX Stockholm
 HEXA-B.ST,Hexagon AB (publ),Technology,OMX Stockholm
 HIG,Hartford (The),Financials,S&P 500
 HII,Huntington Ingalls Industries,Industrials,S&P 500
+HILB-B.ST,Hilbert Group AB (publ),Financial Services,OMX Stockholm
 HLT,Hilton Worldwide,Consumer Discretionary,S&P 500
 HM-B.ST,H & M Hennes & Mauritz AB (publ),Consumer Cyclical,OMX Stockholm
 HMS.ST,HMS Networks AB (publ),Technology,OMX Stockholm
@@ -521,7 +522,6 @@ JM.ST,JM AB (publ),Consumer Cyclical,OMX Stockholm
 JNJ,Johnson & Johnson,Health Care,S&P 500
 JOMA.ST,John Mattson FastighetsfÃ¶retagen AB (publ),Real Estate,OMX Stockholm
 JPM,JPMorgan Chase,Financials,S&P 500
-K2A-B.ST,K2A Knaust & Andersson Fastigheter AB (publ),Real Estate,OMX Stockholm
 KABE-B.ST,KABE Group AB (publ.),Consumer Cyclical,OMX Stockholm
 KAMBI.ST,Kambi Group plc,Consumer Cyclical,OMX Stockholm
 KAPIAB.ST,KallebÃ¤ck Property Invest AB (publ),Real Estate,OMX Stockholm
@@ -689,6 +689,7 @@ NYAB.ST,Nyab AB (publ),Industrials,OMX Stockholm
 NYOR.ST,Nyorda AB,Communication Services,OMX Stockholm
 O,Realty Income,Real Estate,S&P 500
 OBAB.ST,Online Brands Nordic AB (publ),Consumer Cyclical,OMX Stockholm
+OBSE.ST,Observit AB,Technology,OMX Stockholm
 OCTV-SDB.ST,Octave Intelligence plc,Technology,OMX Stockholm
 ODFL,Old Dominion,Industrials,Nasdaq-100+S&P 500
 OEM-B.ST,OEM International AB (publ),Industrials,OMX Stockholm
@@ -703,7 +704,6 @@ ORCL,Oracle Corporation,Information Technology,S&P 500
 ORES.ST,Investment AB Ãresund (publ),Financial Services,OMX Stockholm
 ORLY,O'Reilly Automotive,Consumer Discretionary,Nasdaq-100+S&P 500
 ORRON.ST,OrrÃ¶n Energy AB (publ),Utilities,OMX Stockholm
-ORT-B.ST,Ortoma AB (publ),Healthcare,OMX Stockholm
 OSSD.ST,OssDsign AB (publ),Healthcare,OMX Stockholm
 OTIS,Otis Worldwide,Industrials,S&P 500
 OVZON.ST,Ovzon AB (publ),Communication Services,OMX Stockholm
@@ -728,7 +728,7 @@ PGR,Progressive Corporation,Financials,S&P 500
 PH,Parker Hannifin,Industrials,S&P 500
 PHM,PulteGroup,Consumer Discretionary,S&P 500
 PIERCE.ST,Pierce Group AB (publ),Consumer Cyclical,OMX Stockholm
-PJ.ST,Prisjakt AB (publ),Unknown,OMX Stockholm
+PJ.ST,Prisjakt AB (publ),Technology,OMX Stockholm
 PKG,Packaging Corporation of America,Materials,S&P 500
 PLAZ-B.ST,Platzer Fastigheter Holding AB (publ),Real Estate,OMX Stockholm
 PLD,Prologis,Real Estate,S&P 500
@@ -835,7 +835,7 @@ SKF-B.ST,AB SKF (publ),Industrials,OMX Stockholm
 SKIS-B.ST,SkiStar AB (publ),Consumer Cyclical,OMX Stockholm
 SKMO.ST,SkÃ¥ne-mÃ¶llan AB (publ),Consumer Defensive,OMX Stockholm
 SKOLON.ST,Skolon AB (publ),Technology,OMX Stockholm
-SKYD,Skydance Corporation,Communication Services,S&P 500
+SKYD,Skydance,Communication Services,S&P 500
 SLB,Schlumberger,Energy,S&P 500
 SLEEP.ST,Sleep Cycle AB (publ),Technology,OMX Stockholm
 SLP-B.ST,Swedish Logistic Property AB,Real Estate,OMX Stockholm
