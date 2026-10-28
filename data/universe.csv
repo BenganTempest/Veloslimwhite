@@ -483,7 +483,6 @@ IDXX,Idexx Laboratories,Health Care,Nasdaq-100+S&P 500
 IEX,IDEX Corporation,Industrials,S&P 500
 IFF,International Flavors & Fragrances,Materials,S&P 500
 ILMN,"Illumina, Inc.",Health Care,S&P 500
-IMMU.ST,Mendus AB (publ),Healthcare,OMX Stockholm
 IMPC.ST,Impact Coatings AB (publ),Industrials,OMX Stockholm
 INCY,Incyte,Health Care,S&P 500
 INDT.ST,Indutrade AB (publ),Industrials,OMX Stockholm
@@ -704,6 +703,7 @@ ORCL,Oracle Corporation,Information Technology,S&P 500
 ORES.ST,Investment AB Ãresund (publ),Financial Services,OMX Stockholm
 ORLY,O'Reilly Automotive,Consumer Discretionary,Nasdaq-100+S&P 500
 ORRON.ST,OrrÃ¶n Energy AB (publ),Utilities,OMX Stockholm
+ORT-B.ST,Ortoma AB (publ),Healthcare,OMX Stockholm
 OSSD.ST,OssDsign AB (publ),Healthcare,OMX Stockholm
 OTIS,Otis Worldwide,Industrials,S&P 500
 OVZON.ST,Ovzon AB (publ),Communication Services,OMX Stockholm
@@ -985,7 +985,6 @@ W5.ST,W5 Solutions AB (publ),Industrials,OMX Stockholm
 WAB,Wabtec,Industrials,S&P 500
 WALL-B.ST,Wallenstam AB (publ),Real Estate,OMX Stockholm
 WAT,Waters Corporation,Health Care,S&P 500
-WAYS.ST,Waystream Holding AB (publ),Technology,OMX Stockholm
 WDAY,"Workday, Inc.",Information Technology,Nasdaq-100+S&P 500
 WDC,Western Digital,Information Technology,Nasdaq-100+S&P 500
 WEC,WEC Energy Group,Utilities,S&P 500
@@ -1005,6 +1004,7 @@ WTW-A.ST,Wall to Wall Group AB,Industrials,OMX Stockholm
 WY,Weyerhaeuser,Real Estate,S&P 500
 WYNN,Wynn Resorts,Consumer Discretionary,S&P 500
 XANO-B.ST,XANO Industri AB (publ),Industrials,OMX Stockholm
+XBRANE.ST,Xbrane Biopharma AB (publ),Healthcare,OMX Stockholm
 XEL,Xcel Energy,Utilities,Nasdaq-100+S&P 500
 XOM,ExxonMobil,Energy,S&P 500
 XSPRAY.ST,Xspray Pharma AB (publ),Healthcare,OMX Stockholm
