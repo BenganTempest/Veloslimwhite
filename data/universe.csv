@@ -73,7 +73,6 @@ APOTEA.ST,Apotea AB (publ),Healthcare,OMX Stockholm
 APP,AppLovin,Communication Services,Nasdaq-100+S&P 500
 APTV,Aptiv,Consumer Discretionary,S&P 500
 AQ.ST,AQ Group AB (publ),Industrials,OMX Stockholm
-ARCT.ST,Arctic Minerals AB (publ),Basic Materials,OMX Stockholm
 ARE,Alexandria Real Estate Equities,Real Estate,S&P 500
 ARENIT-SDB.ST,Arenit Industrie SE,Industrials,OMX Stockholm
 ARES,Ares Management,Financials,S&P 500
@@ -172,7 +171,6 @@ BYGGP.ST,ByggPartner Gruppen AB (publ),Industrials,OMX Stockholm
 C,Citigroup,Financials,S&P 500
 CAG.ST,CAG Group AB (publ),Technology,OMX Stockholm
 CAH,Cardinal Health,Health Care,S&P 500
-CALVIK.ST,Calviks AB (publ),Industrials,OMX Stockholm
 CAMX.ST,Camurus AB (publ),Healthcare,OMX Stockholm
 CANTA.ST,Cantargia AB (publ),Healthcare,OMX Stockholm
 CARA.ST,Carasent AB (publ),Healthcare,OMX Stockholm
@@ -552,6 +550,7 @@ LAGR-B.ST,Lagercrantz Group AB (publ),Industrials,OMX Stockholm
 LATO-B.ST,Investment AB Latour (publ),Industrials,OMX Stockholm
 LDOS,Leidos,Industrials,S&P 500
 LEA.ST,Lea Bank AB (publ),Financial Services,OMX Stockholm
+LEMSE.ST,Leading Edge Materials Corp.,Basic Materials,OMX Stockholm
 LEN,Lennar,Consumer Discretionary,S&P 500
 LH,Labcorp,Health Care,S&P 500
 LHX,L3Harris,Industrials,S&P 500
@@ -986,6 +985,7 @@ WAB,Wabtec,Industrials,S&P 500
 WALL-B.ST,Wallenstam AB (publ),Real Estate,OMX Stockholm
 WAT,Waters Corporation,Health Care,S&P 500
 WAYS.ST,Waystream Holding AB (publ),Technology,OMX Stockholm
+WBGR-B.ST,WÃ¤stbygg Gruppen AB (publ),Industrials,OMX Stockholm
 WDAY,"Workday, Inc.",Information Technology,Nasdaq-100+S&P 500
 WDC,Western Digital,Information Technology,Nasdaq-100+S&P 500
 WEC,WEC Energy Group,Utilities,S&P 500
