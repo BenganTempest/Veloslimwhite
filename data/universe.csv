@@ -73,6 +73,7 @@ APOTEA.ST,Apotea AB (publ),Healthcare,OMX Stockholm
 APP,AppLovin,Communication Services,Nasdaq-100+S&P 500
 APTV,Aptiv,Consumer Discretionary,S&P 500
 AQ.ST,AQ Group AB (publ),Industrials,OMX Stockholm
+ARCT.ST,Arctic Minerals AB (publ),Basic Materials,OMX Stockholm
 ARE,Alexandria Real Estate Equities,Real Estate,S&P 500
 ARENIT-SDB.ST,Arenit Industrie SE,Industrials,OMX Stockholm
 ARES,Ares Management,Financials,S&P 500
@@ -133,7 +134,6 @@ BIIB,Biogen,Health Care,S&P 500
 BILI-A.ST,Bilia AB (publ),Consumer Cyclical,OMX Stockholm
 BILL.ST,Billerud AB (publ),Basic Materials,OMX Stockholm
 BIM.ST,BIMobject AB,Technology,OMX Stockholm
-BINV.ST,BioInvent International AB (publ),Healthcare,OMX Stockholm
 BIOA-B.ST,BioArctic AB (publ),Healthcare,OMX Stockholm
 BIOG-B.ST,BioGaia AB (publ),Healthcare,OMX Stockholm
 BKNG,Booking Holdings,Consumer Discretionary,Nasdaq-100+S&P 500
@@ -171,6 +171,7 @@ BYGGP.ST,ByggPartner Gruppen AB (publ),Industrials,OMX Stockholm
 C,Citigroup,Financials,S&P 500
 CAG.ST,CAG Group AB (publ),Technology,OMX Stockholm
 CAH,Cardinal Health,Health Care,S&P 500
+CALVIK.ST,Calviks AB (publ),Industrials,OMX Stockholm
 CAMX.ST,Camurus AB (publ),Healthcare,OMX Stockholm
 CANTA.ST,Cantargia AB (publ),Healthcare,OMX Stockholm
 CARA.ST,Carasent AB (publ),Healthcare,OMX Stockholm
@@ -467,7 +468,6 @@ HTRO.ST,Hexatronic Group AB (publ),Technology,OMX Stockholm
 HUBB,Hubbell Incorporated,Industrials,S&P 500
 HUFV-A.ST,Hufvudstaden AB (publ),Real Estate,OMX Stockholm
 HUM,Humana,Health Care,S&P 500
-HUM.ST,Humana AB (publ),Healthcare,OMX Stockholm
 HUMBLE.ST,Humble Group AB (publ),Consumer Defensive,OMX Stockholm
 HUSQ-A.ST,Husqvarna AB (publ),Industrials,OMX Stockholm
 HUSQ-B.ST,Husqvarna AB (publ),Industrials,OMX Stockholm
@@ -486,6 +486,7 @@ INCY,Incyte,Health Care,S&P 500
 INDT.ST,Indutrade AB (publ),Industrials,OMX Stockholm
 INDU-A.ST,AB IndustrivÃ¤rden (publ),Financial Services,OMX Stockholm
 INDU-C.ST,AB IndustrivÃ¤rden (publ),Financial Services,OMX Stockholm
+INFREA.ST,Infrea AB,Industrials,OMX Stockholm
 INISS-B.ST,Inission AB (publ),Technology,OMX Stockholm
 INSTAL.ST,Instalco AB (publ),Industrials,OMX Stockholm
 INTC,Intel,Information Technology,Nasdaq-100+S&P 500
@@ -550,7 +551,6 @@ LAGR-B.ST,Lagercrantz Group AB (publ),Industrials,OMX Stockholm
 LATO-B.ST,Investment AB Latour (publ),Industrials,OMX Stockholm
 LDOS,Leidos,Industrials,S&P 500
 LEA.ST,Lea Bank AB (publ),Financial Services,OMX Stockholm
-LEMSE.ST,Leading Edge Materials Corp.,Basic Materials,OMX Stockholm
 LEN,Lennar,Consumer Discretionary,S&P 500
 LH,Labcorp,Health Care,S&P 500
 LHX,L3Harris,Industrials,S&P 500
