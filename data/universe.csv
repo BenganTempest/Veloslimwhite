@@ -480,7 +480,6 @@ IDXX,Idexx Laboratories,Health Care,Nasdaq-100+S&P 500
 IEX,IDEX Corporation,Industrials,S&P 500
 IFF,International Flavors & Fragrances,Materials,S&P 500
 ILMN,"Illumina, Inc.",Health Care,S&P 500
-IMMU.ST,Mendus AB (publ),Healthcare,OMX Stockholm
 INCY,Incyte,Health Care,S&P 500
 INDT.ST,Indutrade AB (publ),Industrials,OMX Stockholm
 INDU-A.ST,AB IndustrivÃ¤rden (publ),Financial Services,OMX Stockholm
@@ -545,12 +544,12 @@ KMI,Kinder Morgan,Energy,S&P 500
 KNOW.ST,Knowit AB (publ),Technology,OMX Stockholm
 KO,Coca-Cola Company (The),Consumer Staples,S&P 500
 KR,Kroger,Consumer Staples,S&P 500
-KVUE,Kenvue,Consumer Staples,S&P 500
 L,Loews Corporation,Financials,S&P 500
 LAGR-B.ST,Lagercrantz Group AB (publ),Industrials,OMX Stockholm
 LATO-B.ST,Investment AB Latour (publ),Industrials,OMX Stockholm
 LDOS,Leidos,Industrials,S&P 500
 LEA.ST,Lea Bank AB (publ),Financial Services,OMX Stockholm
+LEMSE.ST,Leading Edge Materials Corp.,Basic Materials,OMX Stockholm
 LEN,Lennar,Consumer Discretionary,S&P 500
 LH,Labcorp,Health Care,S&P 500
 LHX,L3Harris,Industrials,S&P 500
@@ -693,6 +692,7 @@ ODFL,Old Dominion,Industrials,Nasdaq-100+S&P 500
 OEM-B.ST,OEM International AB (publ),Industrials,OMX Stockholm
 OKE,Oneok,Energy,S&P 500
 OKEAO.ST,OKEA ASA,Unknown,OMX Stockholm
+OKTA,"Okta, Inc.",Information Technology,S&P 500
 OMC,Omnicom Group,Communication Services,S&P 500
 ON,ON Semiconductor,Information Technology,S&P 500
 ONCO.ST,Oncopeptides AB (publ),Healthcare,OMX Stockholm
@@ -985,7 +985,7 @@ W5.ST,W5 Solutions AB (publ),Industrials,OMX Stockholm
 WAB,Wabtec,Industrials,S&P 500
 WALL-B.ST,Wallenstam AB (publ),Real Estate,OMX Stockholm
 WAT,Waters Corporation,Health Care,S&P 500
-WBGR-B.ST,WÃ¤stbygg Gruppen AB (publ),Industrials,OMX Stockholm
+WAYS.ST,Waystream Holding AB (publ),Technology,OMX Stockholm
 WDAY,"Workday, Inc.",Information Technology,Nasdaq-100+S&P 500
 WDC,Western Digital,Information Technology,Nasdaq-100+S&P 500
 WEC,WEC Energy Group,Utilities,S&P 500
