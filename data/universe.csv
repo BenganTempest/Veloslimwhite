@@ -370,6 +370,7 @@ FDXF,FedEx Freight,Industrials,S&P 500
 FE,FirstEnergy,Utilities,S&P 500
 FER,Ferrovial,Industrials,Nasdaq-100
 FERG,Ferguson Enterprises,Industrials,S&P 500
+FERRO.ST,Ferroamp AB (publ),Industrials,OMX Stockholm
 FFIV,"F5, Inc.",Information Technology,S&P 500
 FG.ST,Fasadgruppen Group AB (publ),Industrials,OMX Stockholm
 FICO,Fair Isaac,Information Technology,S&P 500
@@ -686,7 +687,6 @@ NYAB.ST,Nyab AB (publ),Industrials,OMX Stockholm
 NYOR.ST,Nyorda AB,Communication Services,OMX Stockholm
 O,Realty Income,Real Estate,S&P 500
 OBAB.ST,Online Brands Nordic AB (publ),Consumer Cyclical,OMX Stockholm
-OBSE.ST,Observit AB,Technology,OMX Stockholm
 OCTV-SDB.ST,Octave Intelligence plc,Technology,OMX Stockholm
 ODFL,Old Dominion,Industrials,Nasdaq-100+S&P 500
 OEM-B.ST,OEM International AB (publ),Industrials,OMX Stockholm
@@ -985,7 +985,7 @@ W5.ST,W5 Solutions AB (publ),Industrials,OMX Stockholm
 WAB,Wabtec,Industrials,S&P 500
 WALL-B.ST,Wallenstam AB (publ),Real Estate,OMX Stockholm
 WAT,Waters Corporation,Health Care,S&P 500
-WAYS.ST,Waystream Holding AB (publ),Technology,OMX Stockholm
+WBGR-B.ST,WÃ¤stbygg Gruppen AB (publ),Industrials,OMX Stockholm
 WDAY,"Workday, Inc.",Information Technology,Nasdaq-100+S&P 500
 WDC,Western Digital,Information Technology,Nasdaq-100+S&P 500
 WEC,WEC Energy Group,Utilities,S&P 500
