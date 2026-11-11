@@ -172,7 +172,6 @@ CAG.ST,CAG Group AB (publ),Technology,OMX Stockholm
 CAH,Cardinal Health,Health Care,S&P 500
 CALVIK.ST,Calviks AB (publ),Industrials,OMX Stockholm
 CAMX.ST,Camurus AB (publ),Healthcare,OMX Stockholm
-CANDLE-B.ST,Candles Scandinavia AB (publ),Consumer Defensive,OMX Stockholm
 CANTA.ST,Cantargia AB (publ),Healthcare,OMX Stockholm
 CARA.ST,Carasent AB (publ),Healthcare,OMX Stockholm
 CARE.ST,Careium AB (Publ),Industrials,OMX Stockholm
@@ -481,7 +480,6 @@ IDXX,Idexx Laboratories,Health Care,Nasdaq-100+S&P 500
 IEX,IDEX Corporation,Industrials,S&P 500
 IFF,International Flavors & Fragrances,Materials,S&P 500
 ILMN,"Illumina, Inc.",Health Care,S&P 500
-IMMU.ST,Mendus AB (publ),Healthcare,OMX Stockholm
 INCY,Incyte,Health Care,S&P 500
 INDT.ST,Indutrade AB (publ),Industrials,OMX Stockholm
 INDU-A.ST,AB IndustrivÃ¤rden (publ),Financial Services,OMX Stockholm
@@ -501,6 +499,7 @@ IP,International Paper,Materials,S&P 500
 IPCO.ST,International Petroleum Corporation,Energy,OMX Stockholm
 IQV,IQVIA,Health Care,S&P 500
 IR,Ingersoll Rand,Industrials,S&P 500
+IRLAB-A.ST,IRLAB Therapeutics AB (publ),Healthcare,OMX Stockholm
 IRM,Iron Mountain,Real Estate,S&P 500
 ISOFOL.ST,Isofol Medical AB (publ),Healthcare,OMX Stockholm
 ISRG,Intuitive Surgical,Health Care,Nasdaq-100+S&P 500
@@ -550,6 +549,7 @@ LAGR-B.ST,Lagercrantz Group AB (publ),Industrials,OMX Stockholm
 LATO-B.ST,Investment AB Latour (publ),Industrials,OMX Stockholm
 LDOS,Leidos,Industrials,S&P 500
 LEA.ST,Lea Bank AB (publ),Financial Services,OMX Stockholm
+LEMSE.ST,Leading Edge Materials Corp.,Basic Materials,OMX Stockholm
 LEN,Lennar,Consumer Discretionary,S&P 500
 LH,Labcorp,Health Care,S&P 500
 LHX,L3Harris,Industrials,S&P 500
@@ -629,7 +629,7 @@ MSON-B.ST,Midsona AB (publ),Consumer Defensive,OMX Stockholm
 MSTR,MicroStrategy,Technology,Nasdaq-100
 MTB,M&T Bank,Financials,S&P 500
 MTD,Mettler Toledo,Health Care,S&P 500
-MTG-A.ST,Modern Times Group MTG AB,Communication Services,OMX Stockholm
+MTG-A.ST,Modern Times Group MTG AB (publ),Communication Services,OMX Stockholm
 MTG-B.ST,Modern Times Group MTG AB (publ),Communication Services,OMX Stockholm
 MTRS.ST,Munters Group AB (publ),Industrials,OMX Stockholm
 MU,Micron Technology,Information Technology,Nasdaq-100+S&P 500
