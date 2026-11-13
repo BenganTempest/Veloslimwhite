@@ -284,7 +284,6 @@ DONE.ST,Done.ai Group AB (publ),Technology,OMX Stockholm
 DORMY.ST,Dormy Corporation AB (publ),Consumer Cyclical,OMX Stockholm
 DOV,Dover Corporation,Industrials,S&P 500
 DOW,Dow Inc.,Materials,S&P 500
-DOXA.ST,Doxa AB (publ),Real Estate,OMX Stockholm
 DPZ,Domino's,Consumer Discretionary,S&P 500
 DRI,Darden Restaurants,Consumer Discretionary,S&P 500
 DSNO.ST,Desenio Group AB (publ),Consumer Cyclical,OMX Stockholm
@@ -500,7 +499,6 @@ IP,International Paper,Materials,S&P 500
 IPCO.ST,International Petroleum Corporation,Energy,OMX Stockholm
 IQV,IQVIA,Health Care,S&P 500
 IR,Ingersoll Rand,Industrials,S&P 500
-IRLAB-A.ST,IRLAB Therapeutics AB (publ),Healthcare,OMX Stockholm
 IRM,Iron Mountain,Real Estate,S&P 500
 ISOFOL.ST,Isofol Medical AB (publ),Healthcare,OMX Stockholm
 ISRG,Intuitive Surgical,Health Care,Nasdaq-100+S&P 500
@@ -594,7 +592,7 @@ MCOV-B.ST,Medicover AB (publ),Healthcare,OMX Stockholm
 MDLZ,Mondelez International,Consumer Staples,Nasdaq-100+S&P 500
 MDT,Medtronic,Health Care,S&P 500
 MEDIO.ST,Medistim ASA,Unknown,OMX Stockholm
-MEDS.ST,Meds Apotek AB,Consumer Cyclical,OMX Stockholm
+MEDS.ST,Meds Apotek AB (publ),Consumer Cyclical,OMX Stockholm
 MEKO.ST,Meko AB (publ),Consumer Cyclical,OMX Stockholm
 MELI,Mercado Libre,Consumer Discretionary,Nasdaq-100
 MER.ST,Meren Energy Inc.,Energy,OMX Stockholm
@@ -666,6 +664,7 @@ NOC,Northrop Grumman,Industrials,S&P 500
 NOKIA-SEK.ST,Nokia Oyj,Technology,OMX Stockholm
 NOLA-B.ST,Nolato AB (publ),Healthcare,OMX Stockholm
 NORB-B.ST,Nordisk Bergteknik AB (publ),Industrials,OMX Stockholm
+NORDVI.ST,Nordvi Sverige AB (publ),Unknown,OMX Stockholm
 NORION.ST,Norion Bank AB (publ),Financial Services,OMX Stockholm
 NOTE.ST,NOTE AB (publ),Technology,OMX Stockholm
 NOW,ServiceNow,Information Technology,S&P 500
@@ -986,6 +985,7 @@ WAB,Wabtec,Industrials,S&P 500
 WALL-B.ST,Wallenstam AB (publ),Real Estate,OMX Stockholm
 WAT,Waters Corporation,Health Care,S&P 500
 WAYS.ST,Waystream Holding AB (publ),Technology,OMX Stockholm
+WBGR-B.ST,WÃ¤stbygg Gruppen AB (publ),Industrials,OMX Stockholm
 WDAY,"Workday, Inc.",Information Technology,Nasdaq-100+S&P 500
 WDC,Western Digital,Information Technology,Nasdaq-100+S&P 500
 WEC,WEC Energy Group,Utilities,S&P 500
