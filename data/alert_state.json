@@ -1,11 +1,11 @@
 {
   "alerted": [
     "AFRY.ST",
-    "AMD",
     "ANOD-B.ST",
     "APP",
     "BHG.ST",
     "BONEX.ST",
+    "BTS-B.ST",
     "CHTR",
     "CVNA",
     "ELON.ST",
@@ -19,7 +19,6 @@
     "PNR",
     "PREV-B.ST",
     "QLIRO.ST",
-    "VSURE.ST",
     "YUBICO.ST"
   ]
 }
