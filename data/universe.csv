@@ -30,6 +30,7 @@ AFL,Aflac,Financials,S&P 500
 AFRY.ST,AFRY AB (publ),Industrials,OMX Stockholm
 AGES-B.ST,AGES Industri AB (publ),Industrials,OMX Stockholm
 AGROUP.ST,Arlandastad Group AB (publ),Real Estate,OMX Stockholm
+AGTIRA-B.ST,Agtira AB,Consumer Defensive,OMX Stockholm
 AIG,American International Group,Financials,S&P 500
 AIZ,Assurant,Financials,S&P 500
 AJA-B.ST,ByggmÃ¤stare Anders J AhlstrÃ¶m Holding AB (publ),Communication Services,OMX Stockholm
@@ -173,7 +174,6 @@ CAG.ST,CAG Group AB (publ),Technology,OMX Stockholm
 CAH,Cardinal Health,Health Care,S&P 500
 CALVIK.ST,Calviks AB (publ),Industrials,OMX Stockholm
 CAMX.ST,Camurus AB (publ),Healthcare,OMX Stockholm
-CANDLE-B.ST,Candles Scandinavia AB (publ),Consumer Defensive,OMX Stockholm
 CANTA.ST,Cantargia AB (publ),Healthcare,OMX Stockholm
 CARA.ST,Carasent AB (publ),Healthcare,OMX Stockholm
 CARE.ST,Careium AB (Publ),Industrials,OMX Stockholm
@@ -437,7 +437,7 @@ HAKI-B.ST,HAKI Safety AB (publ),Industrials,OMX Stockholm
 HAL,Halliburton,Energy,S&P 500
 HANZA.ST,Hanza AB (publ),Technology,OMX Stockholm
 HAS,Hasbro,Consumer Discretionary,S&P 500
-HASKO-B.ST,Hasko Invest AB,Unknown,OMX Stockholm
+HASKO-B.ST,Hasko Invest AB,Industrials,OMX Stockholm
 HAYPP.ST,Haypp Group AB (publ),Consumer Defensive,OMX Stockholm
 HBAN,Huntington Bancshares,Financials,S&P 500
 HCA,HCA Healthcare,Health Care,S&P 500
@@ -503,6 +503,7 @@ IPCO.ST,International Petroleum Corporation,Energy,OMX Stockholm
 IQV,IQVIA,Health Care,S&P 500
 IR,Ingersoll Rand,Industrials,S&P 500
 IRM,Iron Mountain,Real Estate,S&P 500
+ISOFOL.ST,Isofol Medical AB (publ),Healthcare,OMX Stockholm
 ISRG,Intuitive Surgical,Health Care,Nasdaq-100+S&P 500
 IT,Gartner,Information Technology,S&P 500
 ITAB.ST,ITAB Group AB (publ),Industrials,OMX Stockholm
@@ -995,7 +996,6 @@ WIHL.ST,Wihlborgs Fastigheter AB (publ),Real Estate,OMX Stockholm
 WM,Waste Management,Industrials,S&P 500
 WMB,Williams Companies,Energy,S&P 500
 WMT,Walmart,Consumer Staples,Nasdaq-100+S&P 500
-WPTG-B.ST,White Pearl Technology Group AB (publ),Technology,OMX Stockholm
 WRB,W. R. Berkley Corporation,Financials,S&P 500
 WSG.ST,WS WeSports Group AB (publ),Consumer Cyclical,OMX Stockholm
 WSM,"Williams-Sonoma, Inc.",Consumer Discretionary,S&P 500

@@ -6,3 +6,4 @@ date,ticker,name,score,prev_score,close,model_version
 2026-11-19,OKTA,"Okta, Inc.",86.4,81.2,195.61000061035156,2.0
 2026-11-24,MPWR,Monolithic Power Systems,87.0,72.9,1333.8800048828125,2.0
 2026-11-24,GNRC,Generac,86.7,83.6,204.75,2.0
+2026-11-26,CSGP,CoStar Group,86.5,83.3,34.02000045776367,2.0
