@@ -30,7 +30,6 @@ AFL,Aflac,Financials,S&P 500
 AFRY.ST,AFRY AB (publ),Industrials,OMX Stockholm
 AGES-B.ST,AGES Industri AB (publ),Industrials,OMX Stockholm
 AGROUP.ST,Arlandastad Group AB (publ),Real Estate,OMX Stockholm
-AGTIRA-B.ST,Agtira AB,Consumer Defensive,OMX Stockholm
 AIG,American International Group,Financials,S&P 500
 AIZ,Assurant,Financials,S&P 500
 AJA-B.ST,ByggmÃ¤stare Anders J AhlstrÃ¶m Holding AB (publ),Communication Services,OMX Stockholm
@@ -84,7 +83,6 @@ ARJO-B.ST,Arjo AB (publ),Healthcare,OMX Stockholm
 ARM,Arm Holdings,Technology,Nasdaq-100
 ARP.ST,Arctic Paper S.A.,Basic Materials,OMX Stockholm
 ARPL.ST,Arla Plast AB (publ),Basic Materials,OMX Stockholm
-ARRO.ST,Arribatec Group ASA,Unknown,OMX Stockholm
 ASKER.ST,Asker Healthcare Group AB (publ),Healthcare,OMX Stockholm
 ASMDEE-B.ST,Asmodee Group AB (publ),Consumer Cyclical,OMX Stockholm
 ASML,ASML Holding,Technology,Nasdaq-100
@@ -551,6 +549,7 @@ LAGR-B.ST,Lagercrantz Group AB (publ),Industrials,OMX Stockholm
 LATO-B.ST,Investment AB Latour (publ),Industrials,OMX Stockholm
 LDOS,Leidos,Industrials,S&P 500
 LEA.ST,Lea Bank AB (publ),Financial Services,OMX Stockholm
+LEMSE.ST,Leading Edge Materials Corp.,Basic Materials,OMX Stockholm
 LEN,Lennar,Consumer Discretionary,S&P 500
 LH,Labcorp,Health Care,S&P 500
 LHX,L3Harris,Industrials,S&P 500
@@ -996,6 +995,7 @@ WIHL.ST,Wihlborgs Fastigheter AB (publ),Real Estate,OMX Stockholm
 WM,Waste Management,Industrials,S&P 500
 WMB,Williams Companies,Energy,S&P 500
 WMT,Walmart,Consumer Staples,Nasdaq-100+S&P 500
+WPTG-B.ST,White Pearl Technology Group AB (publ),Technology,OMX Stockholm
 WRB,W. R. Berkley Corporation,Financials,S&P 500
 WSG.ST,WS WeSports Group AB (publ),Consumer Cyclical,OMX Stockholm
 WSM,"Williams-Sonoma, Inc.",Consumer Discretionary,S&P 500
