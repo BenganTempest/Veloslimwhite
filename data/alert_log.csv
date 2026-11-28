@@ -7,3 +7,4 @@ date,ticker,name,score,prev_score,close,model_version
 2026-11-24,MPWR,Monolithic Power Systems,87.0,72.9,1333.8800048828125,2.0
 2026-11-24,GNRC,Generac,86.7,83.6,204.75,2.0
 2026-11-26,CSGP,CoStar Group,86.5,83.3,34.02000045776367,2.0
+2026-11-28,MRNA,Moderna,85.5,84.9,228.63999938964844,2.0
